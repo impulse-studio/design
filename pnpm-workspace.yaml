@@ -1,0 +1,10 @@
+packages:
+  - renderer
+  - packages/*
+
+allowBuilds:
+  esbuild: true
+  lightningcss: true
+  unrs-resolver: true
+  msw: false
+  "@parcel/watcher": false

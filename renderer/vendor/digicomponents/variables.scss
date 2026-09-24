@@ -1,0 +1,96 @@
+/* FONTS */
+$font-family: var(--font-family);
+
+$base-font-size: var(--base-font-size);
+$font-scale-ratio: var(--font-scale-ratio);
+$font-size-xs: var(--font-size-xs);
+$font-size-sm: var(--font-size-sm);
+$font-size-md: var(--font-size-md);
+$font-size-lg: var(--font-size-lg);
+$font-size-xl: var(--font-size-xl);
+$font-size-2xl: var(--font-size-2xl);
+
+$font-weight-normal: var(--font-weight-normal);
+$font-weight-medium: var(--font-weight-medium);
+$font-weight-bold: var(--font-weight-bold);
+$font-weight-extra-bold: var(--font-weight-extra-bold);
+
+$letter-spacing-sm: var(--letter-spacing-sm);
+$letter-spacing-md: var(--letter-spacing-md);
+$letter-spacing-xl: var(--letter-spacing-xl);
+
+$line-height-xs: var(--line-height-xs);
+$line-height-sm: var(--line-height-sm);
+$line-height-md: var(--line-height-md);
+$line-height-lg: var(--line-height-lg);
+
+/* COLORS */
+$background: hsl(var(--background));
+$foreground: hsl(var(--foreground));
+
+$muted: hsl(var(--muted));
+$muted-foreground: hsl(var(--muted-foreground));
+
+$popover: hsl(var(--popover));
+$popover-foreground: hsl(var(--popover-foreground));
+
+$card: hsl(var(--card));
+$card-foreground: hsl(var(--card-foreground));
+
+$border: hsl(var(--border));
+
+$input: hsl(var(--input));
+
+$primary: hsl(var(--primary));
+$primary-foreground: hsl(var(--primary-foreground));
+
+$secondary: hsl(var(--secondary));
+$secondary-foreground: hsl(var(--secondary-foreground));
+
+$success: hsl(var(--success));
+$success-foreground: hsl(var(--success-foreground));
+
+$accent: hsl(var(--accent));
+$accent-foreground: hsl(var(--accent-foreground));
+
+$destructive: hsl(var(--destructive));
+$destructive-foreground: hsl(var(--destructive-foreground));
+
+$off-white: hsl(var(--off-white));
+$off-white-foreground: hsl(var(--off-white-foreground));
+
+$off-black: hsl(var(--off-black));
+$off-black-foreground: hsl(var(--off-black-foreground));
+
+$blue: hsl(var(--blue));
+$blue-foreground: hsl(var(--blue-foreground));
+
+$purple: hsl(var(--purple));
+$purple-foreground: hsl(var(--purple-foreground));
+
+$warning: hsl(var(--warning));
+$warning-foreground: hsl(var(--warning-foreground));
+
+$white: hsl(var(--white));
+$black: hsl(var(--black));
+$ring: hsl(var(--ring));
+
+/* SPACING */
+$spacing-sm: var(--spacing-sm);
+$spacing-md: var(--spacing-md);
+$spacing-lg: var(--spacing-lg);
+$spacing-xl: var(--spacing-xl);
+$contained-page-width: var(--contained-page-width);
+
+/* BORDERS */
+$border-width: var(--border-width);
+$border-width-2: var(--border-width-2);
+$border-width-4: var(--border-width-4);
+
+/* RADIUS */
+$radius-sm: var(--radius-sm);
+$radius-md: var(--radius-md);
+$radius-lg: var(--radius-lg);
+$radius-xl: var(--radius-xl);
+
+$z-index-modal: var(--modal-z-index);

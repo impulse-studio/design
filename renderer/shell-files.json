@@ -1,0 +1,23 @@
+{
+  "$comment": "Files copied verbatim from orchestration/back/src into renderer/src/back. Their '@/' imports resolve to renderer/src/back, where stubs/ replaces app services (stores, router, api).",
+  "files": [
+    "styles/colors.scss",
+    "styles/vars.scss",
+    "styles/navigationStyle.scss",
+    "styles/mixins.scss",
+    "styles/utils.scss",
+    "styles/bootstrapUtils.scss",
+    "styles/layersOrder.css",
+    "core/EventMenu.ts",
+    "navigation/eventMenu/utils.ts",
+    "navigation/eventMenu/components/eventMenuStyles.scss",
+    "navigation/eventMenu/components/MenuItem.vue",
+    "navigation/eventMenu/components/menuSection/BaseMenuSection.vue",
+    "navigation/eventMenu/components/menuSection/ListMenuSection.vue",
+    "navigation/eventMenu/components/menuSection/LinkMenuSection.vue",
+    "components/ui/DigiSidebar.vue",
+    "layouts/components/HeaderLogo.vue",
+    "layouts/eventLayout/parts/MenuEventAbstract.vue",
+    "assets/logos"
+  ]
+}

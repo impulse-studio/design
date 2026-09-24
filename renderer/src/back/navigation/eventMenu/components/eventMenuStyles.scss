@@ -1,0 +1,62 @@
+@use '@/styles/colors';
+@use '@/styles/navigationStyle';
+@use "digicomponents/dist/variables";
+
+@mixin  activeStyle {
+  color: variables.$off-black;
+  background-color: variables.$off-black-foreground;
+}
+
+@mixin menuSectionStyle {
+    width: 100%;
+    margin: 0 auto;
+
+    &__header {
+      border-radius: variables.$radius-md;
+      display: flex;
+      gap: variables.$spacing-sm;
+      align-items: center;
+      font-size: variables.$font-size-md;
+      cursor: pointer;
+      padding: variables.$spacing-sm 0;
+      width: 100%;
+      transition: background-color ease-out 200ms;
+
+      @include navigationStyle.inversedMobileEventLayoutMixin {
+        padding: variables.$spacing-sm variables.$spacing-sm;
+        width: 100%;
+
+        &:hover {
+          background-color: variables.$off-black-foreground;
+        }
+      }
+    }
+
+    &__icon {
+      width: min-content;
+    }
+
+    &__header-center {
+      max-width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+      gap: 0.2rem;
+      flex-grow: 2;
+    }
+
+    &__title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+
+    &--active {
+      @include navigationStyle.inversedMobileEventLayoutMixin {
+        .menu-section__header {
+          @include activeStyle;
+        }
+      }
+    }
+}
+

@@ -1,0 +1,39 @@
+@use "sass:math";
+
+/* All utils css classes */
+
+/* Text transform utilities */
+.lowerCase {
+  text-transform: lowercase;
+}
+.upperCase {
+  text-transform: uppercase;
+}
+
+/* Mixin to set font size in both pixels and rem */
+@mixin font-size($sizeValue) {
+  font-size: #{$sizeValue}px;
+  font-size: #{math.div($sizeValue, 16)}rem;
+}
+
+@mixin defaultFont {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Misc */
+// Turns any character into plain white
+// Useful if you want to use a unicode character for something but still need unified looks
+.plainWhiteUnicode {
+  color: transparent;
+  text-shadow: 0 0 0 white;
+}
+
+// Self-explanatory
+.noSelect {
+  user-select: none;
+}
+
+// Utility to remove mouse events
+.noPointer {
+  pointer-events: none;
+}

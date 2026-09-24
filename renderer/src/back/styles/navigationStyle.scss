@@ -1,0 +1,14 @@
+
+$navWidth: 300px;
+
+@mixin mobileEventLayoutMixin {
+  @media screen and (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin inversedMobileEventLayoutMixin {
+  @media screen and (min-width: 768px) {
+    @content;
+  }
+}

@@ -1,0 +1,2 @@
+/* This file is used to add the bootstrap layer in a lower priority than tailwind's utilities layer. */
+@layer properties, base, theme, components, bootstrap, utilities;

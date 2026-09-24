@@ -1,0 +1,32 @@
+@use "colors";
+
+$backOfficeWidth: 1366px;
+
+$headerHeight: 80px;
+$headerHorizontalPadding: 1.5rem;
+
+$smallTextFontSize: 12;
+$textFontSize: 14;
+$titleFontSize: 30;
+$subTitleFontSize: 15;
+
+$builderContentWidth: 780px;
+
+$websiteNavHeight: 70px;
+$websiteNavVerticalPadding: 14px;
+
+$btnRadius: 0.8rem;
+$btnVerticalPadding: 0.8rem;
+$btnHorizontalPadding: 1.6rem;
+$btnBoxShadow: rgba(0, 0, 0, 0.05) 0px 1px 3px, rgba(0, 0, 0, 0.10) 0px 1px 2px;
+
+$buildersBoxShadow: 0 1rem 1rem rgba(0, 0, 0, 0.1);
+
+$greyBorderColor: colors.$lightGrey;
+
+$eventPageLayoutHorizontalPadding: 2rem;
+
+
+:export {
+  textFontSize: $textFontSize;
+}
