@@ -2,7 +2,6 @@ import type { TextNode } from "@digit-ai-studio/shared"
 import { withEditorAlpha } from "@/features/editor/colors"
 import { computedNumber } from "@/features/editor/geometry"
 import { useSelection } from "@/features/editor/use-selection"
-import { useEditor } from "@/features/editor/context"
 import { InspectorSection } from "@/pages/editor/components/inspector/InspectorSection"
 import { InspectorColorField } from "@/pages/editor/components/inspector/InspectorColorField"
 import { LengthField } from "@/components/shared/fields/LengthField"
@@ -10,10 +9,33 @@ import { lengthTokens } from "@/features/editor/tokens"
 import { InspectorSelectField } from "@/pages/editor/components/inspector/InspectorSelectField"
 import { Textarea } from "@/components/ui/textarea"
 import { Field, FieldLabel } from "@/components/ui/field"
+import { useDraftEdit } from "@/components/shared/fields/use-draft-edit"
 
 export function TextSection() {
-  const { nodes, common, apply, state } = useSelection(),
-    editor = useEditor()
+  const { nodes, common, apply, state } = useSelection()
+  const content =
+    common((node) =>
+      node.type === "text"
+        ? node.content
+        : node.type === "component"
+          ? node.text
+          : ""
+    ) ?? ""
+  const contentEdit = useDraftEdit<string, string, HTMLTextAreaElement>({
+    value: content,
+    format: (value) => value,
+    parse: (draft) => draft,
+    apply: (next) => {
+      apply((node) => {
+        if (node.type === "text") node.content = next
+        if (node.type === "component" && node.text !== undefined)
+          node.text = next
+      })
+      return next
+    },
+    identity: state.selectedIds.join(","),
+    selectOnFocus: false,
+  })
   if (
     !nodes.length ||
     !nodes.every(
@@ -29,33 +51,19 @@ export function TextSection() {
         <FieldLabel htmlFor="node-content">Contenu</FieldLabel>
         <Textarea
           id="node-content"
-          value={
-            common((node) =>
-              node.type === "text"
-                ? node.content
-                : node.type === "component"
-                  ? node.text
-                  : ""
-            ) ?? ""
-          }
+          value={contentEdit.draft}
           placeholder="Valeurs mixtes"
-          onFocus={editor.begin}
-          onBlur={editor.commit}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.preventDefault()
-              event.stopPropagation()
-              editor.cancel()
-              event.currentTarget.blur()
-            }
-          }}
-          onChange={(event) =>
+          onFocus={contentEdit.onFocus}
+          onBlur={contentEdit.onBlur}
+          onKeyDown={contentEdit.onKeyDown}
+          onChange={(event) => {
+            contentEdit.setDraft(event.target.value)
             apply((node) => {
               if (node.type === "text") node.content = event.target.value
               if (node.type === "component" && node.text !== undefined)
                 node.text = event.target.value
             })
-          }
+          }}
         />
       </Field>
       {nodes.every((node) => node.type === "text") && (

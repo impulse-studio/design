@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react"
+import { useId } from "react"
 import type { Json, ManifestProp } from "@digit-ai-studio/shared"
 import { propOptions } from "@digit-ai-studio/shared"
 import { useEditor } from "@/features/editor/context"
@@ -8,6 +8,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { InspectorSelectField } from "@/pages/editor/components/inspector/InspectorSelectField"
 import { NumberField } from "@/components/shared/fields/NumberField"
+import {
+  INVALID_DRAFT,
+  useDraftEdit,
+} from "@/components/shared/fields/use-draft-edit"
 
 export function ComponentPropField({
   prop,
@@ -22,19 +26,25 @@ export function ComponentPropField({
 }) {
   const editor = useEditor(),
     id = useId(),
-    options = propOptions(prop),
-    [json, setJson] = useState(
-      mixed ? "" : JSON.stringify(value ?? null, null, 2)
-    ),
-    [invalid, setInvalid] = useState(false)
-  const focused = useRef(false),
-    dirty = useRef(false),
-    canceled = useRef(false)
-  useEffect(() => {
-    if (focused.current) return
-    setJson(mixed ? "" : JSON.stringify(value ?? null, null, 2))
-    setInvalid(false)
-  }, [value, mixed])
+    options = propOptions(prop)
+  const jsonEdit = useDraftEdit<Json | undefined, Json, HTMLTextAreaElement>({
+    value,
+    format: (current) =>
+      mixed ? "" : JSON.stringify(current ?? null, null, 2),
+    parse: (draft) => {
+      try {
+        return JSON.parse(draft) as Json
+      } catch {
+        return INVALID_DRAFT
+      }
+    },
+    apply: (next) => {
+      onChange(next)
+      return next
+    },
+    identity: prop.name,
+    selectOnFocus: false,
+  })
   const type = prop.type
     .replace(/\s*\|\s*undefined/g, "")
     .replace(/null\s*\|\s*/g, "")
@@ -98,60 +108,25 @@ export function ComponentPropField({
       </Field>
     )
   return (
-    <Field className="gap-1.5" data-invalid={invalid || undefined}>
+    <Field className="gap-1.5" data-invalid={jsonEdit.invalid || undefined}>
       <FieldLabel htmlFor={id}>{prop.name} · JSON</FieldLabel>
       <Textarea
         id={id}
-        aria-invalid={invalid}
+        aria-invalid={jsonEdit.invalid}
         className="font-mono text-xs"
         rows={3}
-        value={json}
+        value={jsonEdit.draft}
         placeholder={mixed ? "Valeurs mixtes" : undefined}
-        onFocus={() => {
-          focused.current = true
-          dirty.current = false
-          canceled.current = false
-          editor.begin()
-        }}
-        onChange={(event) => {
-          dirty.current = true
-          setJson(event.target.value)
-        }}
+        onFocus={jsonEdit.onFocus}
+        onChange={(event) => jsonEdit.setDraft(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            event.preventDefault()
-            event.stopPropagation()
-            canceled.current = true
-            editor.cancel()
-            setJson(mixed ? "" : JSON.stringify(value ?? null, null, 2))
-            setInvalid(false)
-            event.currentTarget.blur()
-          }
           if ((event.metaKey || event.ctrlKey) && event.key === "Enter")
             event.currentTarget.blur()
+          jsonEdit.onKeyDown(event)
         }}
-        onBlur={() => {
-          focused.current = false
-          if (canceled.current) {
-            canceled.current = false
-            return
-          }
-          if (!dirty.current) {
-            editor.commit()
-            return
-          }
-          try {
-            const next: Json = JSON.parse(json)
-            onChange(next)
-            setInvalid(false)
-            editor.commit()
-          } catch {
-            setInvalid(true)
-            editor.cancel()
-          }
-        }}
+        onBlur={jsonEdit.onBlur}
       />
-      {invalid && (
+      {jsonEdit.invalid && (
         <p className="text-xs">
           JSON invalide. La dernière valeur valide est conservée.
         </p>

@@ -4,9 +4,15 @@ import { lengthTokens } from "@/features/editor/tokens"
 import { LengthField } from "@/components/shared/fields/LengthField"
 import { NumberField } from "@/components/shared/fields/NumberField"
 import { InspectorSelectField } from "@/pages/editor/components/inspector/InspectorSelectField"
+import { useEditor } from "@/features/editor/context"
+import {
+  setAutoLayoutDistribution,
+  setAutoLayoutGap,
+} from "@/features/editor/auto-layout"
 
 export function AutoLayoutGapControls() {
   const { nodes, common, apply, state } = useSelection()
+  const editor = useEditor()
   const direction = common((node) =>
     node.type === "frame" || node.type === "box"
       ? node.autoLayout?.direction
@@ -40,22 +46,7 @@ export function AutoLayoutGapControls() {
               ? (node.autoLayout?.gap ?? 0)
               : undefined
           )}
-          onChange={(gap) =>
-            apply((node) => {
-              if (
-                (node.type !== "frame" && node.type !== "box") ||
-                !node.autoLayout
-              )
-                return
-              node.autoLayout.gap = gap
-              if (
-                ["between", "around", "evenly"].includes(
-                  node.autoLayout.justify ?? ""
-                )
-              )
-                node.autoLayout.justify = "start"
-            })
-          }
+          onChange={(gap) => setAutoLayoutGap(editor, "main", gap)}
         />
         {grid ? (
           <NumberField
@@ -89,15 +80,7 @@ export function AutoLayoutGapControls() {
               { value: "auto", label: "Auto" },
             ]}
             onChange={(mode) =>
-              apply((node) => {
-                if (
-                  (node.type !== "frame" && node.type !== "box") ||
-                  !node.autoLayout
-                )
-                  return
-                node.autoLayout.gap = mode === "auto" ? "auto" : 0
-                node.autoLayout.justify = mode === "auto" ? "between" : "start"
-              })
+              setAutoLayoutGap(editor, "main", mode === "auto" ? "auto" : 0)
             }
           />
         )}
@@ -114,15 +97,7 @@ export function AutoLayoutGapControls() {
               ? (node.autoLayout?.crossGap ?? 0)
               : undefined
           )}
-          onChange={(gap) =>
-            apply((node) => {
-              if (
-                (node.type === "frame" || node.type === "box") &&
-                node.autoLayout
-              )
-                node.autoLayout.crossGap = gap
-            })
-          }
+          onChange={(gap) => setAutoLayoutGap(editor, "cross", gap)}
         />
       )}
       {auto && !grid && (
@@ -138,15 +113,7 @@ export function AutoLayoutGapControls() {
             { value: "around", label: "Around" },
             { value: "evenly", label: "Evenly" },
           ]}
-          onChange={(justify) =>
-            apply((node) => {
-              if (
-                (node.type === "frame" || node.type === "box") &&
-                node.autoLayout
-              )
-                node.autoLayout.justify = justify
-            })
-          }
+          onChange={(justify) => setAutoLayoutDistribution(editor, justify)}
         />
       )}
     </div>

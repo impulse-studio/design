@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom"
 import { render } from "@testing-library/react"
 import { createPortal } from "react-dom"
 import { describe, expect, it, vi } from "vitest"
@@ -59,3 +60,57 @@ describe("rendered source components", () => {
     expect(() => new Function(script)).not.toThrow()
   })
 })
+
+it.each(["root", "app"])(
+  "reports the inventory of the Vite #%s mount point",
+  async (id) => {
+    const dom = new JSDOM(
+      `<div id="${id}"><h1 data-digi-id="ds-title">Hello</h1></div>`,
+      {
+        url: "https://preview.test",
+        runScripts: "outside-only",
+        pretendToBeVisual: true,
+      }
+    )
+    try {
+      vi.spyOn(
+        dom.window.Element.prototype,
+        "getBoundingClientRect"
+      ).mockReturnValue({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 20,
+        width: 100,
+        height: 20,
+        toJSON: () => ({}),
+      })
+      const post = vi
+        .spyOn(dom.window, "postMessage")
+        .mockImplementation(() => undefined)
+      dom.window.eval(
+        bridgeSource(
+          "token",
+          1,
+          "/",
+          true,
+          false,
+          id === "app" ? "vue-vite" : "react-vite"
+        )
+      )
+      await vi.waitFor(() =>
+        expect(post).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "inventory",
+            elements: [{ id: "ds-title", count: 1 }],
+          }),
+          "*"
+        )
+      )
+    } finally {
+      dom.window.close()
+    }
+  }
+)

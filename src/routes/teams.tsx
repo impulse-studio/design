@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { TeamsPage } from "@/pages/teams/TeamsPage"
+import { TeamsPage } from "@/pages/teams/page"
 import { PROJECT_NAME } from "@/constants"
 import { requireAuthenticatedUser } from "@/features/auth/route-guard"
 

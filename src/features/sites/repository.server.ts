@@ -1,14 +1,9 @@
-import { validateSiteBuild } from "./compile.server"
-import { randomUUID } from "node:crypto"
-import { and, desc, eq, sql } from "drizzle-orm"
+import { v4 as uuid } from "uuid"
+import type { AiRunRow } from "@/db/schema/ai"
+
+import { and, desc, eq } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
-import {
-  aiRuns,
-  mockups,
-  siteProjects,
-  siteVersions,
-  siteProposals,
-} from "@/db/schema"
+import { aiRuns, siteProjects, siteVersions, siteProposals } from "@/db/schema"
 import { loadRecord } from "@/features/mockups/repository.server"
 import {
   applySiteProposal,
@@ -16,8 +11,17 @@ import {
   applyVisualEdit,
   normalizeSources,
 } from "./source"
-import { siteDocumentSchema, siteProposalSchema } from "./schema"
-import type { SiteChange, SiteDocument, SiteProposal } from "./schema"
+import { SiteFailure } from "./errors"
+import {
+  siteDocumentSchema,
+  siteProposalSchema,
+} from "@/validators/sites/document"
+import type {
+  SiteChange,
+  SiteDocument,
+  SiteProposal,
+} from "@/validators/sites/document"
+import { commitSiteVersion } from "./versioning.server"
 
 export const findSite = async (id: string) =>
   getDatabase()
@@ -61,8 +65,11 @@ export const getSiteVersion = async (
     .from(siteVersions)
     .where(and(eq(siteVersions.projectId, id), eq(siteVersions.id, versionId)))
     .then((rows) => rows.at(0))
-  if (!row) throw new Error("Version introuvable.")
-  return normalizeSources(siteDocumentSchema.parse(row.doc))
+  if (!row) throw new SiteFailure("not_found", "Version introuvable.")
+  const doc = siteDocumentSchema.safeParse(row.doc)
+  if (!doc.success)
+    throw new SiteFailure("invalid", "La version enregistrée est invalide.")
+  return normalizeSources(doc.data)
 }
 export const getSiteProposals = async (id: string, userId: string) => {
   await loadRecord(id, userId)
@@ -85,7 +92,7 @@ export const getSiteProposals = async (id: string, userId: string) => {
     .limit(20)
 }
 export const persistSiteProposal = async (
-  run: typeof aiRuns.$inferSelect,
+  run: AiRunRow,
   callId: string,
   args: unknown
 ) => {
@@ -96,7 +103,7 @@ export const persistSiteProposal = async (
   await getDatabase()
     .insert(siteProposals)
     .values({
-      id: randomUUID(),
+      id: uuid(),
       projectId: run.context.projectId,
       runId: run.id,
       toolCallId: callId,
@@ -116,94 +123,78 @@ export const saveSiteChange = async (
   expectedRevision: number,
   change: SiteChange | { type: "mcp"; input: SiteProposal }
 ) => {
-  const record = await loadRecord(id, userId)
-  if (!record.canEdit) throw new Error("Projet en lecture seule.")
-  return getDatabase().transaction(async (tx) => {
-    const current = await tx
-      .select()
-      .from(siteProjects)
-      .where(eq(siteProjects.id, id))
-      .for("update")
-      .then((rows) => rows.at(0))
-    if (!current) throw new Error("Projet introuvable.")
-    if (current.revision !== expectedRevision)
-      throw new Error(
-        "Le projet a changé. Rechargez avant de poursuivre ; vos valeurs restent dans le panneau."
-      )
-    current.doc = normalizeSources(current.doc)
-    let doc: SiteDocument, summary: string
-    if (change.type === "file") {
-      doc = applySiteProposal(current.doc, {summary:"Modification du fichier",operations:[{type:"writeFile",path:change.path,content:change.content}]})
-      summary = `Modification de ${change.path}`
-      await validateSiteBuild(doc)
-    } else if (change.type === "mcp") {
-      doc = applySiteProposal(current.doc, change.input)
-      summary = change.input.summary
-    } else if (change.type === "visual") {
-      doc = applyVisualEdit(current.doc, change.edit)
-      summary = "Ajustement visuel"
-    } else if (change.type === "text") {
-      doc = applyTextEdit(current.doc, change.id, change.text)
-      summary = "Modification du texte"
-    } else if (change.type === "restore") {
-      const version = await tx
-        .select()
-        .from(siteVersions)
-        .where(
-          and(
-            eq(siteVersions.id, change.versionId),
-            eq(siteVersions.projectId, id)
-          )
-        )
-        .then((rows) => rows.at(0))
-      if (!version) throw new Error("Version introuvable.")
-      doc = normalizeSources(siteDocumentSchema.parse(version.doc))
-      summary = `Restauration de la version ${version.revision}`
-    } else {
-      const proposal = await tx
-        .select({
-          proposal: siteProposals,
-          userId: aiRuns.userId,
-          status: aiRuns.status,
+  return commitSiteVersion({
+    id,
+    userId,
+    expectedRevision,
+    prepare: async (tx, current) => {
+      let doc: SiteDocument, summary: string
+      if (change.type === "file") {
+        doc = applySiteProposal(current.doc, {
+          summary: "Modification du fichier",
+          operations: [
+            { type: "writeFile", path: change.path, content: change.content },
+          ],
         })
-        .from(siteProposals)
-        .innerJoin(aiRuns, eq(aiRuns.id, siteProposals.runId))
-        .where(
-          and(
-            eq(siteProposals.id, change.proposalId),
-            eq(siteProposals.projectId, id)
+        summary = `Modification de ${change.path}`
+      } else if (change.type === "mcp") {
+        doc = applySiteProposal(current.doc, change.input)
+        summary = change.input.summary
+      } else if (change.type === "visual") {
+        doc = applyVisualEdit(current.doc, change.edit)
+        summary = "Ajustement visuel"
+      } else if (change.type === "text") {
+        doc = applyTextEdit(current.doc, change.id, change.text)
+        summary = "Modification du texte"
+      } else if (change.type === "restore") {
+        const version = await tx
+          .select()
+          .from(siteVersions)
+          .where(
+            and(
+              eq(siteVersions.id, change.versionId),
+              eq(siteVersions.projectId, id)
+            )
           )
+          .then((rows) => rows.at(0))
+        if (!version) throw new SiteFailure("invalid", "Version introuvable.")
+        doc = normalizeSources(siteDocumentSchema.parse(version.doc))
+        summary = `Restauration de la version ${version.revision}`
+      } else {
+        const proposal = await tx
+          .select({
+            proposal: siteProposals,
+            userId: aiRuns.userId,
+            status: aiRuns.status,
+          })
+          .from(siteProposals)
+          .innerJoin(aiRuns, eq(aiRuns.id, siteProposals.runId))
+          .where(
+            and(
+              eq(siteProposals.id, change.proposalId),
+              eq(siteProposals.projectId, id)
+            )
+          )
+          .then((rows) => rows.at(0))
+        if (
+          !proposal ||
+          proposal.userId !== userId ||
+          proposal.proposal.status !== "pending" ||
+          proposal.proposal.baseRevision !== expectedRevision ||
+          ["interrupted", "failed"].includes(proposal.status)
         )
-        .then((rows) => rows.at(0))
-      if (
-        !proposal ||
-        proposal.userId !== userId ||
-        proposal.proposal.status !== "pending" ||
-        proposal.proposal.baseRevision !== expectedRevision ||
-        ["interrupted", "failed"].includes(proposal.status)
-      )
-        throw new Error(
-          "Cette génération est obsolète. Demandez une nouvelle modification."
-        )
-      doc = applySiteProposal(current.doc, proposal.proposal.input)
-      summary = proposal.proposal.input.summary
-      await tx
-        .update(siteProposals)
-        .set({ status: "applied" })
-        .where(eq(siteProposals.id, change.proposalId))
-    }
-    const revision = current.revision + 1
-    await tx
-      .update(siteProjects)
-      .set({ doc, revision })
-      .where(eq(siteProjects.id, id))
-    await tx
-      .insert(siteVersions)
-      .values({ id: randomUUID(), projectId: id, revision, doc, summary })
-    await tx
-      .update(mockups)
-      .set({ updatedAt: new Date(), revision: sql`${mockups.revision}+1` })
-      .where(eq(mockups.id, id))
-    return { id, doc, revision }
+          throw new SiteFailure(
+            "conflict",
+            "Cette génération est obsolète. Demandez une nouvelle modification."
+          )
+        doc = applySiteProposal(current.doc, proposal.proposal.input)
+        summary = proposal.proposal.input.summary
+        await tx
+          .update(siteProposals)
+          .set({ status: "applied" })
+          .where(eq(siteProposals.id, change.proposalId))
+      }
+      return { doc, summary }
+    },
   })
 }

@@ -4,8 +4,7 @@ import { createMcpProject } from "./create.server"
 const mocks = vi.hoisted(() => ({
   teams: vi.fn(),
   createRecord: vi.fn(),
-  insert: vi.fn(),
-  values: vi.fn(),
+  createSite: vi.fn(),
 }))
 
 vi.mock("@/features/teams/repository.server", () => ({
@@ -14,11 +13,8 @@ vi.mock("@/features/teams/repository.server", () => ({
 vi.mock("@/features/mockups/repository.server", () => ({
   createRecord: mocks.createRecord,
 }))
-vi.mock("@/db/client.server", () => ({
-  getDatabase: () => ({
-    transaction: (callback: (tx: unknown) => Promise<unknown>) =>
-      callback({ insert: mocks.insert }),
-  }),
+vi.mock("@/features/sites/create.server", () => ({
+  createSite: mocks.createSite,
 }))
 
 beforeEach(() => {
@@ -26,8 +22,11 @@ beforeEach(() => {
   mocks.teams.mockResolvedValue([
     { id: "team-1", name: "Équipe", role: "owner" },
   ])
-  mocks.insert.mockReturnValue({ values: mocks.values })
-  mocks.values.mockResolvedValue(undefined)
+  mocks.createSite.mockResolvedValue({
+    id: "site-1",
+    revision: 0,
+    doc: {},
+  })
 })
 
 describe("création MCP", () => {
@@ -60,7 +59,7 @@ describe("création MCP", () => {
         "https://studio.example.com"
       )
     ).rejects.toThrow("teamId")
-    expect(mocks.insert).not.toHaveBeenCalled()
+    expect(mocks.createSite).not.toHaveBeenCalled()
   })
 
   it("creates a site and its first version atomically", async () => {
@@ -70,13 +69,9 @@ describe("création MCP", () => {
       "https://studio.example.com"
     )
     expect(result).toMatchObject({ kind: "site", revision: 0 })
-    expect(mocks.insert).toHaveBeenCalledTimes(3)
-    expect(mocks.values).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: result.id,
-        name: "Site",
-        organizationId: "team-1",
-      })
-    )
+    expect(mocks.createSite).toHaveBeenCalledWith({
+      name: "Site",
+      organizationId: "team-1",
+    })
   })
 })

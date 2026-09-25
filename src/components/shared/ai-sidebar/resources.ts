@@ -43,7 +43,7 @@ export function containsResource(item: SidebarResource, id: string): boolean {
   )
 }
 
-export function removeResource(
+function removeResource(
   items: SidebarResource[],
   id: string
 ): { items: SidebarResource[]; removed?: SidebarResource } {
@@ -71,7 +71,7 @@ export function removeResource(
   return { items: next, removed }
 }
 
-export function insertResource(
+function insertResource(
   items: SidebarResource[],
   resource: SidebarResource,
   targetId: string | null,

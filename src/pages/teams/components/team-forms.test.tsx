@@ -20,7 +20,7 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: actions.invalidateQueries }),
 }))
-vi.mock("@/lib/use-orpc", () => ({
+vi.mock("@/server/use-orpc", () => ({
   useOrpc: () => ({
     auth: { getCurrentUser: { queryKey: () => ["auth", "getCurrentUser"] } },
     teams: { getOverview: { queryKey: () => ["teams", "getOverview"] } },

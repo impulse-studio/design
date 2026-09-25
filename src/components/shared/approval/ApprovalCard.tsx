@@ -1,6 +1,9 @@
 "use client"
 // beui.dev/components/agents/approval-card
 
+// beui.dev/components/agents/approval-card
+// beui.dev/components/agents/approval-card
+// beui.dev/components/agents/approval-card
 import {
   RiArrowLeftLine as ArrowLeft,
   RiArrowRightLine as ArrowRight,
@@ -16,7 +19,7 @@ import { revalidateLogic, useField, useForm } from "@tanstack/react-form"
 import {
   createApprovalAnswerSchema,
   createApprovalFormSchema,
-} from "@/features/approval/schemas"
+} from "@/validators/approval"
 import { FieldError } from "@/components/ui/field"
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
 import { QuestionOptions } from "./QuestionOptions"

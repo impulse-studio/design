@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
-import { downloadSite } from "@/features/sites/export"
 import { readScenarios } from "@/features/sites/scenarios"
 import { useSiteChat } from "@/features/sites/use-chat"
 import { useSiteEditor } from "@/features/sites/use-editor"
-import type { PreviewInventoryEntry } from "@/features/sites/bridge"
-import type { Breakpoint, SiteRecord } from "@/features/sites/schema"
+import { useSiteExport } from "@/features/sites/use-export"
+import type { PreviewInventoryEntry } from "@/validators/sites/preview"
+import type { Breakpoint } from "@/validators/sites/document"
+import type { SiteRecord } from "@/features/sites/types"
+import type { SiteRuntimeStatus } from "@/features/sites/runtime"
 import { useSiteEditorPageData } from "./usePageData"
 import { useSiteEditorShortcuts } from "./useShortcuts"
-import type { SiteMode } from "../components/Toolbar"
+import type { SiteMode } from "@/pages/site-editor/components/Toolbar"
 
 const createScenariosPrompt =
   "Ajoute des scénarios de données à cette maquette via src/scenarios.json : Lucien — 20 contacts segmentés ; Léa — 3 contacts principaux. Branche les données et les états de la même interface sur le scénario sélectionné. Conserve le design et la navigation existants."
@@ -31,6 +33,7 @@ export function useSiteEditorPage({
 }: SiteEditorPageProps) {
   const editor = useSiteEditor(initial, canEdit)
   const [mode, setMode] = useState<SiteMode>("navigation")
+  const [sidebarVisible, setSidebarVisible] = useState(true)
   const [panel, setPanel] = useState("files")
   const [file, setFile] = useState<string | null>(null)
   const [fileLine, setFileLine] = useState<number | null>(null)
@@ -50,6 +53,10 @@ export function useSiteEditorPage({
     PreviewInventoryEntry[]
   >([])
   const [runtimeError, setRuntimeError] = useState<string | null>(null)
+  const [runtimeStatus, setRuntimeStatus] = useState<SiteRuntimeStatus>({
+    stage: "initializing",
+    message: "Initialisation…",
+  })
   const [command, setCommand] = useState<{
     type: "back" | "forward"
     sequence: number
@@ -68,6 +75,7 @@ export function useSiteEditorPage({
     scenarioId,
     selection,
   })
+  const siteExport = useSiteExport(pageData.previewRecord.doc, name)
 
   useEffect(() => {
     if (pageData.activeScenario) setPath(pageData.activeScenario.path)
@@ -84,8 +92,10 @@ export function useSiteEditorPage({
     setRenderedElements([])
   }, [editor.record.revision])
   useSiteEditorShortcuts(editor)
+  const runtimeBusy = runtimeStatus.stage !== "ready"
 
   const createScenarios = () => {
+    setSidebarVisible(true)
     setPanel("chat")
     void chat.send(createScenariosPrompt)
   }
@@ -144,30 +154,26 @@ export function useSiteEditorPage({
   }
 
   return {
+    sidebarVisible,
     toolbar: {
+      sidebarVisible,
+      onToggleSidebar: () => setSidebarVisible((visible) => !visible),
       name,
       mockupId,
       notionUrl,
       githubUrl,
-      scenarios: pageData.config?.scenarios ?? [],
-      scenarioId: pageData.activeScenario?.id ?? "",
-      scenariosBusy: chat.busy || chat.running,
-      onCreateScenarios: createScenarios,
-      breakpoint,
-      busy: editor.busy,
+      busy: editor.busy || runtimeBusy,
       canEdit,
       canUndo: editor.canUndo,
       canRedo: editor.canRedo,
-      onScenario: selectScenario,
-      onBreakpoint: setBreakpoint,
-      onBack: () => setCommand({ type: "back", sequence: Date.now() }),
-      onForward: () => setCommand({ type: "forward", sequence: Date.now() }),
       onUndo: editor.undo,
       onRedo: editor.redo,
-      onExport: () => downloadSite(pageData.previewRecord.doc, name),
+      ...siteExport,
     },
     sidebar: {
-      record: editor.record, canEdit, onUpdated: editor.reload,
+      record: editor.record,
+      canEdit,
+      onUpdated: editor.reload,
       panel,
       onPanelChange: setPanel,
       chat,
@@ -179,6 +185,19 @@ export function useSiteEditorPage({
       onSelectFile: selectFile,
     },
     workspace: {
+      previewToolbar: {
+        scenarios: pageData.config?.scenarios ?? [],
+        scenarioId: pageData.activeScenario?.id ?? "",
+        scenariosBusy: chat.busy || chat.running,
+        onCreateScenarios: createScenarios,
+        breakpoint,
+        onScenario: selectScenario,
+        onBreakpoint: setBreakpoint,
+        onBack: () => setCommand({ type: "back", sequence: Date.now() }),
+        onForward: () => setCommand({ type: "forward", sequence: Date.now() }),
+        canEdit,
+        busy: editor.busy || runtimeBusy,
+      },
       onSaveFile: editor.saveFile,
       record: editor.record,
       previewRecord: pageData.previewRecord,
@@ -200,6 +219,7 @@ export function useSiteEditorPage({
       onInventory: setRenderedElements,
       onRoute: routeChanged,
       onError: setRuntimeError,
+      onRuntimeStatus: setRuntimeStatus,
     },
     inspector: {
       mode,
@@ -214,7 +234,7 @@ export function useSiteEditorPage({
       breakpoint,
       revision: editor.record.revision,
       doc: editor.record.doc,
-      busy: editor.busy,
+      busy: editor.busy || runtimeBusy,
       canEdit,
       onSelectElement: selectInspectorElement,
       onOpenFile: openFile,

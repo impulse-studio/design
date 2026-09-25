@@ -1,31 +1,25 @@
-import { z } from "zod"
-import { aiCatalog, validateAiComposition } from "@/features/ai/catalog"
-import { applyOperations, operationSchema } from "@/features/ai/operations"
+import { uuidSchema } from "@/validators/identifiers"
+import { applyChangesSchema } from "@/validators/mcp/mockups"
+
+import { aiCatalog } from "@/features/ai/catalog"
+
 import { listTeamsForUser } from "@/features/teams/repository.server"
 import {
   listRecords,
   loadRecord,
   saveRecord,
 } from "@/features/mockups/repository.server"
-import { library } from "@/features/editor/library"
+import { prepareMockupProposal } from "@/features/mockups/proposal"
 import { walk } from "@digit-ai-studio/shared"
 
-export const mockupReferenceSchema = z.string().min(1).max(500)
-export const applyChangesSchema = z.object({
-  mockup: mockupReferenceSchema,
-  expectedRevision: z.number().int().nonnegative(),
-  summary: z.string().trim().min(1).max(4000),
-  operations: z.array(operationSchema).min(1).max(100),
-})
-
 export const resolveMockupId = (reference: string, origin: string) => {
-  if (!reference.includes("://")) return z.string().uuid().parse(reference)
+  if (!reference.includes("://")) return uuidSchema.parse(reference)
   const url = new URL(reference)
   if (url.origin !== origin || url.search || url.hash)
     throw new Error("Le lien doit désigner une maquette de ce studio.")
   const match = /^\/m\/([0-9a-f-]{36})$/.exec(url.pathname)
   if (!match) throw new Error("Lien de maquette invalide.")
-  return z.string().uuid().parse(match[1])
+  return uuidSchema.parse(match[1])
 }
 
 export const listMcpMockups = async (userId: string) => {
@@ -101,14 +95,10 @@ export const applyMcpChanges = async (
   if (!record.canEdit) throw new Error("Cette maquette est en lecture seule.")
   if (record.revision !== input.expectedRevision)
     return { status: "conflict" as const, revision: record.revision }
-  const doc = validateAiComposition(
-    record.doc,
-    applyOperations(
-      record.doc,
-      { summary: input.summary, operations: input.operations },
-      library
-    )
-  )
+  const { doc } = prepareMockupProposal(record.doc, {
+    summary: input.summary,
+    operations: input.operations,
+  })
   return saveRecord(
     {
       id: record.id,

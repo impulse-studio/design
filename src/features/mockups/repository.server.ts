@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid"
+import type { MockupRow } from "@/db/schema/mockups"
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
 import { member, mockups } from "@/db/schema"
@@ -5,13 +7,12 @@ import { roles } from "@/features/teams/permissions"
 import { validateDocument } from "@digit-ai-studio/shared"
 import { library } from "@/features/editor/library"
 import { emptyDocument } from "@/features/editor/document"
-import type { MockupStatus } from "./status"
 import type {
-  MockupRecord,
-  SaveInput,
-  SaveResult,
-  UpdateLinksInput,
-} from "./types"
+  MockupStatus,
+  saveMockupSchema,
+  updateMockupLinksSchema,
+} from "@/validators/mockups"
+import type { z } from "zod"
 
 const authorizedOrganizations = (
   userId: string,
@@ -32,7 +33,7 @@ const authorizedOrganizations = (
       )
     )
 
-const record = (row: typeof mockups.$inferSelect): MockupRecord => ({
+const record = (row: MockupRow) => ({
   id: row.id,
   name: row.name,
   notionUrl: row.notionUrl,
@@ -76,7 +77,7 @@ export const createRecord = async (
   const rows = await getDatabase()
     .insert(mockups)
     .values({
-      id: crypto.randomUUID(),
+      id: uuid(),
       name,
       organizationId,
       doc: emptyDocument(),
@@ -120,9 +121,9 @@ export const loadRecordRevision = async (id: string, userId: string) => {
   return rows[0]
 }
 export const saveRecord = async (
-  input: SaveInput,
+  input: z.infer<typeof saveMockupSchema>,
   userId: string
-): Promise<SaveResult> => {
+) => {
   const doc = validateDocument(input.doc, library)
   const savedRows = await getDatabase()
     .update(mockups)
@@ -149,17 +150,17 @@ export const saveRecord = async (
   const saved = savedRows.at(0)
   if (saved)
     return {
-      status: "saved",
+      status: "saved" as const,
       revision: saved.revision,
       updatedAt: saved.updatedAt.toISOString(),
     }
   const existing = await loadRecord(input.id, userId)
   if (!existing.canEdit) throw new Error("Cette maquette est en lecture seule.")
-  return { status: "conflict", revision: existing.revision }
+  return { status: "conflict" as const, revision: existing.revision }
 }
 
 export const updateRecordLinks = async (
-  input: UpdateLinksInput,
+  input: z.infer<typeof updateMockupLinksSchema>,
   userId: string
 ) => {
   const savedRows = await getDatabase()

@@ -7,6 +7,7 @@ import {
   resultBlocks,
   summarizeAnswers,
 } from "./scenarios"
+import type { ChatRun, ChatState } from "./types"
 import type {
   ChatAnswers,
   ChatAttachment,
@@ -14,10 +15,10 @@ import type {
   ChatContextItem,
   ChatEffort,
   ChatMessage,
-  ChatRun,
   ChatScenario,
-  ChatState,
-} from "./types"
+} from "@/validators/chat/messages"
+import { chatQuestionRule } from "@/validators/chat/questions"
+import { firstInvalidQuestion } from "./questionnaire"
 
 export const initialChatState = (): ChatState => ({
   ready: false,
@@ -308,12 +309,10 @@ export const chatReducer = (
       ?.blocks?.find((item) => item.type === "questions")
     if (
       !block ||
-      block.questions.some(
-        (question) =>
-          question.required &&
-          !block.answers[question.id]?.selected.length &&
-          !block.answers[question.id]?.custom.trim()
-      )
+      firstInvalidQuestion(
+        block.questions.map(chatQuestionRule),
+        block.answers
+      ) >= 0
     )
       return state
     const nextRun: ChatRun = {
@@ -436,6 +435,7 @@ export const chatReducer = (
         ...updateMessage(state, run.id, (message) => ({
           ...message,
           status: "error",
+          errorTitle: "Interruption simulée",
           text: "La réponse a été interrompue pour illustrer une erreur. Vous pouvez relancer cette demande ; la prochaine tentative poursuivra la démonstration.",
           blocks: finishThinking(message.blocks ?? []),
         })),

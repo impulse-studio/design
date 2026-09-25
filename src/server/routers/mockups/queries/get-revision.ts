@@ -1,9 +1,10 @@
-import { z } from "zod"
+import { getMockupRevisionSchema } from "@/validators/mockups"
+
 import { loadRecordRevision } from "@/features/mockups/repository.server"
 import { protectedProcedure } from "@/server/procedure/protected.procedure"
 
 export const getMockupRevisionHandler = protectedProcedure
-  .input(z.object({ id: z.string().min(1).max(100) }))
+  .input(getMockupRevisionSchema)
   .handler(({ context, input }) =>
     loadRecordRevision(input.id, context.user.id)
   )

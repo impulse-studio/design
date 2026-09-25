@@ -1,16 +1,12 @@
-import { z } from "zod"
+import { changeSiteSchema } from "@/validators/sites/requests"
+
 import { saveSiteChange } from "@/features/sites/repository.server"
-import { siteChangeSchema } from "@/features/sites/schema"
+
 import { protectedProcedure } from "@/server/procedure/protected.procedure"
+import { SiteFailure } from "@/features/sites/errors"
 
 export const changeSiteHandler = protectedProcedure
-  .input(
-    z.object({
-      id: z.string().min(1).max(100),
-      expectedRevision: z.number().int().nonnegative(),
-      change: siteChangeSchema,
-    })
-  )
+  .input(changeSiteSchema)
   .handler(async ({ context, errors, input }) => {
     try {
       return await saveSiteChange(
@@ -20,12 +16,10 @@ export const changeSiteHandler = protectedProcedure
         input.change
       )
     } catch (error) {
-      if (error instanceof Error) {
-        if (/lecture seule|non autorisé/i.test(error.message)) {
-          throw errors.FORBIDDEN({ message: error.message })
-        }
+      if (error instanceof SiteFailure && error.kind === "forbidden")
+        throw errors.FORBIDDEN({ message: error.message })
+      if (error instanceof SiteFailure)
         throw errors.CONFLICT({ message: error.message })
-      }
       throw error
     }
   })

@@ -1,49 +1,12 @@
 import { persistSiteProposal } from "@/features/sites/repository.server"
-import { z } from "zod"
-import { and, desc, eq, inArray, lt, sql } from "drizzle-orm"
+import { and, desc, eq, lt, sql } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
 import { aiCallbackReceipts, aiConversations, aiRuns } from "@/db/schema"
 import { aiCatalog } from "./catalog"
 import { verifyCallback } from "./callback-auth"
-import {
-  claimRun,
-  persistProposal,
-  requireConversation,
-} from "./repository.server"
-
-const messageSchema = z
-  .object({
-    id: z.string().max(200),
-    role: z.enum(["system", "user", "assistant"]),
-    parts: z.array(z.object({ type: z.string() }).passthrough()).max(500),
-  })
-  .passthrough()
-const callbackSchema = z
-  .object({
-    chatId: z.string().uuid(),
-    eventId: z.string().uuid(),
-    action: z.enum([
-      "load",
-      "save",
-      "begin",
-      "heartbeat",
-      "proposal",
-      "complete",
-      "recover",
-    ]),
-    runId: z.string().uuid().optional(),
-    triggerRunId: z.string().max(200).optional(),
-    answer: z.string().max(100_000).optional(),
-    messages: z.array(messageSchema).max(500).optional(),
-    state: z.unknown().optional(),
-    lastEventId: z.string().max(200).optional(),
-    status: z.enum(["completed", "failed", "interrupted"]).optional(),
-    inputTokens: z.number().int().nonnegative().nullable().optional(),
-    outputTokens: z.number().int().nonnegative().nullable().optional(),
-    callId: z.string().max(200).optional(),
-    input: z.unknown().optional(),
-  })
-  .strict()
+import { callbackRequestSchema } from "@/validators/ai/callback"
+import { persistProposal, requireConversation } from "./repository.server"
+import { handleGenerationCommand } from "./generation.server"
 
 export const handleWorkerCallback = async (request: Request) => {
   try {
@@ -53,7 +16,7 @@ export const handleWorkerCallback = async (request: Request) => {
     if (body.length > 5_000_000) return new Response(null, { status: 413 })
     if (!verifyCallback(request, body))
       return new Response(null, { status: 401 })
-    const input = callbackSchema.parse(JSON.parse(body))
+    const input = callbackRequestSchema.parse(JSON.parse(body))
     const db = getDatabase()
     await db
       .delete(aiCallbackReceipts)
@@ -79,20 +42,11 @@ export const handleWorkerCallback = async (request: Request) => {
       })
     if (input.action === "recover") {
       // Never re-dispatch an in-flight user turn after an ambiguous process failure.
-      await db
-        .update(aiRuns)
-        .set({
-          status: "interrupted",
-          error: "Génération interrompue après redémarrage.",
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(aiRuns.conversationId, conversation.id),
-            eq(aiRuns.triggerRunId, input.triggerRunId ?? ""),
-            inArray(aiRuns.status, ["queued", "running"])
-          )
-        )
+      await handleGenerationCommand({
+        type: "recover",
+        conversationId: conversation.id,
+        triggerRunId: input.triggerRunId,
+      })
       return Response.json({ ok: true })
     }
     const run = await db
@@ -100,7 +54,7 @@ export const handleWorkerCallback = async (request: Request) => {
       .from(aiRuns)
       .where(
         and(
-          eq(aiRuns.id, input.runId ?? ""),
+          eq(aiRuns.id, input.runId),
           eq(aiRuns.conversationId, conversation.id),
           eq(aiRuns.userId, conversation.userId)
         )
@@ -108,32 +62,29 @@ export const handleWorkerCallback = async (request: Request) => {
       .then((rows) => rows.at(0))
     if (!run) return new Response(null, { status: 404 })
     if (input.action === "begin") {
-      if (Date.now() - run.createdAt.getTime() > 600_000)
+      const outcome = await handleGenerationCommand({
+        type: "begin",
+        runId: run.id,
+        triggerRunId: input.triggerRunId,
+      })
+      if (outcome.kind === "waiting") return Response.json({ waiting: true })
+      if (outcome.kind !== "admitted")
         return Response.json({ interrupted: true })
-      if (run.status !== "queued") return Response.json({ interrupted: true })
-      const claimed = await claimRun(run.id)
-      if (!claimed) return Response.json({ waiting: true })
-      await db
-        .update(aiRuns)
-        .set({ triggerRunId: input.triggerRunId })
-        .where(eq(aiRuns.id, run.id))
       return Response.json({
-        context: run.context,
-        model: run.model,
-        provider: run.provider,
+        context: outcome.run.context,
+        model: outcome.run.model,
+        provider: outcome.run.provider,
         catalogue: aiCatalog,
       })
     }
     // Old workers cannot change a newer turn, and stopped/terminal runs cannot become active again.
     if (
-      input.action !== "save" &&
-      ((run.status !== "running" &&
-        !(input.action === "complete" && run.status === "interrupted")) ||
-        run.triggerRunId !== input.triggerRunId)
+      input.action === "proposal" &&
+      (run.status !== "running" || run.triggerRunId !== input.triggerRunId)
     )
       return new Response(null, { status: 409 })
     if (
-      input.action !== "save" &&
+      input.action === "proposal" &&
       run.startedAt &&
       Date.now() - run.startedAt.getTime() > 600_000
     )
@@ -154,7 +105,7 @@ export const handleWorkerCallback = async (request: Request) => {
           throw new Error("Obsolete worker")
         const { validateUIMessages } = await import("ai")
         const messages = await validateUIMessages({
-          messages: input.messages ?? [],
+          messages: input.messages,
         })
         await tx
           .update(aiConversations)
@@ -166,7 +117,6 @@ export const handleWorkerCallback = async (request: Request) => {
           .where(eq(aiConversations.id, conversation.id))
       })
     } else if (input.action === "proposal") {
-      if (!input.callId) return new Response(null, { status: 400 })
       try {
         return Response.json(
           await (run.context.project
@@ -180,36 +130,26 @@ export const handleWorkerCallback = async (request: Request) => {
         })
       }
     } else if (input.action === "heartbeat") {
-      await db
-        .update(aiRuns)
-        .set({ answer: input.answer ?? run.answer, updatedAt: new Date() })
-        .where(and(eq(aiRuns.id, run.id), eq(aiRuns.status, "running")))
+      const outcome = await handleGenerationCommand({
+        type: "heartbeat",
+        runId: run.id,
+        triggerRunId: input.triggerRunId,
+        answer: input.answer,
+      })
+      if (outcome.kind === "obsolete")
+        return new Response(null, { status: 409 })
     } else {
-      const status =
-        run.status === "interrupted"
-          ? "interrupted"
-          : (input.status ?? "failed")
-      await db
-        .update(aiRuns)
-        .set({
-          answer: input.answer ?? run.answer,
-          status,
-          inputTokens: input.inputTokens ?? null,
-          outputTokens: input.outputTokens ?? null,
-          error:
-            status === "completed"
-              ? null
-              : status === "interrupted"
-                ? "Génération interrompue."
-                : "Le fournisseur n’a pas pu terminer la réponse. Vérifiez les limites API du studio.",
-          updatedAt: new Date(),
-        })
-        .where(
-          and(
-            eq(aiRuns.id, run.id),
-            inArray(aiRuns.status, ["running", "interrupted"])
-          )
-        )
+      const outcome = await handleGenerationCommand({
+        type: "complete",
+        runId: run.id,
+        triggerRunId: input.triggerRunId,
+        answer: input.answer,
+        status: input.status,
+        inputTokens: input.inputTokens,
+        outputTokens: input.outputTokens,
+      })
+      if (outcome.kind === "obsolete")
+        return new Response(null, { status: 409 })
     }
     return Response.json({ ok: true })
   } catch {

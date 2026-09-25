@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input"
 import { formatColor, parseColorInput } from "@/lib/colors"
 import type { ColorFormat, RGBA } from "@/lib/colors"
-import { useDraftEdit } from "./use-draft-edit"
+import { INVALID_DRAFT, useDraftEdit } from "./use-draft-edit"
 
 export function ColorCodeInput({
   color,
@@ -17,7 +17,8 @@ export function ColorCodeInput({
   const edit = useDraftEdit({
     value: color,
     format: (value) => formatColor(value, format),
-    parse: (draft, initial) => parseColorInput(draft, format, initial.a),
+    parse: (draft, initial) =>
+      parseColorInput(draft, format, initial.a) ?? INVALID_DRAFT,
     apply: (next) => {
       onChange(next)
       return next

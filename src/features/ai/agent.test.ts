@@ -1,4 +1,4 @@
-import { createSiteDocument } from "@/features/sites/template"
+import { createSiteDocument } from "@/features/sites/document.fixture"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test"
 import { mockChatAgent } from "@trigger.dev/sdk/ai/test"

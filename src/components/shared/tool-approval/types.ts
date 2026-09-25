@@ -11,7 +11,7 @@ export type ToolApprovalStatus =
   | "complete"
   | "error"
 
-export interface ToolApprovalParameter {
+interface ToolApprovalParameter {
   id: string
   label: ReactNode
   value: ReactNode

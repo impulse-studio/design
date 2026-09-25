@@ -1,34 +1,38 @@
+import { v4 as uuid } from "uuid"
+import type { AiRunRow } from "@/db/schema/ai"
 import { findSite } from "@/features/sites/repository.server"
-import { createHash, randomUUID } from "node:crypto"
-import { and, asc, desc, eq, inArray, lt, sql } from "drizzle-orm"
+import { createHash } from "node:crypto"
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
 import { aiConversations, aiProposals, aiRuns } from "@/db/schema"
-import { library } from "@/features/editor/library"
+import { prepareMockupProposal } from "@/features/mockups/proposal"
+import { projectGenerationConversation } from "@/features/chat/projection"
 import { studioAiAccess } from "./access.server"
-import { validateAiComposition } from "./catalog"
-import {
-  applyOperations,
-  canonicalDocument,
-  proposalInputSchema,
-} from "./operations"
+import { canonicalDocument } from "./operations"
 import type { AiSnapshot, RunContext } from "./types"
+import {
+  activeGenerationStatuses,
+  claimNextGeneration,
+} from "./generation.server"
+import { AiFailure } from "./errors"
 
 export const documentHash = (doc: unknown) =>
   createHash("sha256").update(canonicalDocument(doc)).digest("hex")
-export const activeStatuses = ["queued", "running"] as const
+const activeStatuses = activeGenerationStatuses
+export const claimRun = claimNextGeneration
 export const requireConversation = async (userId: string, id: string) => {
   const row = await getDatabase()
     .select()
     .from(aiConversations)
     .where(and(eq(aiConversations.id, id), eq(aiConversations.userId, userId)))
     .then((rows) => rows.at(0))
-  if (!row) throw new Error("Conversation introuvable.")
+  if (!row) throw new AiFailure("not_found", "Conversation introuvable.")
   await studioAiAccess.requireMockup(userId, row.mockupId, "read")
   return row
 }
 export const createConversation = async (userId: string, mockupId: string) => {
   await studioAiAccess.requireMockup(userId, mockupId, "read")
-  const id = randomUUID()
+  const id = uuid()
   await getDatabase()
     .insert(aiConversations)
     .values({ id, userId, mockupId, title: "Nouvelle conversation" })
@@ -53,7 +57,7 @@ export const getSnapshot = async (
     .limit(100)
   const id = conversationId ?? conversations.at(0)?.id
   if (id && !conversations.some((row) => row.id === id))
-    throw new Error("Conversation introuvable.")
+    throw new AiFailure("not_found", "Conversation introuvable.")
   const runs = id
     ? await getDatabase()
         .select()
@@ -95,31 +99,7 @@ export const getSnapshot = async (
       updatedAt: row.updatedAt.toISOString(),
     })),
     conversationId: id ?? null,
-    messages: runs.flatMap((run) => [
-      {
-        id: `${run.id}:user`,
-        role: "user" as const,
-        text: run.prompt,
-        status: "complete" as const,
-      },
-      {
-        id: `${run.id}:assistant`,
-        role: "assistant" as const,
-        text: run.answer,
-        status:
-          run.status === "running"
-            ? run.answer
-              ? ("streaming" as const)
-              : ("thinking" as const)
-            : run.status === "queued"
-              ? ("waiting" as const)
-              : run.status === "failed"
-                ? ("error" as const)
-                : run.status === "interrupted"
-                  ? ("stopped" as const)
-                  : ("complete" as const),
-      },
-    ]),
+    messages: projectGenerationConversation(runs),
     proposals: proposals.map((row) => ({
       ...row.input,
       id: row.id,
@@ -153,7 +133,7 @@ export const enqueueRun = async (
   )
   const project = await findSite(record.id)
   if (project && !record.canEdit)
-    throw new Error("Cette maquette est en lecture seule.")
+    throw new AiFailure("forbidden", "Cette maquette est en lecture seule.")
   const hash = documentHash(project?.doc ?? record.doc)
   return getDatabase().transaction(async (tx) => {
     await tx.execute(
@@ -178,11 +158,12 @@ export const enqueueRun = async (
         canonicalDocument(existing.context.selectedIds) !==
           canonicalDocument(input.selectedIds)
       )
-        throw new Error("Identifiant d’envoi déjà utilisé.")
+        throw new AiFailure("conflict", "Identifiant d’envoi déjà utilisé.")
       return { id: existing.id }
     }
     if (hash !== input.docHash)
-      throw new Error(
+      throw new AiFailure(
+        "conflict",
         "Enregistrez la maquette avant d’envoyer le message. Une modification ou un conflit est en attente."
       )
     const active = await tx
@@ -196,13 +177,19 @@ export const enqueueRun = async (
       )
       .then((rows) => rows.at(0))
     if (active)
-      throw new Error("Une génération est déjà en cours pour votre compte.")
+      throw new AiFailure(
+        "conflict",
+        "Une génération est déjà en cours pour votre compte."
+      )
     const count = await tx
       .select({ count: sql<number>`count(*)::int` })
       .from(aiRuns)
       .where(eq(aiRuns.conversationId, conversation.id))
     if (count[0].count >= 200)
-      throw new Error("Créez une nouvelle conversation pour continuer.")
+      throw new AiFailure(
+        "limit",
+        "Créez une nouvelle conversation pour continuer."
+      )
     const context: RunContext = {
       doc: record.doc,
       revision: project?.revision ?? record.revision,
@@ -216,7 +203,7 @@ export const enqueueRun = async (
       hash,
       selectedIds: input.selectedIds,
     }
-    const id = randomUUID()
+    const id = uuid()
     await tx.insert(aiRuns).values({
       id,
       userId,
@@ -237,51 +224,8 @@ export const enqueueRun = async (
     return { id }
   })
 }
-export const claimRun = async (runId?: string) =>
-  getDatabase().transaction(async (tx) => {
-    // One scheduler admission lock, also safe across multiple web processes.
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(714032)`)
-    await tx
-      .update(aiRuns)
-      .set({
-        status: "interrupted",
-        error:
-          "La connexion au serveur a été interrompue. Vous pouvez envoyer un nouveau message.",
-        updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(aiRuns.status, "running"),
-          lt(aiRuns.updatedAt, new Date(Date.now() - 60_000))
-        )
-      )
-    const running = await tx
-      .select({ id: aiRuns.id })
-      .from(aiRuns)
-      .where(eq(aiRuns.status, "running"))
-    if (running.length >= 2) return null
-    const next = await tx
-      .select()
-      .from(aiRuns)
-      .where(
-        and(
-          eq(aiRuns.status, "queued"),
-          runId ? eq(aiRuns.id, runId) : undefined
-        )
-      )
-      .orderBy(asc(aiRuns.createdAt))
-      .limit(1)
-      .for("update", { skipLocked: true })
-      .then((rows) => rows.at(0))
-    if (!next) return null
-    await tx
-      .update(aiRuns)
-      .set({ status: "running", startedAt: new Date(), updatedAt: new Date() })
-      .where(eq(aiRuns.id, next.id))
-    return next
-  })
 export const persistProposal = async (
-  run: typeof aiRuns.$inferSelect,
+  run: AiRunRow,
   callId: string,
   args: unknown
 ) => {
@@ -290,13 +234,9 @@ export const persistProposal = async (
     .from(aiRuns)
     .where(and(eq(aiRuns.id, run.id), eq(aiRuns.status, "running")))
     .then((rows) => rows.at(0))
-  if (!active) throw new Error("Génération arrêtée.")
-  const result = validateAiComposition(
-    run.context.doc,
-    applyOperations(run.context.doc, args, library)
-  )
-  const input = proposalInputSchema.parse(args)
-  const id = randomUUID()
+  if (!active) throw new AiFailure("conflict", "Génération arrêtée.")
+  const { doc: result, input } = prepareMockupProposal(run.context.doc, args)
+  const id = uuid()
   await getDatabase()
     .insert(aiProposals)
     .values({
@@ -323,7 +263,7 @@ export const persistProposal = async (
       "Proposition validée. Elle sera appliquée uniquement par l’utilisateur avec le bouton Appliquer.",
   }
 }
-export const requireProposal = async (userId: string, id: string) => {
+const requireProposal = async (userId: string, id: string) => {
   const row = await getDatabase()
     .select({
       proposal: aiProposals,
@@ -335,7 +275,7 @@ export const requireProposal = async (userId: string, id: string) => {
     .innerJoin(aiConversations, eq(aiConversations.id, aiRuns.conversationId))
     .where(and(eq(aiProposals.id, id), eq(aiRuns.userId, userId)))
     .then((rows) => rows.at(0))
-  if (!row) throw new Error("Proposition introuvable.")
+  if (!row) throw new AiFailure("not_found", "Proposition introuvable.")
   return row
 }
 export const prepareProposal = async (
@@ -350,7 +290,7 @@ export const prepareProposal = async (
     "write"
   )
   if (proposal.status !== "pending")
-    throw new Error("Cette proposition a déjà été traitée.")
+    throw new AiFailure("conflict", "Cette proposition a déjà été traitée.")
   const savedHash = documentHash(record.doc)
   // A lost acknowledgement must not reapply the same edit after a reload.
   if (savedHash === proposal.resultHash && currentHash === proposal.resultHash)
@@ -365,11 +305,11 @@ export const prepareProposal = async (
     savedHash !== proposal.baseHash ||
     currentHash !== proposal.baseHash
   )
-    throw new Error("La maquette a changé. Demandez une nouvelle proposition.")
-  const doc = validateAiComposition(
-    run.context.doc,
-    applyOperations(run.context.doc, proposal.input, library)
-  )
+    throw new AiFailure(
+      "conflict",
+      "La maquette a changé. Demandez une nouvelle proposition."
+    )
+  const { doc } = prepareMockupProposal(run.context.doc, proposal.input)
   return {
     doc,
     baseHash: proposal.baseHash,
@@ -392,7 +332,10 @@ export const decideProposal = async (
     decision === "applied" &&
     documentHash(record.doc) !== proposal.resultHash
   )
-    throw new Error("La sauvegarde de la proposition n’est pas terminée.")
+    throw new AiFailure(
+      "conflict",
+      "La sauvegarde de la proposition n’est pas terminée."
+    )
   await getDatabase()
     .update(aiProposals)
     .set({ status: decision })

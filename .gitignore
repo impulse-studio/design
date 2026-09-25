@@ -20,8 +20,3 @@ backups/
 
 # renderer build output (served by the studio)
 public/renderer
-
-# React site compiler assets
-public/site-runtime
-src/generated/site-template.json
-site-template/src/base.css

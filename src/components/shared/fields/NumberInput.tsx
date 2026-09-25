@@ -6,7 +6,7 @@ import {
   parseNumberExpression,
   stepIncrement,
 } from "@/lib/number-expression"
-import { useDraftEdit } from "./use-draft-edit"
+import { INVALID_DRAFT, useDraftEdit } from "./use-draft-edit"
 
 export function NumberInput({
   label,
@@ -37,7 +37,8 @@ export function NumberInput({
   const edit = useDraftEdit({
     value,
     format: formatNumber,
-    parse: (draft, initial) => parseNumberExpression(draft, initial),
+    parse: (draft, initial) =>
+      parseNumberExpression(draft, initial) ?? INVALID_DRAFT,
     apply,
   })
   return (

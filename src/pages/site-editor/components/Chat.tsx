@@ -1,5 +1,6 @@
+import { sitePromptSchema } from "@/validators/sites/forms"
 import { useForm } from "@tanstack/react-form"
-import { z } from "zod"
+
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { OptionSelect } from "@/components/shared/OptionSelect"
@@ -15,9 +16,6 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import type { useSiteChat } from "@/features/sites/use-chat"
 
-const promptSchema = z.object({
-  prompt: z.string().trim().min(1, "Décrivez votre modification.").max(20000),
-})
 export function SiteChat({
   chat,
   disabled,
@@ -31,17 +29,17 @@ export function SiteChat({
 }) {
   const form = useForm({
     defaultValues: { prompt: "" },
-    validators: { onSubmit: promptSchema },
+    validators: { onSubmit: sitePromptSchema },
     onSubmit: async ({ value }) => {
-      const { prompt } = promptSchema.parse(value)
+      const { prompt } = sitePromptSchema.parse(value)
       if (await chat.send(prompt)) form.reset()
     },
   })
   return (
     <aside className="flex w-full min-w-0 flex-1 flex-col border-0">
-      <div className="site-panel-heading py-[18px] px-4 border-b border-border [&_h2]:text-[13px] [&_h2]:font-semibold [&_p]:text-[11px] [&_p]:text-muted-foreground [&_p]:mt-1">
+      <div className="site-panel-heading px-4 pt-6 pb-2 [&_h2]:text-[13px] [&_h2]:font-semibold [&_p]:mt-1 [&_p]:text-[11px] [&_p]:text-muted-foreground">
         <h2>Créons votre site</h2>
-        <p>React + Vite · style Digitevent</p>
+        <p>Une idée, un ajustement, une nouvelle page.</p>
       </div>
       <MessageScrollerProvider>
         <MessageScroller>
@@ -80,7 +78,7 @@ export function SiteChat({
         </p>
       )}
       <form
-        className="site-chat-composer p-4 border-t border-border [&_[data-slot=field-group]]:gap-3"
+        className="site-chat-composer border-t border-border p-4 [&_[data-slot=field-group]]:gap-3"
         onSubmit={(e) => {
           e.preventDefault()
           void form.handleSubmit()

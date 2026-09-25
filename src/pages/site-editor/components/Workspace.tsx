@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button"
-import type { PreviewInventoryEntry } from "@/features/sites/bridge"
-import type { Breakpoint, SiteRecord } from "@/features/sites/schema"
+import type { PreviewInventoryEntry } from "@/validators/sites/preview"
+import type { Breakpoint } from "@/validators/sites/document"
+import type { SiteRecord } from "@/features/sites/types"
 import type { SourceElement } from "@/features/sites/source"
 import type { SiteMode } from "./Toolbar"
+import type { SiteRuntimeStatus } from "@/features/sites/runtime"
 import { SiteCodeView } from "./CodeView"
 import { SitePreview } from "./Preview"
 import { SiteModeIsland } from "./ModeIsland"
+import { SitePreviewToolbar } from "./PreviewToolbar"
+import type { ComponentProps } from "react"
 
 const previewWidths: Record<Breakpoint, number> = {
   base: 1280,
@@ -19,6 +23,7 @@ export function SiteEditorWorkspace({
   previewRecord,
   mode,
   onMode,
+  previewToolbar,
   breakpoint,
   path,
   file,
@@ -35,12 +40,14 @@ export function SiteEditorWorkspace({
   onInventory,
   onRoute,
   onError,
+  onRuntimeStatus,
 }: {
-  onSaveFile: (path:string,content:string)=>Promise<void>
+  onSaveFile: (path: string, content: string) => Promise<void>
   record: SiteRecord
   previewRecord: SiteRecord
   mode: SiteMode
   onMode: (mode: SiteMode) => void
+  previewToolbar: ComponentProps<typeof SitePreviewToolbar>
   breakpoint: Breakpoint
   path: string
   file: string | null
@@ -61,20 +68,16 @@ export function SiteEditorWorkspace({
   onInventory: (elements: PreviewInventoryEntry[]) => void
   onRoute: (path: string) => void
   onError: (message: string) => void
+  onRuntimeStatus: (status: SiteRuntimeStatus) => void
 }) {
   return (
-    <section className="site-editor-center flex-1 min-w-0 flex flex-col bg-muted max-[1100px]:min-w-[480px] relative">
-      <div className="flex justify-between border-b border-border px-4 py-2 text-[11px] text-muted-foreground">
-        <span>
-          {busy
-            ? "Validation et sauvegarde…"
-            : `Enregistré · version ${record.revision}`}
-          {!canEdit ? " · Lecture seule" : ""}
-        </span>
-        <span>{path}</span>
-      </div>
+    <section className="site-editor-center relative flex min-w-0 flex-1 flex-col bg-muted/40">
+      <SitePreviewToolbar {...previewToolbar} />
       {error && (
-        <div className="site-editor-error p-3 flex gap-3 items-center bg-background text-[12px] text-destructive" role="alert">
+        <div
+          className="site-editor-error flex items-center gap-3 bg-background p-3 text-[12px] text-destructive"
+          role="alert"
+        >
           <span>{error}</span>
           <Button size="sm" variant="outline" onClick={onReload}>
             Recharger
@@ -92,7 +95,10 @@ export function SiteEditorWorkspace({
           onClose={onCloseFile}
         />
       )}
-      <div className="site-preview-container [&[hidden]]:hidden flex flex-1 min-h-0 flex-col" hidden={Boolean(file)}>
+      <div
+        className="site-preview-container flex min-h-0 flex-1 flex-col [&[hidden]]:hidden"
+        hidden={Boolean(file)}
+      >
         <SitePreview
           record={previewRecord}
           sourceElements={sourceElements}
@@ -105,9 +111,22 @@ export function SiteEditorWorkspace({
           onInventory={onInventory}
           onRoute={onRoute}
           onError={onError}
+          onStatus={onRuntimeStatus}
         />
       </div>
       <SiteModeIsland mode={mode} onMode={onMode} />
+      <footer className="flex h-8 shrink-0 items-center justify-between gap-3 px-4 text-[0.6875rem] text-muted-foreground">
+        <span role="status">
+          {busy ? "Enregistrement…" : "Enregistré"}
+          {!canEdit ? " · Lecture seule" : ""}
+        </span>
+        <span className="truncate" title={path}>
+          {path}{" "}
+          <span className="ml-3 tabular-nums opacity-60">
+            v{record.revision}
+          </span>
+        </span>
+      </footer>
     </section>
   )
 }

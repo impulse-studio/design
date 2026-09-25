@@ -1,4 +1,4 @@
-import type { ChatAttachment } from "./types"
+import type { ChatAttachment } from "@/validators/chat/messages"
 
 export const CHAT_FILE_ACCEPT = ".png,.jpg,.jpeg,.webp,.pdf,.txt,.md"
 export const MAX_CHAT_FILES = 5

@@ -1,17 +1,14 @@
+import type { Database } from "@/db/types"
+import { inputValidationDataSchema } from "@/validators/rpc"
 import { os } from "@orpc/server"
-import { z } from "zod"
+
 import { getDatabase } from "@/db/client.server"
 import type { CurrentUser } from "@/features/auth/session.server"
-
-const inputValidationDataSchema = z.object({
-  formErrors: z.array(z.string()),
-  fieldErrors: z.record(z.string(), z.array(z.string())),
-})
 
 export type RpcContext = {
   headers: Headers
   request: Request
-  db: ReturnType<typeof getDatabase>
+  db: Database
   user?: CurrentUser
 }
 

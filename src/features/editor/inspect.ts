@@ -6,6 +6,10 @@ import {
   color,
   length,
   selfLayoutStyle,
+  projectedElementAttributes,
+  projectedElementStyles,
+  resolveComponent,
+  visibleNodes,
   walk,
 } from "@digit-ai-studio/shared"
 
@@ -74,24 +78,23 @@ export const reactSnippet = (
   direction: "row" | "column" | "grid" = "column"
 ): string => {
   const indent = "  ".repeat(depth)
-  const childrenOf = (children: AnyNode[], childDirection = "column" as const) =>
-    children
+  const childrenOf = (
+    children: AnyNode[],
+    childDirection: "row" | "column" | "grid" = "column"
+  ) =>
+    visibleNodes(children)
       .map((child) => reactSnippet(child, depth + 1, childDirection))
       .join("\n")
 
   if (node.type === "component") {
-    const props: Record<string, Json> = {
-      ...(node.localVariant?.props ?? {}),
-      ...(node.props ?? {}),
-    }
-    const text = node.text ?? node.localVariant?.text
+    const resolved = resolveComponent(node)
+    const props: Record<string, Json> = { ...resolved.props }
+    const text = resolved.text
     if (text !== undefined && !node.slots?.default) props.text = text
     const attributes = jsxAttributes(props)
     const styles = {
-      ...selfLayoutStyle(node.localVariant?.layout, direction),
-      ...selfLayoutStyle(node.layout, direction),
-      ...boxStyle(node.localVariant?.style),
-      ...boxStyle(node.style),
+      ...selfLayoutStyle(resolved.layout, direction),
+      ...boxStyle(resolved.style),
     }
     const slots = Object.entries(node.slots ?? {})
       .filter(([name]) => name !== "default")
@@ -107,10 +110,12 @@ export const reactSnippet = (
   }
 
   if (node.type === "element") {
-    const attributes = jsxAttributes((node.attributes ?? {}) as Record<string, Json>)
+    const attributes = jsxAttributes(
+      projectedElementAttributes(node)
+    )
     if (node.className) attributes.push(`className=${jsxValue(node.className)}`)
     const styles = {
-      ...elementStyles(node.inlineStyle),
+      ...Object.assign({}, ...projectedElementStyles(node).map(elementStyles)),
       ...selfLayoutStyle(node.layout, direction),
       ...boxStyle(node.style),
     }

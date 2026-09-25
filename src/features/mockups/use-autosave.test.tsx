@@ -1,3 +1,4 @@
+import { saveMockupSchema } from "@/validators/mockups"
 import { StrictMode } from "react"
 import { act, render, screen } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -13,7 +14,7 @@ import { draftKey } from "./save-queue"
 import { useAutosave } from "./use-autosave"
 
 const mocks = vi.hoisted(() => ({ useOrpc: vi.fn() }))
-vi.mock("@/lib/use-orpc", () => ({ useOrpc: mocks.useOrpc }))
+vi.mock("@/server/use-orpc", () => ({ useOrpc: mocks.useOrpc }))
 
 const Harness = ({
   editor,
@@ -128,7 +129,9 @@ it("preserves the save queue across rerenders and saves only the final transacti
   view.rerender(ui)
   await act(() => vi.advanceTimersByTimeAsync(1600))
   expect(save).toHaveBeenCalledTimes(1)
-  expect(save.mock.calls[0][0].doc.pages[0].frames[0].x).toBe(200)
+  expect(
+    saveMockupSchema.parse(save.mock.calls[0][0]).doc.pages[0].frames[0].x
+  ).toBe(200)
 })
 
 it.each(["saved", "error", "conflict"] as const)(

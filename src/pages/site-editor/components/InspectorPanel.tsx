@@ -1,11 +1,11 @@
 import { sourceElementName } from "@/features/sites/element-name"
 import { OptionSelect } from "@/components/shared/OptionSelect"
-import type { PreviewInventoryEntry } from "@/features/sites/bridge"
+import type { PreviewInventoryEntry } from "@/validators/sites/preview"
 import type {
   Breakpoint,
   SiteChange,
   SiteDocument,
-} from "@/features/sites/schema"
+} from "@/validators/sites/document"
 import type { SiteElementStatus, SourceElement } from "@/features/sites/source"
 import type { SiteMode } from "./Toolbar"
 import { SiteDevInspector } from "./DevInspector"
@@ -59,8 +59,8 @@ export function SiteEditorInspectorPanel({
   onSelectionChange: (id: string | null) => void
 }) {
   return (
-    <aside className="site-editor-inspector w-[280px] shrink-0 border-l border-border overflow-auto max-[1100px]:w-[240px]">
-      <div className="site-panel-heading py-[18px] px-4 border-b border-border [&_h2]:text-[13px] [&_h2]:font-semibold [&_p]:text-[11px] [&_p]:text-muted-foreground [&_p]:mt-1">
+    <aside className="site-editor-inspector w-72 shrink-0 overflow-auto border-l border-border/60 max-[1100px]:w-[240px]">
+      <div className="site-panel-heading border-b border-border/60 px-4 py-3.5 [&_h2]:text-[13px] [&_h2]:font-semibold [&_p]:mt-1 [&_p]:text-[11px] [&_p]:text-muted-foreground">
         <h2>{inspectorTitles[mode]}</h2>
       </div>
       {mode === "dev" && (

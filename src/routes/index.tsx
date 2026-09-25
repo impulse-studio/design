@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { StudioPage } from "@/pages/studio/StudioPage"
+import { StudioPage } from "@/pages/studio/page"
 import { PROJECT_NAME } from "@/constants"
 import { requireAuthenticatedUser } from "@/features/auth/route-guard"
 

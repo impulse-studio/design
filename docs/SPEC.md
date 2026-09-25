@@ -325,7 +325,7 @@ Iframe → shell :
 2. `pnpm --filter digicomponents build` (+ `scripts/build-deps.sh` si nécessaire).
 3. Copier `dist/` → `renderer/vendor/digicomponents/`.
 4. Copier/transformer les fichiers shell listés dans `manifest/shell-files.json` → `renderer/vendor/shell/` (réécriture des imports vers les stubs).
-5. Générer le manifest + registry TS du renderer (`renderer/src/registry.generated.ts`) + types (`src/generated/components.d.ts`) pour l'inspecteur.
+5. Générer le manifest pour l’inspecteur et les composants React depuis les rendus SSR de la bibliothèque.
 6. Diff vs manifest précédent → `manifest/CHANGELOG.md` (ajouts, suppressions, props renommées).
 7. Valider toutes les maquettes en base (script `pnpm validate:mockups` contre la DB de prod en lecture) → rapport des nodes cassés.
 8. `pnpm build` du renderer + du studio, smoke test (rendu de chaque composant avec ses exemples dans un navigateur headless → capture d'une planche « tous les composants »).
@@ -439,7 +439,7 @@ usage_events  (id, mockup_id, model, input_tokens, output_tokens, duration_ms, c
 | # | Jalon | Livrable / critère d'acceptation |
 |---|---|---|
 | M0 | **Spike renderer** | Iframe Vue affiche un arbre JSON en dur avec `EventLayout` + `DigiTable` + `DigiButton`, visuellement identique à `back`. Valide la faisabilité des stubs shell. |
-| M1 | Skill sync + manifest | `/sync-digicomponents` produit manifest + registry ; planche de tous les composants rendus sans erreur. |
+| M1 | Skill sync + manifest | `/sync-digicomponents` produit le manifest et les composants React ; planche de tous les composants rendus sans erreur. |
 | M2 | Socle app | Workspace pnpm, Drizzle + Railway Postgres, Better Auth (seed owner, routes protégées), Recents (grille + Table), CRUD projets/maquettes. |
 | M3 | Éditeur statique | Canvas zoom/pan, frames multiples, sélection via bridge, overlay, layers (sélection, réordonner, masquer), inspecteur Design (auto-layout, taille, props), undo/redo, autosave. |
 | M4 | IA | Settings token, agent + outils, streaming chat Markdown, patches live, scope sélection, image input. |

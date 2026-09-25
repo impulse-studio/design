@@ -11,9 +11,9 @@ import {
 } from "@/db/schema"
 import { getAuthEnvironment } from "./config.server"
 
-export const DEV_USER_ID = "digit-local-developer"
-export const DEV_USER_EMAIL = "dev@digitevent.com"
-export const DEV_TEAM_ID = "digit-local-team"
+const DEV_USER_ID = "digit-local-developer"
+const DEV_USER_EMAIL = "dev@digitevent.com"
+const DEV_TEAM_ID = "digit-local-team"
 
 export const seedDevelopmentAccount = async () => {
   const env = getAuthEnvironment()

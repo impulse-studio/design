@@ -1,14 +1,10 @@
-import { z } from "zod"
+import { getSiteVersionSchema } from "@/validators/sites/requests"
+
 import { getSiteVersion } from "@/features/sites/repository.server"
 import { protectedProcedure } from "@/server/procedure/protected.procedure"
 
 export const getSiteVersionHandler = protectedProcedure
-  .input(
-    z.object({
-      id: z.string().min(1).max(100),
-      versionId: z.string().uuid(),
-    })
-  )
+  .input(getSiteVersionSchema)
   .handler(({ context, input }) =>
     getSiteVersion(input.id, context.user.id, input.versionId)
   )

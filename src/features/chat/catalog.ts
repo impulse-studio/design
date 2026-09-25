@@ -1,4 +1,4 @@
-import type { ChatEffort, ChatScenario } from "./types"
+import type { ChatEffort, ChatScenario } from "@/validators/chat/messages"
 
 export const CHAT_MODELS = [
   { value: "demo-gpt", label: "GPT", provider: "OpenAI" },

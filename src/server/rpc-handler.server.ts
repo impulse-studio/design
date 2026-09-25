@@ -4,6 +4,10 @@ import { BatchHandlerPlugin, StrictGetMethodPlugin } from "@orpc/server/plugins"
 import { z } from "zod"
 import { appRouter } from "@/server/routers/_app"
 import { createRpcContext } from "@/server/context"
+import {
+  authorizeBrowserRequest,
+  BrowserPolicyError,
+} from "@/features/auth/browser-policy.server"
 
 const rpcHandler = new RPCHandler(appRouter, {
   plugins: [new StrictGetMethodPlugin(), new BatchHandlerPlugin()],
@@ -38,6 +42,16 @@ const rpcHandler = new RPCHandler(appRouter, {
 })
 
 export const handleRpcRequest = async (request: Request): Promise<Response> => {
+  try {
+    await authorizeBrowserRequest(request, { session: "optional" })
+  } catch (error) {
+    if (error instanceof BrowserPolicyError)
+      return Response.json(
+        { error: error.message },
+        { status: error.kind === "origin" ? 403 : 401 }
+      )
+    throw error
+  }
   const { response } = await rpcHandler.handle(request, {
     prefix: "/api/rpc",
     context: createRpcContext(request),

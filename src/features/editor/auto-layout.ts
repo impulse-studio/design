@@ -102,3 +102,56 @@ export const parentHasAutoLayout = (editor: Editor, id: string) => {
     location.parent.autoLayout
   )
 }
+
+export const setAutoLayoutGap = (
+  editor: Editor,
+  axis: "main" | "cross",
+  value: AutoLayout["gap"]
+) =>
+  editor.updateSelection((node) => {
+    if (
+      (node.type !== "frame" && node.type !== "box") ||
+      !node.autoLayout
+    )
+      return
+    if (axis === "cross") {
+      if (value !== "auto") node.autoLayout.crossGap = value
+      return
+    }
+    node.autoLayout.gap = value
+    node.autoLayout.justify = value === "auto" ? "between" : "start"
+  })
+
+export const setAutoLayoutDistribution = (
+  editor: Editor,
+  justify: NonNullable<AutoLayout["justify"]>
+) =>
+  editor.updateSelection((node) => {
+    if (
+      (node.type === "frame" || node.type === "box") &&
+      node.autoLayout?.gap === "auto"
+    )
+      node.autoLayout.justify = justify
+  })
+
+export const setAutoLayoutAlignment = (
+  editor: Editor,
+  horizontal: "start" | "center" | "end",
+  vertical: "start" | "center" | "end"
+) =>
+  editor.updateSelection((node) => {
+    if (
+      (node.type !== "frame" && node.type !== "box") ||
+      !node.autoLayout
+    )
+      return
+    if (node.autoLayout.direction === "column") {
+      node.autoLayout.align = horizontal
+      if (node.autoLayout.gap !== "auto")
+        node.autoLayout.justify = vertical
+    } else {
+      if (node.autoLayout.gap !== "auto")
+        node.autoLayout.justify = horizontal
+      node.autoLayout.align = vertical
+    }
+  })

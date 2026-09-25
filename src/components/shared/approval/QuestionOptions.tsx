@@ -67,7 +67,7 @@ export function QuestionOptions({
           <FieldLabel htmlFor={`${id}-custom`}>Autre réponse</FieldLabel>
           <Input
             id={`${id}-custom`}
-            value={answer.custom ?? ""}
+            value={answer.custom}
             disabled={disabled}
             placeholder={question.customPlaceholder ?? "Votre réponse…"}
             onChange={(event) =>

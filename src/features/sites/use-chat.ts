@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { aiRequest, hashDocument } from "@/features/ai/client"
+import { createConversationSession } from "@/features/ai/conversation-session"
 import type { AiConfiguration, AiSnapshot } from "@/features/ai/types"
-import { useOrpc } from "@/lib/use-orpc"
-import type { SiteRecord, PendingSiteProposal } from "./schema"
+import { useOrpc } from "@/server/use-orpc"
+import type { SiteRecord, PendingSiteProposal } from "@/features/sites/types"
 
 export const useSiteChat = (
   record: SiteRecord,
@@ -23,7 +24,13 @@ export const useSiteChat = (
     [busy, setBusy] = useState(false)
   const current = useRef({ record, selection, path, apply }),
     processing = useRef(new Set<string>()),
-    sending = useRef(false)
+    sending = useRef(false),
+    session = useRef(
+      createConversationSession({
+        targetId: record.id,
+        startRemoteSession: true,
+      })
+    )
   current.current = { record, selection, path, apply }
   useEffect(() => {
     void aiRequest<AiConfiguration>("configuration")
@@ -89,49 +96,42 @@ export const useSiteChat = (
     setError(null)
     try {
       const state = current.current
-      let conversationId = snapshot?.conversationId
-      if (!conversationId)
-        conversationId = (
-          await aiRequest<{ id: string }>("action", {
-            action: "conversation",
-            mockupId: record.id,
-          })
-        ).id
-      await aiRequest("action", { action: "session", conversationId })
-      const admitted = await aiRequest<{ id: string }>("action", {
-        action: "send",
-        conversationId,
-        requestId: crypto.randomUUID(),
-        model,
-        prompt,
-        docHash: await hashDocument(state.record.doc),
-        selectedIds: state.selection ? [state.selection] : [],
-        activeRoute: state.path,
-      })
-      const response = await fetch(
-        `/api/ai/transport/in?chatId=${encodeURIComponent(conversationId)}`,
+      await session.current.send(
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            kind: "message",
-            payload: {
-              chatId: conversationId,
-              trigger: "submit-message",
-              runId: admitted.id,
-              message: {
-                id: `${admitted.id}:user`,
-                role: "user",
-                parts: [{ type: "text", text: prompt }],
-              },
-            },
-          }),
+          conversationId: snapshot?.conversationId,
+          model,
+          prompt,
+          docHash: await hashDocument(state.record.doc),
+          selectedIds: state.selection ? [state.selection] : [],
+          activeRoute: state.path,
+        },
+        async ({ conversationId, runId }) => {
+          const response = await fetch(
+            `/api/ai/transport/in?chatId=${encodeURIComponent(conversationId)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                kind: "message",
+                payload: {
+                  chatId: conversationId,
+                  trigger: "submit-message",
+                  runId,
+                  message: {
+                    id: `${runId}:user`,
+                    role: "user",
+                    parts: [{ type: "text", text: prompt }],
+                  },
+                },
+              }),
+            }
+          )
+          if (!response.ok)
+            throw new Error(
+              "Le message n’a pas pu être transmis. Arrêtez la génération puis réessayez."
+            )
         }
       )
-      if (!response.ok)
-        throw new Error(
-          "Le message n’a pas pu être transmis. Arrêtez la génération puis réessayez."
-        )
       setSnapshot(
         await aiRequest<AiSnapshot>(
           `state?mockupId=${encodeURIComponent(record.id)}`
@@ -157,8 +157,7 @@ export const useSiteChat = (
     running:
       snapshot?.run?.status === "queued" || snapshot?.run?.status === "running",
     stop: async () => {
-      if (snapshot?.run)
-        await aiRequest("action", { action: "stop", runId: snapshot.run.id })
+      if (snapshot?.run) await session.current.stop(snapshot.run.id)
     },
   }
 }

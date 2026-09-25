@@ -10,8 +10,32 @@ import { catalog } from "./catalog"
 import { defaultOptions } from "./types"
 import { searchCatalog } from "./search"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import {
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+  RouterContextProvider,
+} from "@tanstack/react-router"
 
 describe("catalogue", () => {
+  it("fournit des imports utilisables sans déduction par la page", () => {
+    const files = new Set(
+      Object.keys(import.meta.glob("/src/components/**/*.tsx"))
+    )
+    for (const entry of catalog) {
+      if (entry.kind === "foundation") expect(entry.importPath).toBeNull()
+      else
+        expect(
+          files.has(entry.importPath!.replace("@/", "/src/") + ".tsx"),
+          entry.id
+        ).toBe(true)
+      expect(Array.isArray(entry.properties)).toBe(true)
+    }
+    expect(catalog.find((entry) => entry.id === "ai-sidebar")?.importPath).toBe(
+      "@/components/shared/ai-sidebar/AISidebar"
+    )
+  })
+
   it("référence chaque primitive disponible, hors sélecteur natif", () => {
     const files = Object.keys(import.meta.glob("/src/components/ui/*.tsx"))
       .map((path) => path.split("/").pop()!.replace(".tsx", ""))
@@ -43,10 +67,16 @@ describe("catalogue", () => {
     async (entry) => {
       const example = await entry.load()
       const options = defaultOptions(entry)
+      const router = createRouter({
+        routeTree: createRootRoute(),
+        history: createMemoryHistory({ initialEntries: ["/design-system"] }),
+      })
       const { container, rerender } = render(
-        <TooltipProvider>
-          <example.Component options={options} />
-        </TooltipProvider>
+        <RouterContextProvider router={router}>
+          <TooltipProvider>
+            <example.Component options={options} />
+          </TooltipProvider>
+        </RouterContextProvider>
       )
       await act(async () => {})
       expect(container.innerHTML.length).toBeGreaterThan(0)
@@ -57,9 +87,11 @@ describe("catalogue", () => {
       ]
       for (const choice of choices) {
         rerender(
-          <TooltipProvider>
-            <example.Component options={choice} />
-          </TooltipProvider>
+          <RouterContextProvider router={router}>
+            <TooltipProvider>
+              <example.Component options={choice} />
+            </TooltipProvider>
+          </RouterContextProvider>
         )
         const code = example.getCode(choice)
         expect(code).toContain("export function")

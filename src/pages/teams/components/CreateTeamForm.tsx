@@ -4,7 +4,8 @@ import { useTeamAction } from "@/features/teams/use-team-action"
 import { Button } from "@/components/ui/button"
 import { FormTextField } from "@/components/shared/FormTextField"
 import { FieldGroup } from "@/components/ui/field"
-import { createTeamSlug, teamFormSchema } from "@/features/teams/schemas"
+import { teamFormSchema } from "@/validators/teams"
+import { createTeamSlug } from "@/features/teams/slug"
 import {
   Card,
   CardHeader,

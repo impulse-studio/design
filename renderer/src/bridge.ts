@@ -8,7 +8,7 @@ import type {
 export const frameId =
   new URLSearchParams(location.search).get("frameId") ?? "standalone"
 let revision = 0
-export const setRevision = (value: number) => {
+const setRevision = (value: number) => {
   revision = value
 }
 type Payload = RendererMessage extends infer T

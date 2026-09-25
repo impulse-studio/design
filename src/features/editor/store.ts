@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid"
 import { createCanvasRuntime } from "./canvas-runtime"
 import { createStore } from "@tanstack/react-store"
 import { produce } from "immer"
@@ -5,11 +6,16 @@ import type { Draft } from "immer"
 import type {
   AnyNode,
   FramePreset,
-  Json,
   MockupDoc,
   Node,
 } from "@digit-ai-studio/shared"
-import { childLists, findNode, validateDocument, walk } from "@digit-ai-studio/shared"
+import {
+  childLists,
+  detachedSnapshotSchema,
+  findNode,
+  validateDocument,
+  walk,
+} from "@digit-ai-studio/shared"
 import type { EditorState, Snapshot, Viewport } from "./types"
 import { framesOf, makeFrame } from "./document"
 import { bounds, nodeRect } from "./geometry"
@@ -19,7 +25,6 @@ import {
   library,
   localVariantsOf,
   makeLibraryNode,
-  newId,
   textNode,
 } from "./library"
 import {
@@ -29,6 +34,8 @@ import {
   isEditable,
   topSelected,
 } from "./tree"
+import { materializeDetachedComponent } from "./editable-elements"
+import { applyLocalVariantCommand } from "./local-variants"
 
 export const createEditor = (initial: Snapshot, readOnly = false) => {
   const state = createStore<EditorState>({
@@ -185,99 +192,20 @@ export const createEditor = (initial: Snapshot, readOnly = false) => {
     if (!current.editingVariantId)
       return updateNodes(current.selectedIds, recipe, allowLocked)
     change((doc) => {
-      const definitions: {
-        component: string
-        props: Record<string, Json>
-        text?: string
-        layout?: Node["layout"]
-        style?: Node["style"]
-      }[] = []
-      for (const frame of framesOf(doc))
-        walk(frame, (node) => {
-          if (
-            node.type === "component" &&
-            node.localVariant?.id === current.editingVariantId
-          )
-            definitions.push({
-              component: node.component,
-              props: { ...node.localVariant.props },
-              text: node.localVariant.text,
-              layout: node.localVariant.layout
-                ? { ...node.localVariant.layout }
-                : undefined,
-              style: node.localVariant.style
-                ? { ...node.localVariant.style }
-                : undefined,
-            })
-        })
-      const selectedComponent = current.selectedIds
-        .map((id) => findNode(framesOf(doc), id)?.node)
-        .find(
-          (node) =>
-            node?.type === "component" &&
-            node.localVariant?.id === current.editingVariantId
-        )
-      const selectedComponentName = selectedComponent?.type === "component"
-        ? selectedComponent.component
-        : undefined
-      const definition = definitions.find(
-        (item) => item.component === selectedComponentName
-      ) ?? definitions[0]
-      if (!definition) return
-      const editable = {
-        id: current.editingVariantId,
-        type: "component" as const,
-        component: definition.component,
-        props: definition.props,
-        text: definition.text,
-        layout: definition.layout,
-        style: definition.style,
-      }
-      const next = produce(editable, (draft) => recipe(draft as Draft<AnyNode>))
-      for (const frame of framesOf(doc))
-        walk(frame, (node) => {
-          if (node.type === "component" && node.localVariant?.id === current.editingVariantId) {
-            node.localVariant.props = { ...(next.props ?? {}) }
-            node.localVariant.text = next.text
-            node.localVariant.layout = next.layout
-            node.localVariant.style = next.style
-          }
-        })
+      applyLocalVariantCommand(doc, {
+        type: "update",
+        variantId: current.editingVariantId!,
+        selectedIds: current.selectedIds,
+        recipe,
+      })
     })
   }
   const createLocalVariant = (nodeId: string) => {
     const location = findNode(framesOf(state.get().doc), nodeId)
     if (!location || location.node.type !== "component") return null
-    const node = location.node
-    const id = newId()
-    const entry = entryFor(node.component)
-    const variantProps = {
-      ...(entry?.previewProps ?? {}),
-      ...(node.localVariant?.props ?? {}),
-      ...(node.props ?? {}),
-    }
-    const variantText = node.text ?? node.localVariant?.text
-    const variantLayout = { ...node.localVariant?.layout, ...node.layout }
-    const variantStyle = { ...node.localVariant?.style, ...node.style }
-    const usedNames = new Set(localVariantsOf(state.get().doc, node.component).map(({ variant }) => variant.name))
-    const baseName = `${node.component.replace(/^Digi/, "")} local`
-    let name = baseName
-    for (let index = 2; usedNames.has(name); index++) name = `${baseName} ${index}`
+    const id = uuid()
     change((doc) => {
-      const target = findNode(framesOf(doc), nodeId)?.node
-      if (!target || target.type !== "component") return
-      target.localVariant = {
-        id,
-        name,
-        props: variantProps,
-        ...(variantText !== undefined ? { text: variantText } : {}),
-        ...(Object.keys(variantLayout).length ? { layout: variantLayout } : {}),
-        ...(Object.keys(variantStyle).length ? { style: variantStyle } : {}),
-      }
-      target.props = {}
-      target.text = undefined
-      target.layout = undefined
-      target.style = undefined
+      applyLocalVariantCommand(doc, { type: "create", nodeId, variantId: id })
     })
     set({ selectedIds: [nodeId], editingVariantId: id })
     return id
@@ -287,7 +215,9 @@ export const createEditor = (initial: Snapshot, readOnly = false) => {
       set({ editingVariantId: null })
       return
     }
-    const instances = localVariantsOf(state.get().doc).filter((item) => item.variant.id === id)
+    const instances = localVariantsOf(state.get().doc).filter(
+      (item) => item.variant.id === id
+    )
     if (!instances.length) return
     const selectedIds = state.get().selectedIds.filter((nodeId) => {
       const node = findNode(framesOf(state.get().doc), nodeId)?.node
@@ -306,99 +236,92 @@ export const createEditor = (initial: Snapshot, readOnly = false) => {
   }
   const assignLocalVariant = (ids: string[], variantId: string | null) => {
     change((doc) => {
-      const definition = variantId
-        ? localVariantsOf(doc).find((item) => item.variant.id === variantId)
-        : undefined
-      for (const id of ids) {
-        const node = findNode(framesOf(doc), id)?.node
-        if (!node || node.type !== "component") continue
-        if (variantId && (!definition || definition.component !== node.component)) continue
-        if (variantId && definition) {
-          node.localVariant = JSON.parse(JSON.stringify(definition.variant)) as typeof definition.variant
-        } else if (node.localVariant) {
-          node.props = { ...node.localVariant.props, ...(node.props ?? {}) }
-          node.text ??= node.localVariant.text
-          node.layout = { ...node.localVariant.layout, ...node.layout }
-          node.style = { ...node.localVariant.style, ...node.style }
-          node.localVariant = undefined
-        }
-      }
+      applyLocalVariantCommand(doc, { type: "assign", nodeIds: ids, variantId })
     })
     set({ editingVariantId: null })
   }
   const insertLocalVariant = (variantId: string) => {
-    const definition = localVariantsOf(state.get().doc).find((item) => item.variant.id === variantId)
+    const definition = localVariantsOf(state.get().doc).find(
+      (item) => item.variant.id === variantId
+    )
     if (!definition) return []
     const entry = entryFor(definition.component)
     const node = entry ? makeLibraryNode(entry) : null
     if (!node || node.type !== "component") return []
-    node.localVariant = JSON.parse(JSON.stringify(definition.variant)) as typeof definition.variant
+    node.localVariant = JSON.parse(
+      JSON.stringify(definition.variant)
+    ) as typeof definition.variant
     node.props = {}
     node.text = undefined
     return insertNodes([node])
   }
   const requestDetach = (nodeId: string) => {
     const location = findNode(framesOf(state.get().doc), nodeId)
-    if (!location || location.node.type !== "component" || !isEditable(state.get().doc, nodeId)) return
-    set({ detachRequest: { nodeId, frameId: location.frame.id, requestId: newId() } })
+    if (
+      !location ||
+      location.node.type !== "component" ||
+      !isEditable(state.get().doc, nodeId)
+    )
+      return
+    set({
+      detachRequest: { nodeId, frameId: location.frame.id, requestId: uuid() },
+    })
   }
-  const detachComponent = (nodeId: string, snapshot: Json, requestId: string) => {
+  const detachComponent = (
+    nodeId: string,
+    input: unknown,
+    requestId: string
+  ) => {
     const pending = state.get().detachRequest
-    if (!pending || pending.nodeId !== nodeId || pending.requestId !== requestId)
+    if (
+      !pending ||
+      pending.nodeId !== nodeId ||
+      pending.requestId !== requestId
+    )
       return false
+    const snapshot = detachedSnapshotSchema.safeParse(input)
+    if (!snapshot.success) {
+      set({
+        detachRequest: null,
+        notice: "Le rendu détaché contient une structure non autorisée.",
+      })
+      return false
+    }
     let changed = false
     change((doc) => {
       const location = findNode(framesOf(doc), nodeId)
       if (!location || location.node.type !== "component") return
-      const source = location.node
-      const materialize = (value: Json, isRoot = false): Node[] => {
-        if (Array.isArray(value)) return value.flatMap((item) => materialize(item))
-        if (typeof value !== "object" || value === null) return []
-        if (typeof value.slot === "string") {
-          const slotNodes = source.slots?.[value.slot]
-          if (slotNodes?.length) return slotNodes
-          const text = value.slot === "default" ? source.text ?? source.localVariant?.text : undefined
-          return text === undefined ? [] : [{ id: newId(), type: "text", content: text }]
-        }
-        if (typeof value.text === "string")
-          return [{ id: newId(), type: "text", content: value.text }]
-        if (typeof value.tag !== "string") return []
-        const children = Array.isArray(value.children)
-          ? value.children.flatMap((child) => materialize(child))
-          : []
-        const attributes = typeof value.attributes === "object" && value.attributes !== null && !Array.isArray(value.attributes)
-          ? value.attributes as Record<string, string | number | boolean>
-          : {}
-        return [{
-          id: isRoot ? source.id : newId(),
-          ...(isRoot && source.name ? { name: source.name } : {}),
-          ...(isRoot && source.hidden ? { hidden: true } : {}),
-          ...(isRoot && source.locked ? { locked: true } : {}),
-          ...(isRoot && source.layout ? { layout: source.layout } : {}),
-          ...(isRoot && source.style ? { style: source.style } : {}),
-          type: "element",
-          tag: value.tag,
-          ...(typeof value.className === "string" ? { className: value.className } : {}),
-          ...(Object.keys(attributes).length ? { attributes } : {}),
-          ...(typeof value.inlineStyle === "string" ? { inlineStyle: value.inlineStyle } : {}),
-          children,
-        }]
-      }
-      const materialized = materialize(snapshot, true)
+      const materialized = materializeDetachedComponent(
+        location.node,
+        snapshot.data,
+        uuid
+      )
       if (!materialized.length) return
       const list = location.parent
-        ? childLists(location.parent).find((item) => item.nodes.some((node) => node.id === nodeId))?.nodes
+        ? childLists(location.parent).find((item) =>
+            item.nodes.some((node) => node.id === nodeId)
+          )?.nodes
         : framesOf(doc)
       const index = list?.findIndex((node) => node.id === nodeId) ?? -1
       if (!list || index < 0) return
       list.splice(index, 1, ...materialized)
       changed = true
     })
+    // Immer executes the recipe synchronously, although static analysis cannot
+    // observe the assignment made inside its callback.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (changed) {
-      set({ selectedIds: [nodeId], editingVariantId: null, detachRequest: null })
+      set({
+        selectedIds: [nodeId],
+        editingVariantId: null,
+        detachRequest: null,
+      })
       return true
     }
-    set({ detachRequest: null, notice: "Impossible de détacher cette instance." })
+    set({
+      detachRequest: null,
+      notice: "Impossible de détacher cette instance.",
+    })
     return false
   }
   const undo = () => {
@@ -890,8 +813,13 @@ export const createEditor = (initial: Snapshot, readOnly = false) => {
   }
   const setViewport = (viewport: Viewport) => {
     canvas.setViewport(viewport)
-    const next = canvas.viewport.get(), previous = state.get().viewport
-    if (next.x !== previous.x || next.y !== previous.y || next.zoom !== previous.zoom)
+    const next = canvas.viewport.get(),
+      previous = state.get().viewport
+    if (
+      next.x !== previous.x ||
+      next.y !== previous.y ||
+      next.zoom !== previous.zoom
+    )
       set({ viewport: next })
   }
   const zoomAt = (point: { x: number; y: number }, factor: number) => {

@@ -3,12 +3,9 @@ import { z } from "zod"
 import { emptyDocument } from "@/features/editor/document"
 import { library, makeLibraryNode, entryFor } from "@/features/editor/library"
 import { createEditor } from "@/features/editor/store"
-import {
-  applyOperations,
-  canonicalDocument,
-  proposalInputSchema,
-} from "./operations"
-import type { MockupOperation } from "./operations"
+import { applyOperations, canonicalDocument } from "./operations"
+import { proposalInputSchema } from "@/validators/ai/operations"
+import type { MockupOperation } from "@/validators/ai/operations"
 import { aiCatalog, validateAiComposition } from "./catalog"
 
 const proposal = (operations: MockupOperation[]) => ({

@@ -1,5 +1,7 @@
 import { useSelection } from "@/features/editor/use-selection"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useEditor } from "@/features/editor/context"
+import { setAutoLayoutAlignment } from "@/features/editor/auto-layout"
 
 const positions = [
   { value: "start-start", label: "Haut gauche" },
@@ -14,7 +16,8 @@ const positions = [
 ] as const
 
 export function AutoLayoutAlignment() {
-  const { common, apply } = useSelection()
+  const { common } = useSelection()
+  const editor = useEditor()
   const direction = common((node) =>
     node.type === "frame" || node.type === "box"
       ? node.autoLayout?.direction
@@ -57,22 +60,7 @@ export function AutoLayoutAlignment() {
             "start" | "center" | "end",
             "start" | "center" | "end",
           ]
-          apply((node) => {
-            if (
-              (node.type !== "frame" && node.type !== "box") ||
-              !node.autoLayout
-            )
-              return
-            if (node.autoLayout.direction === "column") {
-              node.autoLayout.align = horizontal
-              if (node.autoLayout.gap !== "auto")
-                node.autoLayout.justify = vertical
-            } else {
-              if (node.autoLayout.gap !== "auto")
-                node.autoLayout.justify = horizontal
-              node.autoLayout.align = vertical
-            }
-          })
+          setAutoLayoutAlignment(editor, horizontal, vertical)
         }}
         spacing={0}
         className="editor-layout-alignment [&_[data-state=on]]:[color:var(--editor-selection)] [&_[data-state=on]]:bg-background [&_[data-state=on]]:shadow-[0_1px_3px_#0000001a] grid grid-cols-[repeat(3,_minmax(0,_1fr))] grid-rows-[repeat(3,_minmax(0,_1fr))] w-full h-[84px] p-1 rounded-md bg-muted [&_[data-slot=toggle-group-item]]:grid [&_[data-slot=toggle-group-item]]:place-items-center [&_[data-slot=toggle-group-item]]:min-w-0 [&_[data-slot=toggle-group-item]]:min-h-0 [&_[data-slot=toggle-group-item]]:[padding:0] [&_[data-slot=toggle-group-item]]:rounded-sm [&_[data-state=on]_.editor-layout-alignment-dot]:w-[10px] [&_[data-state=on]_.editor-layout-alignment-dot]:h-[3px] [&_[data-state=on]_.editor-layout-alignment-dot]:rounded-[2px] [@media(hover:hover)_and_(pointer:fine)]:[&_[data-slot=toggle-group-item]:not([data-state=on]):hover]:bg-accent"

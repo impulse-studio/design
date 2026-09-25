@@ -1,9 +1,10 @@
-import type { AnyNode, Rect } from "@digit-ai-studio/shared"
 import { findNode } from "@digit-ai-studio/shared"
+import type { AnyNode, Rect } from "@digit-ai-studio/shared"
 import { geometryIndex } from "./geometry-index"
-export { frameDimension } from "./geometry-index"
 import { framesOf } from "./document"
 import type { EditorState } from "./types"
+
+export { frameDimension } from "./geometry-index"
 
 export const bounds = (rects: Rect[]): Rect | null => {
   if (!rects.length) return null
@@ -16,7 +17,7 @@ export const bounds = (rects: Rect[]): Rect | null => {
     height: Math.max(...rects.map((r) => r.y + r.height)) - y,
   }
 }
-export const contains = (rect: Rect, point: { x: number; y: number }) =>
+const contains = (rect: Rect, point: { x: number; y: number }) =>
   point.x >= rect.x &&
   point.y >= rect.y &&
   point.x <= rect.x + rect.width &&

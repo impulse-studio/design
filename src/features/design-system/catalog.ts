@@ -1,8 +1,50 @@
-import type { CatalogEntry } from "./types"
+import { EXTERNAL_LINKS } from "@/constants"
+import { getProperties } from "./properties"
+import type { CatalogDefinition, CatalogEntry } from "./types"
 
-export const catalog: CatalogEntry[] = [
+const definitions: CatalogDefinition[] = [
+  {
+    id: "file-tree",
+    name: "File Tree",
+    description: "Parcourir les fichiers au clavier et déplier les dossiers.",
+    category: "Navigation",
+    kind: "component",
+    importPath: "@/components/ui/file-tree",
+    documentation: null,
+    variants: [],
+    sizes: [],
+    states: ["default"],
+    load: () =>
+      import("@/components/design-system/examples/FileTreeExample").then(
+        (module) => ({
+          Component: module.FileTreeExample,
+          getCode: module.getCode,
+        })
+      ),
+  },
+  {
+    id: "shared-layout-bg",
+    name: "Shared Layout Background",
+    description: "Suivre le survol d’une liste avec un fond partagé.",
+    category: "Affichage",
+    kind: "component",
+    importPath: "@/components/ui/shared-layout-bg",
+    documentation: null,
+    variants: [],
+    sizes: [],
+    states: ["default"],
+    load: () =>
+      import("@/components/design-system/examples/SharedLayoutBackgroundExample").then(
+        (module) => ({
+          Component: module.SharedLayoutBackgroundExample,
+          getCode: module.getCode,
+        })
+      ),
+  },
   {
     id: "not-found",
+    importPath: "@/components/shared/not-found/NotFoundGlitch",
+    documentation: null,
     name: "Not Found",
     description: "Page 404 avec effet Glitch et action de navigation.",
     category: "Compositions",
@@ -20,13 +62,15 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "range-slider",
+    importPath: "@/components/shared/motion/RangeSlider",
+    documentation: null,
     name: "Range Slider",
     description: "Curseur gradué avec poignée et progression animées.",
     category: "Formulaires",
     variants: [],
     sizes: [],
     states: ["default", "disabled"],
-    kind: "component",
+    kind: "composition",
     load: () =>
       import("@/components/design-system/examples/RangeSliderExample").then(
         (module) => ({
@@ -37,6 +81,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "chat-app",
+    importPath: "@/components/shared/chat/ChatApp",
+    documentation: null,
     name: "Chat App",
     description: "Espace de conversation avec navigation, messages et saisie.",
     category: "Compositions",
@@ -54,6 +100,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "ai-sidebar",
+    importPath: "@/components/shared/ai-sidebar/AISidebar",
+    documentation: null,
     name: "AI Sidebar",
     description: "Organiser les projets, dossiers, fichiers et favoris.",
     category: "Compositions",
@@ -71,6 +119,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "agent-activity",
+    importPath: "@/components/shared/agent-activity/AgentActivity",
+    documentation: null,
     name: "Agent Activity",
     description: "Suivre les étapes, recherches et outils d’un agent.",
     category: "Compositions",
@@ -88,6 +138,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "tool-approval",
+    importPath: "@/components/shared/tool-approval/ToolApproval",
+    documentation: null,
     name: "Tool Approval",
     description:
       "Examiner les paramètres d’un outil et autoriser ou refuser son exécution.",
@@ -106,6 +158,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "image-generation",
+    importPath: "@/components/shared/image-generation/ImageGeneration",
+    documentation: null,
     name: "Image Generation",
     description: "Aperçu animé des étapes de génération d’une image.",
     category: "Compositions",
@@ -123,6 +177,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "streaming-response",
+    importPath: "@/components/shared/streaming/StreamingResponse",
+    documentation: null,
     name: "Streaming Response",
     description: "Réponse progressive avec sources, copie et avis.",
     category: "Compositions",
@@ -140,6 +196,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "prompt-input",
+    importPath: "@/components/shared/PromptInput",
+    documentation: null,
     name: "Prompt Input",
     description:
       "Saisir un message, choisir un modèle et lancer une génération.",
@@ -158,6 +216,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "inline-citations",
+    importPath: "@/components/shared/InlineCitations",
+    documentation: null,
     name: "Inline Citations",
     description: "Citations numérotées et liens vers les sources.",
     category: "Compositions",
@@ -175,6 +235,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "task-list",
+    importPath: "@/components/shared/todo-list/TodoList",
+    documentation: null,
     name: "Task List",
     description: "Suivre les tâches terminées, en cours et à venir.",
     category: "Compositions",
@@ -192,6 +254,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "approval-card",
+    importPath: "@/components/shared/approval/ApprovalCard",
+    documentation: null,
     name: "Approval Card",
     description: "Approuver, refuser ou répondre à un questionnaire.",
     category: "Compositions",
@@ -209,6 +273,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "colors",
+    importPath: null,
+    documentation: null,
     name: "Couleurs",
     description: "Une palette neutre. Une fonction pour chaque nuance.",
     category: "Fondations",
@@ -226,6 +292,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "spacing",
+    importPath: null,
+    documentation: null,
     name: "Espacements",
     description: "Un rythme de 4 pixels, du contrôle à la page.",
     category: "Fondations",
@@ -243,6 +311,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "motion",
+    importPath: null,
+    documentation: null,
     name: "Mouvement",
     description: "Des transitions courtes qui rendent l’état compréhensible.",
     category: "Fondations",
@@ -260,6 +330,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "typography",
+    importPath: null,
+    documentation: null,
     name: "Typographie",
     description: "Inter, une échelle courte et une hiérarchie précise.",
     category: "Fondations",
@@ -277,6 +349,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "button",
+    importPath: "@/components/ui/button",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/button`,
     name: "Button",
     description: "Une hiérarchie claire pour chaque action.",
     category: "Actions",
@@ -301,6 +375,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "button-group",
+    importPath: "@/components/ui/button-group",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/button-group`,
     name: "Button Group",
     description: "Rassembler des actions liées.",
     category: "Actions",
@@ -318,6 +394,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "toggle",
+    importPath: "@/components/ui/toggle",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/toggle`,
     name: "Toggle",
     description: "Activer un outil avec un état visuel stable.",
     category: "Actions",
@@ -335,6 +413,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "toggle-group",
+    importPath: "@/components/ui/toggle-group",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/toggle-group`,
     name: "Toggle Group",
     description: "Regrouper des choix de présentation.",
     category: "Actions",
@@ -352,6 +432,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "calendar",
+    importPath: "@/components/ui/calendar",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/calendar`,
     name: "Calendar",
     description: "Choisir une date dans un calendrier localisé.",
     category: "Formulaires",
@@ -369,6 +451,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "checkbox",
+    importPath: "@/components/ui/checkbox",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/checkbox`,
     name: "Checkbox",
     description: "Sélectionner une ou plusieurs possibilités.",
     category: "Formulaires",
@@ -386,6 +470,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "combobox",
+    importPath: "@/components/ui/combobox",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/combobox`,
     name: "Combobox",
     description: "Rechercher rapidement dans une liste d’options.",
     category: "Formulaires",
@@ -403,6 +489,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "field",
+    importPath: "@/components/ui/field",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/field`,
     name: "Field",
     description: "Associer un libellé, une aide et une validation.",
     category: "Formulaires",
@@ -420,6 +508,9 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "input",
+    importPath: "@/components/ui/input",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/input`,
+    sizeProperty: "controlSize",
     name: "Input",
     description: "Un champ précis, avec des états explicites.",
     category: "Formulaires",
@@ -437,6 +528,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "input-group",
+    importPath: "@/components/ui/input-group",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/input-group`,
     name: "Input Group",
     description: "Réunir un champ, des icônes et des actions.",
     category: "Formulaires",
@@ -454,6 +547,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "input-otp",
+    importPath: "@/components/ui/input-otp",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/input-otp`,
     name: "Input OTP",
     description: "Saisir un code de vérification avec le clavier.",
     category: "Formulaires",
@@ -471,6 +566,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "label",
+    importPath: "@/components/ui/label",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/label`,
     name: "Label",
     description: "Nommer clairement chaque contrôle.",
     category: "Formulaires",
@@ -488,6 +585,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "questionnaire",
+    importPath: "@/components/ui/questionnaire",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/questionnaire`,
     name: "Questionnaire",
     description: "Guider une décision avec des choix explicites.",
     category: "Formulaires",
@@ -505,6 +604,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "radio-group",
+    importPath: "@/components/ui/radio-group",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/radio-group`,
     name: "Radio Group",
     description: "Une seule sélection, avec toutes les options visibles.",
     category: "Formulaires",
@@ -522,6 +623,9 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "select",
+    importPath: "@/components/ui/select",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/select`,
+    variantProperty: "SelectTrigger.variant",
     name: "Select",
     description: "Choisir une option dans un espace réduit.",
     category: "Formulaires",
@@ -539,6 +643,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "slider",
+    importPath: "@/components/ui/slider",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/slider`,
     name: "Slider",
     description: "Ajuster une valeur dans un intervalle.",
     category: "Formulaires",
@@ -556,6 +662,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "switch",
+    importPath: "@/components/ui/switch",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/switch`,
     name: "Switch",
     description: "Activer une préférence en un geste.",
     category: "Formulaires",
@@ -573,6 +681,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "textarea",
+    importPath: "@/components/ui/textarea",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/textarea`,
     name: "Textarea",
     description: "Du texte libre, avec de la place pour les idées.",
     category: "Formulaires",
@@ -590,6 +700,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "breadcrumb",
+    importPath: "@/components/ui/breadcrumb",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/breadcrumb`,
     name: "Breadcrumb",
     description: "Situer la page dans une navigation hiérarchique.",
     category: "Navigation",
@@ -607,6 +719,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "command",
+    importPath: "@/components/ui/command",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/command`,
     name: "Command",
     description: "Trouver une action avec quelques lettres.",
     category: "Navigation",
@@ -624,6 +738,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "menubar",
+    importPath: "@/components/ui/menubar",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/menubar`,
     name: "Menubar",
     description: "Les commandes d’un outil, organisées en menus.",
     category: "Navigation",
@@ -641,6 +757,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "navigation-menu",
+    importPath: "@/components/ui/navigation-menu",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/navigation-menu`,
     name: "Navigation Menu",
     description: "Organiser les destinations principales.",
     category: "Navigation",
@@ -658,6 +776,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "pagination",
+    importPath: "@/components/ui/pagination",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/pagination`,
     name: "Pagination",
     description: "Parcourir une collection page par page.",
     category: "Navigation",
@@ -675,6 +795,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "sidebar",
+    importPath: "@/components/ui/sidebar",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/sidebar`,
     name: "Sidebar",
     description: "Une navigation persistante, compacte et hiérarchisée.",
     category: "Navigation",
@@ -692,6 +814,9 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "tabs",
+    importPath: "@/components/ui/tabs",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/tabs`,
+    variantProperty: "TabsList.variant",
     name: "Tabs",
     description: "Passer d’une vue à une autre, au même endroit.",
     category: "Navigation",
@@ -706,6 +831,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "avatar",
+    importPath: "@/components/ui/avatar",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/avatar`,
     name: "Avatar",
     description: "Identifier les personnes, même sans image.",
     category: "Affichage",
@@ -723,6 +850,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "badge",
+    importPath: "@/components/ui/badge",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/badge`,
     name: "Badge",
     description: "Des statuts lisibles, sans dépendre de la couleur.",
     category: "Affichage",
@@ -747,6 +876,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "chart",
+    importPath: "@/components/ui/chart",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/chart`,
     name: "Chart",
     description:
       "Des données lisibles grâce aux valeurs et aux niveaux de gris.",
@@ -765,6 +896,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "item",
+    importPath: "@/components/ui/item",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/item`,
     name: "Item",
     description: "Un élément de liste avec du contexte et une action.",
     category: "Affichage",
@@ -779,6 +912,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "kbd",
+    importPath: "@/components/ui/kbd",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/kbd`,
     name: "Kbd",
     description: "Afficher les raccourcis là où ils sont utiles.",
     category: "Affichage",
@@ -793,6 +928,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "table",
+    importPath: "@/components/ui/table",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/table`,
     name: "Table",
     description: "Présenter les données avec une hiérarchie régulière.",
     category: "Affichage",
@@ -810,6 +947,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "accordion",
+    importPath: "@/components/ui/accordion",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/accordion`,
     name: "Accordion",
     description: "Révéler les détails au bon moment.",
     category: "Structure",
@@ -827,6 +966,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "aspect-ratio",
+    importPath: "@/components/ui/aspect-ratio",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/aspect-ratio`,
     name: "Aspect Ratio",
     description: "Conserver des proportions stables pour les aperçus.",
     category: "Structure",
@@ -844,6 +985,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "card",
+    importPath: "@/components/ui/card",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/card`,
     name: "Card",
     description: "Une surface pour regrouper une information et ses actions.",
     category: "Structure",
@@ -858,6 +1001,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "carousel",
+    importPath: "@/components/ui/carousel",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/carousel`,
     name: "Carousel",
     description: "Parcourir une série d’aperçus au clavier ou au toucher.",
     category: "Structure",
@@ -875,6 +1020,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "collapsible",
+    importPath: "@/components/ui/collapsible",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/collapsible`,
     name: "Collapsible",
     description: "Déplier un groupe de contenu à la demande.",
     category: "Structure",
@@ -892,6 +1039,9 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "direction",
+    importPath: "@/components/ui/direction",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/direction`,
+    variantProperty: "direction",
     name: "Direction",
     description: "Adapter le sens de lecture d’une composition.",
     category: "Structure",
@@ -909,6 +1059,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "resizable",
+    importPath: "@/components/ui/resizable",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/resizable`,
     name: "Resizable",
     description: "Ajuster la place de chaque panneau.",
     category: "Structure",
@@ -926,6 +1078,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "scroll-area",
+    importPath: "@/components/ui/scroll-area",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/scroll-area`,
     name: "Scroll Area",
     description: "Parcourir un contenu long dans un espace délimité.",
     category: "Structure",
@@ -943,6 +1097,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "separator",
+    importPath: "@/components/ui/separator",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/separator`,
     name: "Separator",
     description: "Structurer sans ajouter de bruit visuel.",
     category: "Structure",
@@ -960,6 +1116,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "alert-dialog",
+    importPath: "@/components/ui/alert-dialog",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/alert-dialog`,
     name: "Alert Dialog",
     description: "Confirmer une action et en expliquer la conséquence.",
     category: "Superpositions",
@@ -977,6 +1135,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "context-menu",
+    importPath: "@/components/ui/context-menu",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/context-menu`,
     name: "Context Menu",
     description: "Des actions liées à l’élément sélectionné.",
     category: "Superpositions",
@@ -994,6 +1154,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "dialog",
+    importPath: "@/components/ui/dialog",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/dialog`,
     name: "Dialog",
     description: "Concentrer une tâche dans une fenêtre accessible.",
     category: "Superpositions",
@@ -1011,6 +1173,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "drawer",
+    importPath: "@/components/ui/drawer",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/drawer`,
     name: "Drawer",
     description: "Une surface adaptée aux interactions tactiles.",
     category: "Superpositions",
@@ -1028,6 +1192,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "dropdown-menu",
+    importPath: "@/components/ui/dropdown-menu",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/dropdown-menu`,
     name: "Dropdown Menu",
     description: "Présenter les actions secondaires au bon endroit.",
     category: "Superpositions",
@@ -1045,6 +1211,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "hover-card",
+    importPath: "@/components/ui/hover-card",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/hover-card`,
     name: "Hover Card",
     description: "Donner du contexte à un lien au survol ou au focus.",
     category: "Superpositions",
@@ -1062,6 +1230,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "popover",
+    importPath: "@/components/ui/popover",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/popover`,
     name: "Popover",
     description: "Proposer une interaction contextuelle et légère.",
     category: "Superpositions",
@@ -1079,6 +1249,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "sheet",
+    importPath: "@/components/ui/sheet",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/sheet`,
     name: "Sheet",
     description: "Afficher des détails sans quitter le contexte.",
     category: "Superpositions",
@@ -1096,6 +1268,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "tooltip",
+    importPath: "@/components/ui/tooltip",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/tooltip`,
     name: "Tooltip",
     description: "Préciser une action sans surcharger l’interface.",
     category: "Superpositions",
@@ -1113,6 +1287,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "alert",
+    importPath: "@/components/ui/alert",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/alert`,
     name: "Alert",
     description: "Un message contextualisé, visible et concis.",
     category: "Feedback",
@@ -1130,6 +1306,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "empty",
+    importPath: "@/components/ui/empty",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/empty`,
     name: "Empty",
     description: "Donner un point de départ lorsque le contenu manque.",
     category: "Feedback",
@@ -1147,6 +1325,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "progress",
+    importPath: "@/components/ui/progress",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/progress`,
     name: "Progress",
     description: "Rendre l’avancement d’une opération visible.",
     category: "Feedback",
@@ -1164,6 +1344,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "skeleton",
+    importPath: "@/components/ui/skeleton",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/skeleton`,
     name: "Skeleton",
     description: "Réserver la place du contenu pendant son chargement.",
     category: "Feedback",
@@ -1181,6 +1363,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "spinner",
+    importPath: "@/components/ui/spinner",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/spinner`,
     name: "Spinner",
     description: "Un indicateur discret pour une action en cours.",
     category: "Feedback",
@@ -1198,6 +1382,9 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "toast",
+    importPath: "@/components/ui/toast",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/toast`,
+    variantProperty: "type",
     name: "Toast",
     description: "Confirmer une action sans interrompre le travail.",
     category: "Feedback",
@@ -1215,6 +1402,9 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "attachment",
+    importPath: "@/components/ui/attachment",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/attachment`,
+    variantProperty: "state",
     name: "Attachment",
     description: "Un fichier identifiable et son état de traitement.",
     category: "Conversation",
@@ -1232,6 +1422,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "bubble",
+    importPath: "@/components/ui/bubble",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/bubble`,
     name: "Bubble",
     description: "Une surface de message avec une intention précise.",
     category: "Conversation",
@@ -1249,6 +1441,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "marker",
+    importPath: "@/components/ui/marker",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/marker`,
     name: "Marker",
     description: "Un repère léger dans une conversation.",
     category: "Conversation",
@@ -1266,6 +1460,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "message",
+    importPath: "@/components/ui/message",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/message`,
     name: "Message",
     description: "Structurer l’auteur, le contenu et les métadonnées.",
     category: "Conversation",
@@ -1283,6 +1479,8 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "message-scroller",
+    importPath: "@/components/ui/message-scroller",
+    documentation: `${EXTERNAL_LINKS.shadcnBaseComponents}/message-scroller`,
     name: "Message Scroller",
     description: "Garder le fil d’une conversation qui évolue.",
     category: "Conversation",
@@ -1300,6 +1498,34 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "data-table",
+    importPath: "@/components/shared/DataTable",
+    documentation: null,
+    properties: [
+      {
+        name: "data / columns",
+        type: "TData[] / ColumnDef[]",
+        defaultValue: "Requis",
+        description: "Données et colonnes typées avec DataTableFeatures.",
+      },
+      {
+        name: "filterColumn",
+        type: "string",
+        defaultValue: "—",
+        description: "Identifiant de la colonne filtrée par la recherche.",
+      },
+      {
+        name: "pageSize",
+        type: "number",
+        defaultValue: "5",
+        description: "Nombre de lignes par page.",
+      },
+      {
+        name: "emptyMessage",
+        type: "string",
+        defaultValue: "Aucun résultat.",
+        description: "Texte affiché quand la liste est vide.",
+      },
+    ],
     name: "Data Table",
     description: "Un tableau typé avec tri, filtre et pagination.",
     category: "Compositions",
@@ -1317,6 +1543,28 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "date-picker",
+    importPath: "@/components/shared/DatePicker",
+    documentation: null,
+    properties: [
+      {
+        name: "value",
+        type: "Date | undefined",
+        defaultValue: "—",
+        description: "Date sélectionnée, gérée par le parent.",
+      },
+      {
+        name: "onValueChange",
+        type: "(date?: Date) => void",
+        defaultValue: "Requis",
+        description: "Retourne la sélection et ferme le calendrier.",
+      },
+      {
+        name: "label",
+        type: "string",
+        defaultValue: "Choisir une date",
+        description: "Libellé du bouton et nom accessible.",
+      },
+    ],
     name: "Date Picker",
     description: "Calendrier et bouton réunis en un contrôle localisé.",
     category: "Compositions",
@@ -1334,6 +1582,17 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "filter-bar",
+    importPath: "@/components/shared/FilterBar",
+    documentation: null,
+    properties: [
+      {
+        name: "children / actions",
+        type: "ReactNode",
+        defaultValue: "—",
+        description: "Filtres et actions placés dans deux groupes.",
+      },
+    ],
+    variantProperty: "density",
     name: "Filter Bar",
     description: "Assembler la recherche, les filtres et les actions.",
     category: "Compositions",
@@ -1351,6 +1610,28 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "page-header",
+    importPath: "@/components/shared/PageHeader",
+    documentation: null,
+    properties: [
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "Requis",
+        description: "Titre principal de la page.",
+      },
+      {
+        name: "description / eyebrow",
+        type: "string",
+        defaultValue: "—",
+        description: "Contexte et repère de navigation.",
+      },
+      {
+        name: "actions",
+        type: "ReactNode",
+        defaultValue: "—",
+        description: "Actions composées avec les primitives Button.",
+      },
+    ],
     name: "Page Header",
     description: "Titre, contexte et action principale, alignés.",
     category: "Compositions",
@@ -1368,6 +1649,28 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "search-field",
+    importPath: "@/components/shared/SearchField",
+    documentation: null,
+    properties: [
+      {
+        name: "value",
+        type: "string",
+        defaultValue: "Requis",
+        description: "Valeur contrôlée de la recherche.",
+      },
+      {
+        name: "onValueChange",
+        type: "(value: string) => void",
+        defaultValue: "Requis",
+        description: "Appelé à chaque saisie et à l’effacement.",
+      },
+      {
+        name: "label / placeholder",
+        type: "string",
+        defaultValue: "Rechercher",
+        description: "Libellé accessible et aide à la saisie.",
+      },
+    ],
     name: "Search Field",
     description: "Une recherche avec icône et effacement intégrés.",
     category: "Compositions",
@@ -1385,6 +1688,28 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "settings-section",
+    importPath: "@/components/shared/SettingsSection",
+    documentation: null,
+    properties: [
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "Requis",
+        description: "Titre accessible de la section.",
+      },
+      {
+        name: "children",
+        type: "ReactNode",
+        defaultValue: "Requis",
+        description: "Champs shadcn Field.",
+      },
+      {
+        name: "description / footer",
+        type: "string / ReactNode",
+        defaultValue: "—",
+        description: "Contexte et actions de fin de section.",
+      },
+    ],
     name: "Settings Section",
     description: "Une section de formulaire avec un rythme constant.",
     category: "Compositions",
@@ -1402,6 +1727,35 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "status-icon",
+    importPath: "@/components/shared/StatusIcon",
+    documentation: null,
+    properties: [
+      {
+        name: "status",
+        type: "StatusValue",
+        defaultValue: "Requis",
+        description: "Backlog, à faire, en cours, terminé, annulé ou doublon.",
+      },
+      {
+        name: "progress",
+        type: "number",
+        defaultValue: "50",
+        description: "Remplissage du cercle en cours, entre 0 et 100.",
+      },
+      {
+        name: "tone",
+        type: "semantic | neutral",
+        defaultValue: "semantic",
+        description: "Couleurs de statut ou variante monochrome.",
+      },
+      {
+        name: "label",
+        type: "string",
+        defaultValue: "—",
+        description: "Nom accessible lorsque l’icône est utilisée seule.",
+      },
+    ],
+    variantProperty: null,
     name: "Status Icon",
     description: "Cercles de statut, progression et états terminés.",
     category: "Compositions",
@@ -1419,6 +1773,22 @@ export const catalog: CatalogEntry[] = [
   },
   {
     id: "status-picker",
+    importPath: "@/components/shared/StatusPicker",
+    documentation: null,
+    properties: [
+      {
+        name: "value",
+        type: "StatusValue",
+        defaultValue: "Requis",
+        description: "Statut sélectionné, géré par le parent.",
+      },
+      {
+        name: "onValueChange",
+        type: "(value: StatusValue) => void",
+        defaultValue: "Requis",
+        description: "Appelé à la sélection, au clic ou au clavier.",
+      },
+    ],
     name: "Status Picker",
     description: "Menu de statut avec indicateurs circulaires.",
     category: "Compositions",
@@ -1435,4 +1805,10 @@ export const catalog: CatalogEntry[] = [
       ),
   },
 ]
+export const catalog: CatalogEntry[] = definitions.map(
+  ({ variantProperty, sizeProperty, ...entry }) => ({
+    ...entry,
+    properties: getProperties({ ...entry, variantProperty, sizeProperty }),
+  })
+)
 export const categories = [...new Set(catalog.map((entry) => entry.category))]

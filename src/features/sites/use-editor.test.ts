@@ -1,8 +1,8 @@
 import { act, renderHook, cleanup } from "@testing-library/react"
 import { afterEach, beforeEach, expect, it, vi } from "vitest"
 import { useSiteEditor } from "./use-editor"
-import { createSiteDocument } from "./template"
-import { compileSite } from "./compile"
+import { createSiteDocument } from "./document.fixture"
+import { validateSiteRuntime } from "./runtime"
 
 const { getSite, getSiteHistory, getSiteVersion, changeSite } = vi.hoisted(
   () => ({
@@ -18,7 +18,7 @@ const { queryClient } = vi.hoisted(() => ({
     invalidateQueries: vi.fn().mockResolvedValue(undefined),
   },
 }))
-vi.mock("@/lib/use-orpc", () => {
+vi.mock("@/server/use-orpc", () => {
   const query = (name: string, fn: (input: never) => unknown) => ({
     queryKey: () => ["sites", name],
     queryOptions: ({ input }: { input: never }) => ({
@@ -42,12 +42,16 @@ vi.mock("@tanstack/react-query", () => ({
     mutateAsync: options.mutationFn,
   }),
 }))
-vi.mock("./compile", () => ({ compileSite: vi.fn() }))
+vi.mock("./runtime", () => ({
+  validateSiteRuntime: vi.fn(),
+  syncSiteRuntime: vi.fn().mockResolvedValue(""),
+}))
 const initial = { id: "site", doc: createSiteDocument(), revision: 0 }
 beforeEach(() => {
   vi.resetAllMocks()
   vi.useFakeTimers()
   getSiteHistory.mockResolvedValue([])
+  vi.mocked(validateSiteRuntime).mockResolvedValue(undefined)
 })
 afterEach(() => {
   cleanup()
@@ -75,7 +79,6 @@ it("ignores a poll started before a local save", async () => {
   getSite.mockImplementation(
     () => new Promise((resolve) => (resolvePoll = resolve))
   )
-  vi.mocked(compileSite).mockResolvedValue("")
   const local = { ...initial, revision: 2 }
   changeSite.mockResolvedValue(local)
   const { result } = renderHook(() => useSiteEditor(initial, true))

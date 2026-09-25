@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router"
-import { ComponentDetailPage } from "@/pages/component-detail/ComponentDetailPage"
+import { ComponentDetailPage } from "@/pages/component-detail/page"
 import { catalog } from "@/features/design-system/catalog"
 import { DESIGN_SYSTEM_NAME } from "@/constants"
 

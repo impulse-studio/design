@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { ArrowUpRight, Box, FileCode2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { sourceElementName } from "@/features/sites/element-name"
-import type { PreviewInventoryEntry } from "@/features/sites/bridge"
+import type { PreviewInventoryEntry } from "@/validators/sites/preview"
 import type { SiteElementStatus, SourceElement } from "@/features/sites/source"
 
 export function SiteDevInspector({

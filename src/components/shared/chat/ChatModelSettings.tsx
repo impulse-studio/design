@@ -2,7 +2,7 @@ import { RiEqualizerLine } from "@remixicon/react"
 import { useContext } from "react"
 import { CHAT_EFFORTS, CHAT_MODELS } from "@/features/chat/catalog"
 import { ThemeContext } from "@/features/theme/theme"
-import type { ChatEffort } from "@/features/chat/types"
+import type { ChatEffort } from "@/validators/chat/messages"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { ReasoningEffort } from "@/components/shared/ReasoningEffort"
+import { ReasoningEffort } from "@/components/shared/reasoning-effort/ReasoningEffort"
 
 export function ChatModelSettings({
   model,
@@ -35,7 +35,7 @@ export function ChatModelSettings({
   const theme = useContext(ThemeContext)?.theme
   const current = CHAT_MODELS.find((item) => item.value === model)
   return (
-    <div className="chat-model-settings flex min-w-0 items-center gap-1 [&_>_[data-slot=popover-trigger]]:h-[32px] [&_>_[data-slot=popover-trigger]]:text-[11px] [&_>_[data-slot=popover-trigger]]:px-1.5">
+    <div className="chat-model-settings flex min-w-0 items-center gap-1 [&_>_[data-slot=popover-trigger]]:h-[32px] [&_>_[data-slot=popover-trigger]]:px-1.5 [&_>_[data-slot=popover-trigger]]:text-[11px]">
       <Select
         value={model}
         onValueChange={(value) => {

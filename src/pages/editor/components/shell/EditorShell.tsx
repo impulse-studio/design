@@ -1,11 +1,8 @@
 import { RiCloseLine } from "@remixicon/react"
 import { useCallback, useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import { useRouter } from "@tanstack/react-router"
-import { useQueryClient } from "@tanstack/react-query"
 import type { MockupRecord } from "@/features/mockups/types"
-import { useOrpc } from "@/lib/use-orpc"
-import { useAutosave } from "@/features/mockups/use-autosave"
+import { useMockupSession } from "@/features/mockups/use-session"
 import { useEditor, useEditorState } from "@/features/editor/context"
 import {
   ResizablePanelGroup,
@@ -21,7 +18,7 @@ import { EditorCanvas } from "@/pages/editor/components/canvas/EditorCanvas"
 import { EditorToolbar } from "@/pages/editor/components/toolbar/EditorToolbar"
 import { useCanvasViewport } from "@/features/editor/use-canvas-viewport"
 import { useCollapsiblePanel } from "@/features/editor/use-collapsible-panel"
-import { AiChatProvider } from "@/components/ai/AiChatProvider"
+import { AiChatProvider } from "@/pages/editor/components/chat/AiChatProvider"
 import { EditorPersistenceContext } from "@/features/mockups/persistence-context"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
@@ -36,14 +33,11 @@ const INSPECTOR_ASIDE_CLASS =
   "flex h-full min-h-0 min-w-0 flex-col bg-background text-[11px] text-foreground motion-reduce:**:animate-none! motion-reduce:**:transition-none!"
 
 export function EditorShell({ initial }: { initial: MockupRecord }) {
-  const router = useRouter()
   const isMobile = useIsMobile()
   const [mobilePanel, setMobilePanel] = useState<
     "library" | "inspector" | null
   >(null)
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
-  const queryClient = useQueryClient(),
-    orpc = useOrpc()
   const editor = useEditor(),
     state = useEditorState(
       (s) => s,
@@ -55,7 +49,7 @@ export function EditorShell({ initial }: { initial: MockupRecord }) {
         a.transaction === b.transaction &&
         a.notice === b.notice
     ),
-    save = useAutosave(editor, initial),
+    save = useMockupSession(editor, initial),
     left = state.libraryVisible,
     right = state.inspectorVisible
   const openMobileLibrary = useCallback(() => {
@@ -70,50 +64,6 @@ export function EditorShell({ initial }: { initial: MockupRecord }) {
     editor.set({ inspectorVisible: visible })
   )
   useEffect(() => setPortalTarget(document.body), [])
-  useEffect(() => {
-    const controller = new AbortController()
-    const check = async () => {
-      if (controller.signal.aborted || document.visibilityState !== "visible")
-        return
-      try {
-        const remote = await queryClient.fetchQuery(
-          orpc.mockups.getRevision.queryOptions({
-            input: { id: initial.id },
-            staleTime: 0,
-          })
-        )
-        // Cleanup may abort while the request is in flight.
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (controller.signal.aborted || remote.revision <= save.getRevision())
-          return
-        // An editable session owns its local document. An asynchronous route
-        // refresh could otherwise arrive just after a drop and remount it.
-        if (editor.readOnly && save.isClean()) await router.invalidate()
-        else
-          editor.set({
-            notice:
-              "Une version plus récente existe. Votre brouillon local est conservé.",
-          })
-      } catch {
-        // Network errors must not interrupt local editing.
-      }
-    }
-    const timer = window.setInterval(() => void check(), 2500)
-    return () => {
-      controller.abort()
-      window.clearInterval(timer)
-    }
-  }, [
-    editor,
-    initial.id,
-    orpc,
-    queryClient,
-    router,
-    save.recovery,
-    save.revision,
-    save.status,
-    state.transaction,
-  ])
   const notice =
     save.recovery ||
     save.status === "conflict" ||
@@ -301,7 +251,7 @@ export function EditorShell({ initial }: { initial: MockupRecord }) {
       <ResizablePanelGroup orientation="horizontal" id="studio-editor-panels">
         <ResizablePanel
           id="library"
-          className="editor-collapsible-panel [&_>_*]:min-w-[240px] [#inspector_>_&]:flex [#inspector_>_&]:justify-end"
+          className="editor-collapsible-panel [#inspector_>_&]:flex [#inspector_>_&]:justify-end [&_>_*]:min-w-[240px]"
           style={{ overflow: "hidden" }}
           panelRef={library.panelRef}
           elementRef={library.elementRef}
@@ -334,7 +284,7 @@ export function EditorShell({ initial }: { initial: MockupRecord }) {
         <ResizableHandle hidden={!right} />
         <ResizablePanel
           id="inspector"
-          className="editor-collapsible-panel [&_>_*]:min-w-[240px] [#inspector_>_&]:flex [#inspector_>_&]:justify-end"
+          className="editor-collapsible-panel [#inspector_>_&]:flex [#inspector_>_&]:justify-end [&_>_*]:min-w-[240px]"
           style={{ overflow: "hidden" }}
           panelRef={inspector.panelRef}
           elementRef={inspector.elementRef}

@@ -5,5 +5,6 @@ export * from "./doc"
 export * from "./tree"
 export * from "./schema"
 export * from "./manifest"
+export * from "./projection"
 
 export * from "./styles"

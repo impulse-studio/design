@@ -1,14 +1,8 @@
-import { z } from "zod"
-import { mockupStatusSchema } from "@/features/mockups/status"
+import { setMockupStatusSchema } from "@/validators/mockups"
+
 import { updateRecordStatus } from "@/features/mockups/repository.server"
 import { protectedProcedure } from "@/server/procedure/protected.procedure"
 
 export const setMockupStatusHandler = protectedProcedure
-  .input(
-    z.object({
-      id: z.string().min(1).max(100),
-      status: mockupStatusSchema,
-      expectedRevision: z.number().int().nonnegative(),
-    })
-  )
+  .input(setMockupStatusSchema)
   .handler(({ context, input }) => updateRecordStatus(input, context.user.id))

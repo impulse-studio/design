@@ -9,8 +9,8 @@ import type { SiteMode } from "./Toolbar"
 
 const modes = [
   { value: "navigation", label: "Navigation", icon: <RiCursorLine /> },
-  { value: "dev", label: "Dev", icon: <RiCodeSSlashLine /> },
   { value: "edit", label: "Édition", icon: <RiPencilRuler2Line /> },
+  { value: "dev", label: "Dev", icon: <RiCodeSSlashLine /> },
 ] as const
 
 export function SiteModeIsland({
@@ -21,10 +21,7 @@ export function SiteModeIsland({
   onMode: (mode: SiteMode) => void
 }) {
   return (
-    <EditorIsland
-      label="Modes du site"
-      mode={mode === "dev" ? "inspect" : "design"}
-    >
+    <EditorIsland label="Modes du site" className="bottom-10">
       <ModeSwitch
         value={mode}
         ariaLabel="Mode du site"

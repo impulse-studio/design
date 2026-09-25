@@ -1,7 +1,7 @@
 import { redirect } from "@tanstack/react-router"
 import { APP_ROUTES } from "@/constants"
 import { getLoginRedirect } from "@/features/auth/policy"
-import type { CurrentUser } from "@/features/auth/session.server"
+import type { CurrentUser } from "@/features/auth/types"
 
 export const requireAuthenticatedUser = (
   user: CurrentUser | null,

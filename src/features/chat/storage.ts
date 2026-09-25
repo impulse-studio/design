@@ -1,20 +1,10 @@
-import { z } from "zod"
+import { savedSchema } from "@/validators/chat/storage"
+
 import { CHAT_MODELS } from "./catalog"
 import { initialChatState, interruptMessage } from "./reducer"
-import { attachmentSchema, effortSchema, messageSchema } from "./types"
+
 import type { ChatState } from "./types"
 
-const draftSchema = z.object({
-  text: z.string(),
-  attachments: z.array(attachmentSchema).max(5),
-})
-const savedSchema = z.object({
-  version: z.literal(1),
-  model: z.string(),
-  effort: effortSchema,
-  drafts: z.object({ disconnected: draftSchema, demo: draftSchema }),
-  messages: z.array(messageSchema),
-})
 export const chatStorageKey = (mockupId: string) =>
   `digit:chat-ui:v1:${mockupId}`
 export const serializeChat = (state: ChatState) =>

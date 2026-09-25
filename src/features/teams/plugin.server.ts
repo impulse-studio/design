@@ -5,7 +5,7 @@ import {
   ACCOUNT_REQUIRED_MESSAGE,
 } from "@/features/auth/policy"
 import { accessControl, isTeamRole, roles } from "./permissions"
-import { inviteMemberSchema, teamFormSchema } from "./schemas"
+import { inviteMemberSchema, teamFormSchema } from "@/validators/teams"
 
 export const organizationPlugin = () =>
   organization({

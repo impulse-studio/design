@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { unzipSync, strFromU8 } from "fflate"
-import { createSiteDocument } from "./template"
+import { createSiteDocument } from "./document.fixture"
 import {
   applySiteProposal,
   applyTextEdit,
@@ -10,7 +10,11 @@ import {
 } from "./source"
 import { sourceElementName } from "./element-name"
 import { exportSite } from "./export"
-import { filePathSchema, siteDocumentSchema, visualEditSchema } from "./schema"
+import {
+  filePathSchema,
+  siteDocumentSchema,
+  visualEditSchema,
+} from "@/validators/sites/document"
 
 const createEditableDocument = () =>
   applySiteProposal(createSiteDocument(), {
@@ -40,7 +44,6 @@ describe("React file projects", () => {
     expect(Object.keys(zip)).toEqual(
       expect.arrayContaining([
         "package.json",
-        "pnpm-lock.yaml",
         "vite.config.ts",
         "src/App.tsx",
         "src/styles.css",

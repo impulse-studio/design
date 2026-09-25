@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
-import type { ChatCallbacks, ChatMessage } from "@/features/chat/types"
+import type { ChatCallbacks } from "@/features/chat/types"
+import type { ChatMessage } from "@/validators/chat/messages"
 import {
   MessageScrollerProvider,
   MessageScroller,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/message-scroller"
 import { ChatMessageItem } from "./ChatMessageItem"
 
-export type { ChatMessage } from "@/features/chat/types"
+export type { ChatMessage } from "@/validators/chat/messages"
 export interface ChatConversationProps extends ChatCallbacks {
   messages: ChatMessage[]
   streaming: boolean

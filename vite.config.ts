@@ -9,9 +9,25 @@ const config = defineConfig({
   plugins: [
     tailwindcss(),
     tanstackStart(),
-    nitro({ preset: "node-server", traceDeps: ["esbuild-wasm*"] }),
+    nitro({
+      preset: "node-server",
+      routeRules: {
+        "/m/**": {
+          headers: {
+            "Cross-Origin-Embedder-Policy": "credentialless",
+            "Cross-Origin-Opener-Policy": "same-origin",
+          },
+        },
+      },
+    }),
     viteReact(),
   ],
+  server: {
+    headers: {
+      "Cross-Origin-Embedder-Policy": "credentialless",
+      "Cross-Origin-Opener-Policy": "same-origin",
+    },
+  },
 })
 
 export default config

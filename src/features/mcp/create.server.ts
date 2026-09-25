@@ -1,18 +1,9 @@
-import { randomUUID } from "node:crypto"
-import { z } from "zod"
-import { getDatabase } from "@/db/client.server"
-import { mockups, siteProjects, siteVersions } from "@/db/schema"
-import { emptyDocument } from "@/features/editor/document"
+import { createMcpProjectSchema } from "@/validators/mcp/projects"
+
 import { createRecord } from "@/features/mockups/repository.server"
-import { createSiteDocument } from "@/features/sites/template"
+import { createSite } from "@/features/sites/create.server"
 import { listTeamsForUser } from "@/features/teams/repository.server"
 import { isTeamRole, roles } from "@/features/teams/permissions"
-
-export const createMcpProjectSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  kind: z.enum(["site", "mockup"]),
-  teamId: z.string().optional(),
-})
 
 export const createMcpProject = async (
   userId: string,
@@ -48,23 +39,11 @@ export const createMcpProject = async (
     }
   }
 
-  const id = randomUUID()
-  const doc = createSiteDocument()
-  await getDatabase().transaction(async (tx) => {
-    await tx.insert(mockups).values({
-      id,
-      name: input.name,
-      organizationId: team.id,
-      doc: emptyDocument(),
-    })
-    await tx.insert(siteProjects).values({ id, doc })
-    await tx.insert(siteVersions).values({
-      id: randomUUID(),
-      projectId: id,
-      revision: 0,
-      doc,
-      summary: "Création du site",
-    })
-  })
-  return { id, kind: input.kind, revision: 0, url: `${origin}/m/${id}` }
+  const site = await createSite({ name: input.name, organizationId: team.id })
+  return {
+    id: site.id,
+    kind: input.kind,
+    revision: site.revision,
+    url: `${origin}/m/${site.id}`,
+  }
 }

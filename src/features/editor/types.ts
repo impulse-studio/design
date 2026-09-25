@@ -1,6 +1,6 @@
 import type { MockupDoc, Rect } from "@digit-ai-studio/shared"
 
-import type { MockupStatus } from "@/features/mockups/status"
+import type { MockupStatus } from "@/validators/mockups"
 
 export type Tool = "move" | "frame" | "box" | "text" | "hand"
 export type Viewport = { x: number; y: number; zoom: number }

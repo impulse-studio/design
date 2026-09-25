@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/context-menu"
 import { copySelection, pasteSelection } from "@/features/editor/clipboard"
 import { orderSelection } from "@/features/editor/arrange"
+import { addAutoLayoutToSelection } from "@/features/editor/auto-layout"
 import { CanvasWorld } from "./CanvasWorld"
 import { SelectionOverlay } from "./SelectionOverlay"
 import { CanvasControls } from "./CanvasControls"
@@ -184,7 +185,7 @@ export function EditorCanvas({
         <ContextMenuGroup>
           <ContextMenuItem
             disabled={inspect || !state.selectedIds.length}
-            onClick={editor.group}
+            onClick={() => addAutoLayoutToSelection(editor)}
           >
             Ajouter un auto-layout
           </ContextMenuItem>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { previewMessageSchema } from "./bridge"
+import { previewMessageSchema } from "@/validators/sites/preview"
 
 describe("site preview bridge", () => {
   it("accepts the visible JSX inventory sent by the preview", () => {

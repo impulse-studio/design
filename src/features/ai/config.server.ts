@@ -1,14 +1,7 @@
-import { z } from "zod"
-import type { AiConfiguration } from "./types"
+import { modelsSchema } from "@/validators/ai/models"
 
-const modelsSchema = z
-  .array(
-    z.object({
-      id: z.string().regex(/^(openai|anthropic):[^\s:]+$/),
-      displayName: z.string().min(1).max(100),
-    })
-  )
-  .max(30)
+import { AiFailure } from "./errors"
+import type { AiConfiguration } from "./types"
 
 /** Identical catalog on web and worker. Provider keys only need to exist on the worker. */
 export const readAiConfiguration = (): AiConfiguration => {
@@ -49,6 +42,7 @@ export const readAiConfiguration = (): AiConfiguration => {
 }
 export const requireModel = (id: string) => {
   const model = readAiConfiguration().models.find((item) => item.id === id)
-  if (!model) throw new Error("Modèle indisponible dans ce studio.")
+  if (!model)
+    throw new AiFailure("unavailable", "Modèle indisponible dans ce studio.")
   return model
 }

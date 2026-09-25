@@ -2,7 +2,11 @@
 import { createElement } from "react"
 import { createRoot } from "react-dom/client"
 import type { Root } from "react-dom/client"
-import type { EditorMode, FrameNode, Json } from "@digit-ai-studio/shared"
+import type {
+  DetachedSnapshot,
+  EditorMode,
+  FrameNode,
+} from "@digit-ai-studio/shared"
 import {
   nextTick,
   onBeforeUnmount,
@@ -16,13 +20,13 @@ import { createGeometryPreview } from "./geometry-preview"
 import { collectLayout, frameId, onShellMessage, post } from "./bridge"
 import { ReactRenderFrame } from "./ReactRenderFrame"
 
-const serializeDomNode = (node: globalThis.Node): Json | null => {
+const serializeDomNode = (node: globalThis.Node): DetachedSnapshot | null => {
   if (node.nodeType === globalThis.Node.TEXT_NODE)
     return { text: node.textContent ?? "" }
   if (!(node instanceof Element)) return null
   const slot = node.getAttribute("data-digit-slot-root")
   if (slot) return { slot }
-  const attributes: Record<string, Json> = {}
+  const attributes: Record<string, string | number | boolean> = {}
   let className: string | undefined
   let inlineStyle: string | undefined
   for (const attribute of Array.from(node.attributes)) {
@@ -48,7 +52,7 @@ const serializeDomNode = (node: globalThis.Node): Json | null => {
     attributes.value = node.value
   const children = Array.from(node.childNodes)
     .map(serializeDomNode)
-    .filter((child): child is Json => child !== null)
+    .filter((child): child is DetachedSnapshot => child !== null)
   return {
     tag: node.tagName.toLowerCase(),
     ...(className ? { className } : {}),
@@ -57,10 +61,10 @@ const serializeDomNode = (node: globalThis.Node): Json | null => {
     children,
   }
 }
-const serializeComponent = (component: HTMLElement): Json => {
+const serializeComponent = (component: HTMLElement): DetachedSnapshot => {
   const children = Array.from(component.childNodes)
     .map(serializeDomNode)
-    .filter((child): child is Json => child !== null)
+    .filter((child): child is DetachedSnapshot => child !== null)
   if (children.length === 1 && typeof children[0] === "object" && !Array.isArray(children[0]))
     return children[0]
   return { tag: "div", inlineStyle: "display: contents", children }

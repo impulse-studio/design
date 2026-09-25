@@ -7,6 +7,7 @@ import { useEditor } from "@/features/editor/context"
 import { useEditorPersistence } from "@/features/mockups/persistence-context"
 import type { AiProposal, AiSnapshot, AiConfiguration } from "./types"
 import { aiRequest, hashDocument } from "./client"
+import { createConversationSession } from "./conversation-session"
 
 const empty: AiSnapshot = {
   sessionStarted: false,
@@ -31,7 +32,9 @@ export const useAiChat = (mockupId: string) => {
   const [reconnecting, setReconnecting] = useState(false)
   const [ignored, setIgnored] = useState<string[]>([])
   const [pendingApply, setPendingApply] = useState<string | null>(null)
-  const submission = useRef<{ key: string; requestId: string } | null>(null)
+  const session = useRef(
+    createConversationSession({ targetId: mockupId, startRemoteSession: false })
+  )
   const connectionRequest = useRef(0)
   const locked = useRef(false)
   const transport = useTriggerChatTransport({
@@ -186,7 +189,7 @@ export const useAiChat = (mockupId: string) => {
         conversations: snapshot.conversations,
         conversationId: result.id,
       })
-      submission.current = null
+      session.current.reset()
     })
   const send = (text: string) =>
     perform(async () => {
@@ -196,50 +199,32 @@ export const useAiChat = (mockupId: string) => {
       const selectedIds = state.selectedIds.filter(
         (id) => !ignored.includes(id)
       )
-      let id = conversationId ?? snapshot.conversationId
-      if (!id) {
-        id = (
-          await aiRequest<{ id: string }>("action", {
-            action: "conversation",
-            mockupId,
-          })
-        ).id
-        setConversationId(id)
-      }
-      const key = JSON.stringify([id, text, model, docHash, selectedIds])
-      if (submission.current?.key !== key)
-        submission.current = { key, requestId: crypto.randomUUID() }
-      const admitted = await aiRequest<{ id: string }>("action", {
-        action: "send",
-        conversationId: id,
-        requestId: submission.current.requestId,
-        model,
-        prompt: text,
-        docHash,
-        selectedIds,
-      })
-      const conversationChat = getChat(id)
-      setActiveChat(conversationChat)
-      void conversationChat
-        .sendMessage(
-          {
-            id: `${admitted.id}:user`,
-            role: "user",
-            parts: [{ type: "text", text }],
-          },
-          { body: { runId: admitted.id } }
-        )
-        .catch(() =>
-          setError(
-            "Le flux a été interrompu. La réponse partielle est conservée."
+      const result = await session.current.send(
+        {
+          conversationId: conversationId ?? snapshot.conversationId,
+          model,
+          prompt: text,
+          docHash,
+          selectedIds,
+        },
+        async ({ conversationId: id, runId }) => {
+          const conversationChat = getChat(id)
+          setActiveChat(conversationChat)
+          await conversationChat.sendMessage(
+            {
+              id: `${runId}:user`,
+              role: "user",
+              parts: [{ type: "text", text }],
+            },
+            { body: { runId } }
           )
-        )
+        }
+      )
       setDraft("")
-      submission.current = null
-      setConversationId(id)
+      setConversationId(result.conversationId)
       setSnapshot(
         await aiRequest<AiSnapshot>(
-          `state?mockupId=${encodeURIComponent(mockupId)}&conversationId=${encodeURIComponent(id)}`
+          `state?mockupId=${encodeURIComponent(mockupId)}&conversationId=${encodeURIComponent(result.conversationId)}`
         )
       )
     })
@@ -328,8 +313,7 @@ export const useAiChat = (mockupId: string) => {
       }),
     stop: () =>
       perform(async () => {
-        if (snapshot.run)
-          await aiRequest("action", { action: "stop", runId: snapshot.run.id })
+        if (snapshot.run) await session.current.stop(snapshot.run.id)
         await activeChat.stop()
         await refresh()
       }),

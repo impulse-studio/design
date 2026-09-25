@@ -3,7 +3,7 @@ import { RiAttachmentLine, RiCloseLine, RiPlayListLine } from "@remixicon/react"
 import { useEditorChat } from "@/features/chat/context"
 import { isGenerating } from "@/features/chat/reducer"
 import { CHAT_FILE_ACCEPT } from "@/features/chat/attachments"
-import type { ChatContextItem, ChatScenario } from "@/features/chat/types"
+import type { ChatContextItem, ChatScenario } from "@/validators/chat/messages"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -40,7 +40,7 @@ export function ChatComposer({
   return (
     <div
       ref={root}
-      className="chat-composer flex flex-none min-w-0 flex-col gap-2 p-2.5 border-t border-border bg-background"
+      className="chat-composer flex min-w-0 flex-none flex-col gap-2 border-t border-border bg-background p-2.5"
       onDragOver={(event) => {
         if (event.dataTransfer.types.includes("Files")) event.preventDefault()
       }}
@@ -73,7 +73,10 @@ export function ChatComposer({
         </p>
       )}
       {!!context.length && (
-        <div className="chat-context flex flex-wrap gap-1 max-h-[90px] overflow-y-auto [&_[data-slot=badge]]:min-w-0 [&_[data-slot=badge]]:font-normal" aria-label="Contexte du prochain message">
+        <div
+          className="chat-context flex max-h-[90px] flex-wrap gap-1 overflow-y-auto [&_[data-slot=badge]]:min-w-0 [&_[data-slot=badge]]:font-normal"
+          aria-label="Contexte du prochain message"
+        >
           {context.map((item) => (
             <Badge
               key={item.id}

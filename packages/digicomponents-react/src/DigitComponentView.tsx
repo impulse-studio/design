@@ -23,8 +23,11 @@ type ComponentSnapshot = {
   defaults: Record<string, Json>
   variants: SnapshotVariant[]
 }
-type SnapshotRegistry = { components: Record<string, ComponentSnapshot> }
-const snapshots = snapshotsData as SnapshotRegistry
+type SnapshotRegistry = {
+  components: Record<string, ComponentSnapshot | undefined>
+}
+// JSON imports widen discriminants and merge optional object keys. Publication validates the tree.
+const snapshots = snapshotsData as unknown as SnapshotRegistry
 const camelCase = (name: string) =>
   name.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
 const reactProperty = (name: string) => {
@@ -68,13 +71,22 @@ const scoreVariant = (
     (score, [name, value]) => score + (props[name] === value ? 0 : 1),
     0
   )
-const plainText = (nodes: SnapshotNode[], textProps: string[], props: Record<string, unknown>) =>
-  nodes.map((node) => node.type === "text"
-    ? replaceText(node.text, textProps, props)
-    : plainText(node.children, textProps, props)
-  ).join("")
+const plainText = (
+  nodes: SnapshotNode[],
+  textProps: string[],
+  props: Record<string, unknown>
+): string =>
+  nodes
+    .map((node) =>
+      node.type === "text"
+        ? replaceText(node.text, textProps, props)
+        : plainText(node.children, textProps, props)
+    )
+    .join("")
 const safeUrl = (value: string) =>
-  /^(?:https?:\/\/|mailto:|tel:|#|\/|\.\/|\.\.\/|data:image\/(?:png|jpeg|gif|webp);base64,)/i.test(value)
+  /^(?:https?:\/\/|mailto:|tel:|#|\/|\.\/|\.\.\/|data:image\/(?:png|jpeg|gif|webp);base64,)/i.test(
+    value
+  )
 const rootAttributes = new Set([
   "accept",
   "alt",
@@ -132,20 +144,29 @@ export function DigitComponentView({
   const snapshot = snapshots.components[component]
   const resolvedProps = {
     ...(snapshot?.defaults ?? {}),
-    ...(props ?? {}),
+    ...props,
   }
   const variant = snapshot?.variants
     .map((value) => ({ value, score: scoreVariant(value, resolvedProps) }))
-    .sort((a, b) => a.score - b.score)[0]?.value
+    .sort((a, b) => a.score - b.score)
+    .at(0)?.value
   let rootApplied = false
   const renderNode = (node: SnapshotNode, key: string): ReactNode => {
     if (node.type === "text")
       return replaceText(node.text, snapshot?.textProps ?? [], resolvedProps)
     const slot = node.attributes["data-digit-slot"]
     if (slot) {
-      const slotContent = slots[slot] ??
-        (slot === "default" && (text !== undefined || typeof props.text === "string")
-          ? [createElement("span", { "data-editor-text": nodeId }, text ?? String(props.text))]
+      const slotContent =
+        slots[slot] ??
+        (slot === "default" &&
+        (text !== undefined || typeof props.text === "string")
+          ? [
+              createElement(
+                "span",
+                { "data-editor-text": nodeId },
+                text ?? String(props.text)
+              ),
+            ]
           : slot === "default" && children !== undefined
             ? [children]
             : [])
@@ -163,9 +184,23 @@ export function DigitComponentView({
     for (const [name, raw] of Object.entries(node.attributes)) {
       if (name === "data-digit-slot" || /^on/i.test(name)) continue
       const value = replaceText(raw, snapshot?.textProps ?? [], resolvedProps)
-      if (["href", "src", "xlink:href"].includes(name.toLowerCase()) && !safeUrl(value)) continue
+      if (
+        ["href", "src", "xlink:href"].includes(name.toLowerCase()) &&
+        !safeUrl(value)
+      )
+        continue
       const keyName = reactProperty(name)
-      if (["checked", "disabled", "multiple", "readOnly", "required", "selected", "autoFocus"].includes(keyName))
+      if (
+        [
+          "checked",
+          "disabled",
+          "multiple",
+          "readOnly",
+          "required",
+          "selected",
+          "autoFocus",
+        ].includes(keyName)
+      )
         attributes[keyName] = true
       else if (name === "style") attributes.style = parseInlineStyle(value)
       else attributes[keyName] = value
@@ -181,18 +216,34 @@ export function DigitComponentView({
       }
     }
     if (node.tag === "textarea") {
-      attributes.defaultValue = plainText(node.children, snapshot?.textProps ?? [], resolvedProps)
+      attributes.defaultValue = plainText(
+        node.children,
+        snapshot?.textProps ?? [],
+        resolvedProps
+      )
     }
     if (!rootApplied) {
       rootApplied = true
       for (const [name, value] of Object.entries(resolvedProps)) {
         const keyName = name === "formId" ? "form" : reactProperty(name)
         const isDataOrAria = /^(?:data-|aria-)/.test(name)
-        const isControlType = keyName === "type" &&
+        const isControlType =
+          keyName === "type" &&
           ["button", "input", "select", "textarea"].includes(node.tag)
-        if (!rootAttributes.has(keyName) && !isDataOrAria && !isControlType) continue
-        if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") continue
-        if (["href", "src"].includes(keyName) && typeof value === "string" && !safeUrl(value)) continue
+        if (!rootAttributes.has(keyName) && !isDataOrAria && !isControlType)
+          continue
+        if (
+          typeof value !== "string" &&
+          typeof value !== "number" &&
+          typeof value !== "boolean"
+        )
+          continue
+        if (
+          ["href", "src"].includes(keyName) &&
+          typeof value === "string" &&
+          !safeUrl(value)
+        )
+          continue
         if (booleanRootAttributes.has(keyName)) {
           if (value) attributes[keyName] = true
           else delete attributes[keyName]
@@ -210,14 +261,30 @@ export function DigitComponentView({
         ...style,
       }
     }
-    const nested = node.tag === "textarea"
-      ? []
-      : node.children.map((child, index) => renderNode(child, `${key}.${index}`))
-    return createElement(node.tag, { ...attributes, key: `${component}:${key}` }, ...nested)
+    const nested =
+      node.tag === "textarea"
+        ? []
+        : node.children.map((child, index) =>
+            renderNode(child, `${key}.${index}`)
+          )
+    return createElement(
+      node.tag,
+      { ...attributes, key: `${component}:${key}` },
+      ...nested
+    )
   }
-  const content = (variant?.tree ?? []).map((node, index) => renderNode(node, String(index)))
+  const content = (variant?.tree ?? []).map((node, index) =>
+    renderNode(node, String(index))
+  )
   const eventProps: Record<string, unknown> = {}
-  for (const name of ["onClick", "onChange", "onFocus", "onBlur", "onKeyDown", "onSubmit"])
+  for (const name of [
+    "onClick",
+    "onChange",
+    "onFocus",
+    "onBlur",
+    "onKeyDown",
+    "onSubmit",
+  ])
     if (typeof props[name] === "function") eventProps[name] = props[name]
   return createElement(
     "div",

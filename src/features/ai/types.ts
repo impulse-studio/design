@@ -1,15 +1,11 @@
+import type { modelSchema } from "@/validators/ai/models"
 import type { UIMessage } from "ai"
-import { z } from "zod"
+import type { z } from "zod"
 import type { MockupDoc } from "@digit-ai-studio/shared"
-import type { ChatMessage } from "@/features/chat/types"
-import type { ProposalInput } from "./operations"
+import type { ChatMessage } from "@/validators/chat/messages"
+import type { SiteDocument } from "@/validators/sites/document"
+import type { ProposalInput } from "@/validators/ai/operations"
 
-export const modelSchema = z.object({
-  id: z.string(),
-  model: z.string(),
-  displayName: z.string(),
-  isDefault: z.boolean().optional(),
-})
 export type AiProvider = "openai" | "anthropic"
 export type AiConfiguration = {
   available: boolean
@@ -33,7 +29,7 @@ export type AiProposal = ProposalInput & {
   resultHash: string
   status: "pending" | "applied" | "rejected"
 }
-export type AiConversation = { id: string; title: string; updatedAt: string }
+type AiConversation = { id: string; title: string; updatedAt: string }
 export type AiSnapshot = {
   sessionStarted: boolean
   uiMessages: UIMessage[]
@@ -46,7 +42,7 @@ export type AiSnapshot = {
   run: { id: string; status: AiRunStatus; error: string | null } | null
 }
 export type RunContext = {
-  project?: import("@/features/sites/schema").SiteDocument
+  project?: SiteDocument
   projectId?: string
   activeRoute?: string
   doc: MockupDoc

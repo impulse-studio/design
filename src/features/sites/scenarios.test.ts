@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { strFromU8, unzipSync } from "fflate"
-import { createSiteDocument } from "./template"
+import { createSiteDocument } from "./document.fixture"
 import { applySiteProposal } from "./source"
 import { exportSite } from "./export"
 import { readScenarios, scenarioDocument, scenariosPath } from "./scenarios"

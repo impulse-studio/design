@@ -1,6 +1,6 @@
 import { RiArrowRightUpLine } from "@remixicon/react"
 import { CHAT_SCENARIOS } from "@/features/chat/catalog"
-import type { ChatScenario } from "@/features/chat/types"
+import type { ChatScenario } from "@/validators/chat/messages"
 import { Button } from "@/components/ui/button"
 
 export function ChatSuggestions({
@@ -20,7 +20,7 @@ export function ChatSuggestions({
           variant="outline"
           disabled={disabled || (scenario.id === "selection" && !hasSelection)}
           onClick={() => onSelect(scenario.id, scenario.prompt)}
-          className="chat-suggestion w-full min-w-0 h-auto min-h-[54px] justify-between p-2.5 gap-2 text-left whitespace-normal text-[12px] leading-[1.5]"
+          className="chat-suggestion h-auto min-h-[54px] w-full min-w-0 justify-between gap-2 p-2.5 text-left text-[12px] leading-[1.5] whitespace-normal"
           title={
             scenario.id === "selection" && !hasSelection
               ? "Sélectionnez un calque sur le canvas"
@@ -29,7 +29,7 @@ export function ChatSuggestions({
         >
           <span className="min-w-0 flex-1">
             <span className="block">{scenario.label}</span>
-            <span className="chat-suggestion-detail block text-[11px] font-normal text-muted-foreground mt-0.5">
+            <span className="chat-suggestion-detail mt-0.5 block text-[11px] font-normal text-muted-foreground">
               {scenario.description}
             </span>
           </span>

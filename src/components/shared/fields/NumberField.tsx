@@ -1,7 +1,7 @@
-import { useEffect, useId, useRef } from "react"
+import { useId, useRef } from "react"
 import type { ReactNode } from "react"
 import { Field, FieldLabel } from "@/components/ui/field"
-import { useEditSession } from "./edit-session"
+import { usePointerEditGesture } from "./use-pointer-edit-gesture"
 import { NumberInput } from "./NumberInput"
 import {
   NUMBER_BOUNDS,
@@ -30,28 +30,32 @@ export function NumberField({
   prefix?: ReactNode
   placeholder?: string
 }) {
-  const id = useId(),
-    editor = useEditSession()
-  const scrub = useRef<{ x: number; value: number; stop: () => void } | null>(
-    null
-  )
+  const id = useId()
+  const scrub = useRef<{ x: number; value: number } | null>(null)
   const input = useRef<HTMLDivElement>(null)
-  const endScrub = (commit: boolean) => {
-    const current = scrub.current
-    if (!current) return false
-    scrub.current = null
-    current.stop()
-    if (commit) editor.commit()
-    else editor.cancel()
-    return true
-  }
-  useEffect(
-    () => () => {
-      scrub.current?.stop()
-      if (scrub.current) editor.cancel()
+  const gesture = usePointerEditGesture<HTMLLabelElement>({
+    onBegin: (event) => {
+      if (document.activeElement instanceof HTMLElement)
+        document.activeElement.blur()
+      scrub.current = { x: event.clientX, value: value ?? 0 }
     },
-    [editor]
-  )
+    onMove: (event) => {
+      if (!scrub.current) return
+      const next =
+        scrub.current.value +
+        Math.round((event.clientX - scrub.current.x) / 2) *
+          stepIncrement(event, step)
+      onChange(clampNumber(next, min, max))
+    },
+    onCommit: (event) => {
+      const clicked = scrub.current && Math.abs(event.clientX - scrub.current.x) < 3
+      scrub.current = null
+      if (clicked) input.current?.querySelector("input")?.focus()
+    },
+    onCancel: () => {
+      scrub.current = null
+    },
+  })
   return (
     <Field
       ref={input}
@@ -68,46 +72,12 @@ export function NumberField({
             input.current?.closest("fieldset:disabled")
           )
             return
-          event.preventDefault()
-          if (document.activeElement instanceof HTMLElement)
-            document.activeElement.blur()
-          editor.begin()
-          // Escape or leaving the window cancels the scrub.
-          const cancel = (windowEvent: Event) => {
-            if (
-              !(windowEvent instanceof KeyboardEvent) ||
-              windowEvent.key === "Escape"
-            )
-              endScrub(false)
-          }
-          window.addEventListener("keydown", cancel)
-          window.addEventListener("blur", cancel)
-          scrub.current = {
-            x: event.clientX,
-            value: value ?? 0,
-            stop: () => {
-              window.removeEventListener("keydown", cancel)
-              window.removeEventListener("blur", cancel)
-            },
-          }
-          event.currentTarget.setPointerCapture(event.pointerId)
+          gesture.onPointerDown(event)
         }}
-        onPointerMove={(event) => {
-          if (!scrub.current) return
-          const next =
-            scrub.current.value +
-            Math.round((event.clientX - scrub.current.x) / 2) *
-              stepIncrement(event, step)
-          onChange(clampNumber(next, min, max))
-        }}
-        onPointerUp={(event) => {
-          const clicked =
-            scrub.current && Math.abs(event.clientX - scrub.current.x) < 3
-          if (endScrub(true) && clicked)
-            input.current?.querySelector("input")?.focus()
-        }}
-        onPointerCancel={() => endScrub(false)}
-        onLostPointerCapture={() => endScrub(true)}
+        onPointerMove={gesture.onPointerMove}
+        onPointerUp={gesture.onPointerUp}
+        onPointerCancel={gesture.onPointerCancel}
+        onLostPointerCapture={gesture.onLostPointerCapture}
       >
         {prefix ? (
           <>

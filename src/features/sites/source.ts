@@ -1,170 +1,57 @@
-import { vueElements, normalizeVue, editVueText } from "./vue"
+import { analyzeVue } from "./vue"
+import { analyzeReact } from "./source-react"
+import { sourceHash } from "./source-model"
+import type { SourceElement, ParsedSource } from "./source-model"
 import { readScenarios } from "./scenarios"
-import { parse } from "@babel/parser"
-import traverseModule from "@babel/traverse"
-import generateModule from "@babel/generator"
-import * as t from "@babel/types"
 import {
   siteDocumentSchema,
   siteProposalSchema,
   visualEditSchema,
-} from "./schema"
-import type { SiteDocument, VisualEdit } from "./schema"
+} from "@/validators/sites/document"
+import type { SiteDocument, VisualEdit } from "@/validators/sites/document"
 
-const traverse =
-  typeof traverseModule === "function"
-    ? traverseModule
-    : (traverseModule as unknown as { default: typeof traverseModule }).default
-const generate =
-  typeof generateModule === "function"
-    ? generateModule
-    : (generateModule as unknown as { default: typeof generateModule }).default
-export const parseSource = (code: string) =>
-  parse(code, { sourceType: "module", plugins: ["typescript", "jsx"] })
-const idOf = (element: t.JSXOpeningElement) => {
-  const attribute = element.attributes.find(
-    (a) =>
-      t.isJSXAttribute(a) && t.isJSXIdentifier(a.name, { name: "data-digi-id" })
-  )
-  return attribute &&
-    t.isJSXAttribute(attribute) &&
-    t.isStringLiteral(attribute.value)
-    ? attribute.value.value
-    : null
-}
-const hash = (text: string) => {
-  let value = 2166136261
-  for (const char of text)
-    value = Math.imul(value ^ char.charCodeAt(0), 16777619)
-  return (value >>> 0).toString(36)
-}
-export type SourceElement = {
-  id: string
-  file: string
-  tag: string
-  text: string | null
-  owner: string | null
-  isOwnerRoot?: boolean
-  kind: "html" | "component"
-  line: number | null
-  signature: string
-}
+export type { SourceElement } from "./source-model"
 export type SiteElementStatus = "new" | "modified" | "same"
-export const elementsOf = (doc: SiteDocument): SourceElement[] => {
-  const elements: SourceElement[] = []
+
+const analyzeSources = (doc: SiteDocument) => {
+  const sources = new Map<string, ParsedSource>()
   for (const [file, code] of Object.entries(doc.files)) {
-    if (file.endsWith(".vue")) { elements.push(...vueElements(code, file)); continue }
-    if (!file.endsWith(".tsx") || file.startsWith("src/components/ui/"))
-      continue
-    traverse(parseSource(code), {
-      JSXElement(path) {
-        const id = idOf(path.node.openingElement)
-        if (!id) return
-        const children = path.node.children
-        let owner: string | null = null
-        let hasJsxAncestor = false
-        let parent: typeof path.parentPath | null = path.parentPath
-        while (parent && !owner) {
-          if (parent.isJSXElement()) hasJsxAncestor = true
-          if (
-            parent.isFunctionDeclaration() &&
-            parent.node.id &&
-            /^[A-Z]/.test(parent.node.id.name)
-          )
-            owner = parent.node.id.name
-          else if (
-            parent.isFunctionExpression() &&
-            parent.node.id &&
-            /^[A-Z]/.test(parent.node.id.name)
-          )
-            owner = parent.node.id.name
-          else if (
-            parent.isVariableDeclarator() &&
-            t.isIdentifier(parent.node.id) &&
-            /^[A-Z]/.test(parent.node.id.name)
-          )
-            owner = parent.node.id.name
-          parent = parent.parentPath
-        }
-        const tag = t.isJSXIdentifier(path.node.openingElement.name)
-          ? path.node.openingElement.name.name
-          : generate(path.node.openingElement.name).code
-        elements.push({
-          id,
-          file,
-          tag,
-          owner,
-          isOwnerRoot: Boolean(owner) && !hasJsxAncestor,
-          kind: /^[A-Z]/.test(tag) ? "component" : "html",
-          line: path.node.loc?.start.line ?? null,
-          signature: hash(generate(path.node).code),
-          text:
-            children.length > 0 && children.every((c) => t.isJSXText(c))
-              ? children
-                  .map((c) => (t.isJSXText(c) ? c.value : ""))
-                  .join("")
-                  .trim()
-              : null,
-        })
-      },
-    })
+    if (file.startsWith("src/components/ui/")) continue
+    if (file.endsWith(".vue")) sources.set(file, analyzeVue(code, file))
+    else if (/\.[jt]sx$/.test(file)) sources.set(file, analyzeReact(code, file))
   }
-  return elements
+  return sources
 }
+export const elementsOf = (doc: SiteDocument): SourceElement[] =>
+  [...analyzeSources(doc).values()].flatMap((source) => source.elements)
+
 export const normalizeSources = (input: SiteDocument): SiteDocument => {
-  const doc = structuredClone(input),
-    ids = new Set<string>(),
-    reserved = new Set(elementsOf(input).map((e) => e.id))
-  for (const [file, code] of Object.entries(doc.files)) {
-    if (file.endsWith(".vue")) { doc.files[file] = normalizeVue(code, file, ids, reserved); continue }
-    if (!file.endsWith(".tsx") || file.startsWith("src/components/ui/"))
-      continue
-    const ast = parseSource(code)
+  const doc = structuredClone(input)
+  const sources = analyzeSources(doc)
+  const reserved = new Set(
+    [...sources.values()].flatMap((source) =>
+      source.elements.map((element) => element.id)
+    )
+  )
+  const used = new Set<string>()
+  for (const [file, source] of sources) {
     let index = 0
-    const edits = { changed: false }
-    traverse(ast, {
-      JSXOpeningElement(path) {
-        const name = t.isJSXIdentifier(path.node.name)
-          ? path.node.name.name
-          : t.isJSXMemberExpression(path.node.name)
-            ? generate(path.node.name).code
-            : null
-        if (
-          !name ||
-          ["Fragment", "Suspense", "StrictMode"].includes(name) ||
-          /\.(Fragment|Suspense|StrictMode)$/.test(name)
-        )
-          return
-        const previous = idOf(path.node)
-        if (
-          previous &&
-          /^ds-[a-z0-9-]+$/.test(previous) &&
-          !ids.has(previous)
-        ) {
-          ids.add(previous)
-          return
-        }
-        let id: string
-        do {
-          id = `ds-${hash(file)}-${index++}`
-        } while (ids.has(id) || reserved.has(id))
-        ids.add(id)
-        path.node.attributes = path.node.attributes.filter(
-          (a) =>
-            !t.isJSXAttribute(a) ||
-            !t.isJSXIdentifier(a.name, { name: "data-digi-id" })
-        )
-        path.node.attributes.push(
-          t.jsxAttribute(t.jsxIdentifier("data-digi-id"), t.stringLiteral(id))
-        )
-        edits.changed = true
-      },
+    doc.files[file] = source.normalize((previous) => {
+      if (previous && /^ds-[a-z0-9-]+$/.test(previous) && !used.has(previous)) {
+        used.add(previous)
+        return previous
+      }
+      let id: string
+      do {
+        id = `ds-${sourceHash(file)}-${index++}`
+      } while (used.has(id) || reserved.has(id))
+      used.add(id)
+      return id
     })
-    if (edits.changed) doc.files[file] = generate(ast, {}, code).code
   }
   return siteDocumentSchema.parse(doc)
 }
-export const visualCss = (edits: VisualEdit[]) =>
+const visualCss = (edits: VisualEdit[]) =>
   [...edits]
     .sort(
       (a, b) =>
@@ -207,36 +94,25 @@ export const applyTextEdit = (
   id: string,
   text: string
 ) => {
-  const element = elementsOf(input).find((e) => e.id === id)
-  if (!element || element.text === null)
-    throw new Error(
-      "Ce contenu est dynamique. Utilisez le chat pour le modifier."
-    )
-  const doc = structuredClone(input)
-  if (element.file.endsWith(".vue")) { doc.files[element.file] = editVueText(doc.files[element.file], element.file, id, text); return siteDocumentSchema.parse(doc) }
-  const ast = parseSource(doc.files[element.file])
-  traverse(ast, {
-    JSXElement(path) {
-      if (idOf(path.node.openingElement) === id)
-        path.node.children = [
-          t.jsxText(
-            text
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/{/g, "&#123;")
-              .replace(/}/g, "&#125;")
-          ),
-        ]
-    },
-  })
-  doc.files[element.file] = generate(ast).code
-  return siteDocumentSchema.parse(doc)
+  const sources = analyzeSources(input)
+  for (const [file, source] of sources) {
+    const element = source.elements.find((item) => item.id === id)
+    if (!element) continue
+    if (element.text === null) break
+    const doc = structuredClone(input)
+    doc.files[file] = source.editText(id, text)
+    return siteDocumentSchema.parse(doc)
+  }
+  throw new Error(
+    "Ce contenu est dynamique. Utilisez le chat pour le modifier."
+  )
 }
 export const isEditableFile = (path: string) =>
   /^src\/.+\.(tsx?|jsx?|vue|css|json)$/.test(path) &&
   !path.startsWith("src/components/ui/") &&
-  !["src/base.css", "src/visual.css", "src/main.tsx", "src/main.ts"].includes(path)
+  !["src/base.css", "src/visual.css", "src/main.tsx", "src/main.ts"].includes(
+    path
+  )
 export const applySiteProposal = (input: SiteDocument, raw: unknown) => {
   const proposal = siteProposalSchema.parse(raw),
     doc = structuredClone(input)

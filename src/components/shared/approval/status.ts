@@ -1,5 +1,5 @@
 import type { ApprovalCardAnswer, ApprovalCardStatus } from "./types"
-import { answeredSchema } from "@/features/approval/schemas"
+import { answeredSchema } from "@/validators/approval"
 
 export const EMPTY_ANSWER: ApprovalCardAnswer = { selected: [], custom: "" }
 

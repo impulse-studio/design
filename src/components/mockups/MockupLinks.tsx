@@ -26,9 +26,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import type { MockupLinks as MockupLinksData } from "@/features/mockups/schemas"
-import { mockupLinksFormSchema } from "@/features/mockups/schemas"
-import { useOrpc } from "@/lib/use-orpc"
+import type { MockupLinks as MockupLinksData } from "@/validators/mockups"
+import { mockupLinksFormSchema } from "@/validators/mockups"
+import { useOrpc } from "@/server/use-orpc"
 
 const services = [
   { field: "notionUrl", label: "Notion", icon: RiNotionFill },
@@ -111,7 +111,9 @@ export function MockupLinks({
   return (
     <div
       className={
-        compact ? "flex shrink-0 items-center gap-0.5" : "mockup-link-group inline-flex min-w-0 items-center gap-1"
+        compact
+          ? "flex shrink-0 items-center gap-0.5"
+          : "mockup-link-group inline-flex min-w-0 items-center gap-1"
       }
       role="group"
       aria-label="Liens de référence"
@@ -126,7 +128,7 @@ export function MockupLinks({
             className={
               compact
                 ? "flex size-7 min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground md:min-h-7 md:min-w-7"
-                : "mockup-link-chip inline-flex min-w-0 max-w-[140px] h-[22px] items-center gap-1.25 overflow-hidden border border-border rounded-[5px] [padding:0_6px] text-muted-foreground text-[11px] leading-[1] [&_>_svg:first-child]:w-[13px] [&_>_svg:first-child]:h-[13px] [&_>_svg:first-child]:shrink-0 [&_>_span]:overflow-hidden [&_>_span]:text-ellipsis [&_>_span]:whitespace-nowrap [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:bg-accent [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:text-foreground [@media(pointer:coarse)]:min-h-[44px] [@media(pointer:coarse)]:min-w-[44px] [@media(pointer:coarse)]:px-2.25"
+                : "mockup-link-chip inline-flex h-[22px] max-w-[140px] min-w-0 items-center gap-1.25 overflow-hidden rounded-[5px] border border-border [padding:0_6px] text-[11px] leading-[1] text-muted-foreground [&_>_span]:overflow-hidden [&_>_span]:text-ellipsis [&_>_span]:whitespace-nowrap [&_>_svg:first-child]:h-[13px] [&_>_svg:first-child]:w-[13px] [&_>_svg:first-child]:shrink-0 [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:bg-accent [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:text-foreground [@media(pointer:coarse)]:min-h-[44px] [@media(pointer:coarse)]:min-w-[44px] [@media(pointer:coarse)]:px-2.25"
             }
             aria-label={`Ouvrir le lien ${label} dans un nouvel onglet`}
             title={url}
@@ -136,7 +138,7 @@ export function MockupLinks({
             {!compact && (
               <RiExternalLinkLine
                 aria-hidden="true"
-                className="mockup-link-external w-[10px] h-[10px] shrink-0 opacity-[0.6]"
+                className="mockup-link-external h-[10px] w-[10px] shrink-0 opacity-[0.6]"
               />
             )}
           </a>
@@ -174,7 +176,7 @@ export function MockupLinks({
                     ? actionLabel && activeServices.length === 0
                       ? "h-7 min-h-11 shrink-0 gap-1 px-2 text-muted-foreground md:min-h-7"
                       : "size-7 min-h-11 min-w-11 shrink-0 p-0 text-muted-foreground md:min-h-7 md:min-w-7"
-                    : "mockup-link-edit shrink-0 text-muted-foreground font-normal [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:text-foreground [@media(pointer:coarse)]:min-h-[44px] [@media(pointer:coarse)]:min-w-[44px]"
+                    : "mockup-link-edit shrink-0 font-normal text-muted-foreground [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:text-foreground [@media(pointer:coarse)]:min-h-[44px] [@media(pointer:coarse)]:min-w-[44px]"
                 }
               />
             }
@@ -201,7 +203,7 @@ export function MockupLinks({
                   void form.handleSubmit()
               }}
             >
-              <FieldGroup className="mockup-links-fields gap-[18px] [&_[data-slot=field]]:gap-1.75 [&_[data-slot=field-label]]:text-[13px] [&_[data-slot=field-description]]:text-[12px]">
+              <FieldGroup className="mockup-links-fields gap-[18px] [&_[data-slot=field-description]]:text-[12px] [&_[data-slot=field-label]]:text-[13px] [&_[data-slot=field]]:gap-1.75">
                 <form.Field name="notionUrl">
                   {(field) => {
                     const invalid =

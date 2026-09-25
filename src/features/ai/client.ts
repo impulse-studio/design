@@ -1,5 +1,5 @@
 import { canonicalDocument } from "./operations"
-import type { AiAction } from "./actions"
+import type { AiAction } from "@/validators/ai/actions"
 
 export const hashDocument = async (doc: unknown) => {
   const hash = await crypto.subtle.digest(

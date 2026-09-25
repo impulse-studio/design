@@ -1,10 +1,10 @@
-import type { ChatAnswers, ChatBlock } from "@/features/chat/types"
+import type { ChatAnswers, ChatBlock } from "@/validators/chat/messages"
 import { useEffect } from "react"
 import { revalidateLogic, useField, useForm } from "@tanstack/react-form"
 import {
   createQuestionnaireSchema,
   createQuestionAnswerSchema,
-} from "@/features/chat/question-schema"
+} from "@/validators/chat/questions"
 import { FieldError } from "@/components/ui/field"
 import { summarizeAnswers } from "@/features/chat/scenarios"
 import {
@@ -95,7 +95,7 @@ export function ChatQuestions({
             event.preventDefault()
             if (!form.state.isSubmitting) void form.handleSubmit()
           }}
-          className="chat-questionnaire gap-4 [&_[data-slot=questionnaire-title]]:text-[14px] [&_[data-slot=questionnaire-title]]:leading-[1.5] [&_[data-slot=questionnaire-description]]:text-[12px] [&_[data-slot=questionnaire-choices]]:gap-2 [&_[data-slot=questionnaire-choice]]:p-2.5 [&_[data-slot=questionnaire-choice]]:gap-2 [&_[data-slot=questionnaire-choice]]:text-[12px] [&_[data-slot=questionnaire-actions]]:gap-1 [&_[data-slot=questionnaire-actions]_button]:px-1.75 [&_[data-slot=questionnaire-actions]_button]:text-[11px]"
+          className="chat-questionnaire gap-4 [&_[data-slot=questionnaire-actions]]:gap-1 [&_[data-slot=questionnaire-actions]_button]:px-1.75 [&_[data-slot=questionnaire-actions]_button]:text-[11px] [&_[data-slot=questionnaire-choice]]:gap-2 [&_[data-slot=questionnaire-choice]]:p-2.5 [&_[data-slot=questionnaire-choice]]:text-[12px] [&_[data-slot=questionnaire-choices]]:gap-2 [&_[data-slot=questionnaire-description]]:text-[12px] [&_[data-slot=questionnaire-title]]:text-[14px] [&_[data-slot=questionnaire-title]]:leading-[1.5]"
         >
           <QuestionnaireProgress>
             Question{" "}

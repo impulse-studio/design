@@ -1,27 +1,26 @@
+import {
+  inspectorFormSchema,
+  inspectorTextSchema,
+} from "@/validators/sites/forms"
 import { sourceElementName } from "@/features/sites/element-name"
 import { useMemo } from "react"
 import { useForm } from "@tanstack/react-form"
-import { z } from "zod"
+
 import { OptionSelect } from "@/components/shared/OptionSelect"
 import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { SiteInspectorSection } from "./InspectorSection"
-import { styleValueSchema, visualEditSchema } from "@/features/sites/schema"
+import { visualEditSchema } from "@/validators/sites/document"
 import type {
   Breakpoint,
   SiteChange,
   SiteDocument,
   StyleProperty,
-} from "@/features/sites/schema"
+} from "@/validators/sites/document"
 import type { SourceElement } from "@/features/sites/source"
 
-const formSchema = z.object({
-  styles: z.record(z.string(), styleValueSchema),
-  text: z.string().max(10000),
-})
-const textSchema = z.string().max(10000)
 const labels: Record<StyleProperty, string> = {
   padding: "Padding uniforme",
   paddingTop: "Padding haut",
@@ -184,7 +183,8 @@ export function SiteInspector({
     }
     for (const visualEdit of doc.visual) {
       for (const [name, value] of Object.entries(visualEdit.styles)) {
-        if (name.startsWith("--")) variables.set(name, value)
+        if (name.startsWith("--") && value !== undefined)
+          variables.set(name, value)
       }
     }
     return [...variables.entries()]
@@ -201,10 +201,10 @@ export function SiteInspector({
   ) as Record<string, string>
   const form = useForm({
     defaultValues: { styles: savedStyles, text: element?.text ?? "" },
-    validators: { onSubmit: formSchema },
+    validators: { onSubmit: inspectorFormSchema },
     onSubmit: async ({ value }) => {
       if (!element) return
-      const parsed = formSchema.parse(value)
+      const parsed = inspectorFormSchema.parse(value)
       const edit = visualEditSchema.parse({
         id: element.id,
         breakpoint,
@@ -446,7 +446,9 @@ export function SiteInspector({
                   variant="outline"
                   disabled={busy || !canEdit}
                   onClick={() => {
-                    const text = textSchema.parse(form.state.values.text)
+                    const text = inspectorTextSchema.parse(
+                      form.state.values.text
+                    )
                     void onEdit({ type: "text", id: element.id, text })
                   }}
                 >

@@ -1,19 +1,11 @@
-import { z } from "zod"
-import {
-  frameSchema,
-  nodeSchema,
-  findNode,
-  validateDocument,
-} from "@digit-ai-studio/shared"
+import { clipboardSchema } from "@/validators/editor"
+
+import { findNode, validateDocument } from "@digit-ai-studio/shared"
 import type { Editor } from "./store"
 import { library } from "./library"
 import { framesOf } from "./document"
 import { freshClone, topSelected } from "./tree"
 
-const schema = z.object({
-  type: z.literal("digit-nodes"),
-  nodes: z.array(z.union([frameSchema, nodeSchema])),
-})
 let fallback = ""
 export const copySelection = async (editor: Editor) => {
   const state = editor.state.get()
@@ -35,7 +27,7 @@ export const pasteSelection = async (editor: Editor) => {
     /* The in-app clipboard works without permission. */
   }
   try {
-    const parsed = schema.safeParse(JSON.parse(text))
+    const parsed = clipboardSchema.safeParse(JSON.parse(text))
     if (!parsed.success) return
     editor.begin()
     for (const node of parsed.data.nodes) {

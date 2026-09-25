@@ -6,6 +6,8 @@ import { getSiteHistoryHandler } from "@/server/routers/sites/queries/get-histor
 import { getSiteVersionHandler } from "@/server/routers/sites/queries/get-version"
 import { listPendingSiteProposalsHandler } from "@/server/routers/sites/queries/list-pending-proposals"
 
+import { scaffoldSiteHandler } from "./mutations/scaffold"
+
 export const sitesRouter = base.router({
   get: getSiteHandler.route({ method: "GET" }),
   getHistory: getSiteHistoryHandler.route({ method: "GET" }),
@@ -13,6 +15,7 @@ export const sitesRouter = base.router({
   listPendingProposals: listPendingSiteProposalsHandler.route({
     method: "GET",
   }),
+  scaffold: scaffoldSiteHandler.route({ method: "POST" }),
   create: createSiteHandler.route({ method: "POST" }),
   change: changeSiteHandler.route({ method: "POST" }),
 })

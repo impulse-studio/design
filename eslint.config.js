@@ -39,8 +39,6 @@ export default [
       "public/renderer/**",
       "renderer/vendor/**",
       "renderer/src/back/**",
-      "renderer/src/registry.generated.ts",
-      "src/generated/**",
     ],
   },
 ]

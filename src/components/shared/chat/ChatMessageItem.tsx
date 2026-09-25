@@ -1,4 +1,5 @@
-import type { ChatCallbacks, ChatMessage } from "@/features/chat/types"
+import type { ChatCallbacks } from "@/features/chat/types"
+import type { ChatMessage } from "@/validators/chat/messages"
 import { CHAT_EFFORTS, modelLabel } from "@/features/chat/catalog"
 import { Message, MessageContent, MessageHeader } from "@/components/ui/message"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
@@ -28,7 +29,10 @@ export function ChatMessageItem({
   const terminal =
     !message.status || ["complete", "stopped", "error"].includes(message.status)
   return (
-    <Message align={user ? "end" : "start"} className="chat-turn text-[12px] [&_[data-slot=card]]:min-w-0 [&_[data-slot=card-content]]:px-2.5 [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=message-content]]:min-w-0 [&_[data-slot=bubble]]:max-w-full [&_[data-slot=marker]]:text-[11px]">
+    <Message
+      align={user ? "end" : "start"}
+      className="chat-turn text-[12px] [&_[data-slot=badge]]:whitespace-normal [&_[data-slot=bubble]]:max-w-full [&_[data-slot=card-content]]:px-2.5 [&_[data-slot=card]]:min-w-0 [&_[data-slot=marker]]:text-[11px] [&_[data-slot=message-content]]:min-w-0"
+    >
       <MessageContent>
         <MessageHeader className="flex-col items-start gap-1 px-0">
           <span>{user ? "Vous" : "Assistant"}</span>
@@ -76,7 +80,9 @@ export function ChatMessageItem({
           <>
             {message.status === "error" && (
               <Alert variant="destructive">
-                <AlertTitle>Interruption simulée</AlertTitle>
+                <AlertTitle>
+                  {message.errorTitle ?? "La génération a échoué"}
+                </AlertTitle>
               </Alert>
             )}
             <StreamingResponse

@@ -1,6 +1,6 @@
 import type { DragEvent, KeyboardEvent, ReactNode } from "react"
 
-export type SidebarResourceKind = "folder" | "project" | "file" | "bookmark"
+type SidebarResourceKind = "folder" | "project" | "file" | "bookmark"
 
 export interface SidebarResource {
   id: string
@@ -31,7 +31,7 @@ export interface SidebarResourceMoveCommands {
   out?: () => void
 }
 
-export interface SidebarResourceMenuControls {
+interface SidebarResourceMenuControls {
   close: () => void
   rename: () => void
   moves: SidebarResourceMoveCommands

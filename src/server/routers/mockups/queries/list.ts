@@ -1,17 +1,13 @@
-import {
-  findActiveTeam,
-  listTeamsForUser,
-} from "@/features/teams/repository.server"
+import { activeTeamMiddleware } from "@/server/middleware/active-team.middleware"
+import { listTeamsForUser } from "@/features/teams/repository.server"
 import { canEditMockups } from "@/features/teams/permissions"
 import { protectedProcedure } from "@/server/procedure/protected.procedure"
 import { listRecords } from "@/features/mockups/repository.server"
 
-export const listMockupsHandler = protectedProcedure.handler(
-  async ({ context, errors }) => {
-    const team = await findActiveTeam(
-      context.user.id,
-      context.user.activeOrganizationId
-    )
+export const listMockupsHandler = protectedProcedure
+  .use(activeTeamMiddleware)
+  .handler(async ({ context, errors }) => {
+    const team = context.team
     if (!team) throw errors.TEAM_REQUIRED()
 
     const teams = await listTeamsForUser(context.user.id)
@@ -33,5 +29,4 @@ export const listMockupsHandler = protectedProcedure.handler(
           "La base de données est indisponible. Démarrez PostgreSQL puis réessayez.",
       }
     }
-  }
-)
+  })

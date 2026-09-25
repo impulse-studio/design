@@ -6,7 +6,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator"
 import { eq } from "drizzle-orm"
 import * as schema from "@/db/schema"
 import { createRecord, loadRecord } from "@/features/mockups/repository.server"
-import { createSiteDocument } from "./template"
+import { createSiteDocument } from "./document.fixture"
 import { applySiteProposal, elementsOf } from "./source"
 import {
   saveSiteChange,
@@ -83,7 +83,7 @@ describe("persistent React site revisions", () => {
     expect(updated.doc.files["src/visual.css"]).toContain("12px")
     await expect(
       saveSiteChange(record.id, userId, 0, { type: "text", id, text: "Stale" })
-    ).rejects.toThrow("changé")
+    ).rejects.toMatchObject({ kind: "conflict" })
     expect((await loadRecord(record.id, userId)).doc).toEqual(record.doc)
     expect(
       (await siteHistory(record.id, userId)).map((v) => v.revision)
@@ -93,7 +93,7 @@ describe("persistent React site revisions", () => {
     await database.insert(schema.siteProjects).values({ id: other.id, doc })
     await expect(
       saveSiteChange(other.id, userId, 0, { type: "restore", versionId })
-    ).rejects.toThrow("introuvable")
+    ).rejects.toMatchObject({ kind: "invalid" })
     const restored = await saveSiteChange(record.id, userId, 1, {
       type: "restore",
       versionId,
@@ -110,7 +110,7 @@ describe("persistent React site revisions", () => {
         id,
         text: "Forbidden",
       })
-    ).rejects.toThrow("lecture seule")
+    ).rejects.toMatchObject({ kind: "forbidden" })
     await expect(getSiteProposals(record.id, "not-a-member")).rejects.toThrow()
     await database
       .update(schema.member)

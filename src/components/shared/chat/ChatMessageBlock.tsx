@@ -1,4 +1,5 @@
-import type { ChatBlock, ChatCallbacks } from "@/features/chat/types"
+import type { ChatCallbacks } from "@/features/chat/types"
+import type { ChatBlock } from "@/validators/chat/messages"
 import { ThinkingReasoning } from "@/components/shared/ThinkingReasoning"
 import { AgentActivity } from "@/components/shared/agent-activity/AgentActivity"
 import { TodoList } from "@/components/shared/todo-list/TodoList"

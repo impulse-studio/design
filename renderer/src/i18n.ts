@@ -8,7 +8,7 @@ const messages: Record<string, string> = {
   EVENT_MENU_PRODUCT_CHANGES_CTA: "Nouveautés",
 }
 
-export function t(key: string): string {
+function t(key: string): string {
   return messages[key] ?? key
 }
 

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import type { Color } from "@digit-ai-studio/shared"
 import { RiDropperLine } from "@remixicon/react"
-import { useEditSession } from "./edit-session"
 import {
   clamp,
   colorCss,
@@ -19,6 +18,8 @@ import { SelectField } from "./SelectField"
 import { NumberInput } from "./NumberInput"
 import { ColorCodeInput } from "./ColorCodeInput"
 import { SearchField } from "@/components/shared/SearchField"
+import { usePointerEditGesture } from "./use-pointer-edit-gesture"
+import { useContinuousEdit } from "./use-continuous-edit"
 
 const FORMAT_OPTIONS: { value: ColorFormat; label: string }[] = [
   { value: "hex", label: "Hex" },
@@ -58,8 +59,7 @@ export function ColorPicker({
   swatchesLabel?: string
   onEyeDropperUnavailable?: () => void
 }) {
-  const editor = useEditSession(),
-    rgba = resolveColor(value, tokens),
+  const rgba = resolveColor(value, tokens),
     hsv = rgbToHsv(rgba)
   const [hue, setHue] = useState(hsv.h),
     [format, setFormat] = useState<ColorFormat>("hex"),
@@ -88,6 +88,14 @@ export function ColorPicker({
       1 - (event.clientY - rect.y) / rect.height
     )
   }
+  const planeGesture = usePointerEditGesture<HTMLDivElement>({
+    onBegin: (event) => {
+      event.currentTarget.focus()
+      pick(event)
+    },
+    onMove: pick,
+  })
+  const sliderGesture = useContinuousEdit()
   const sample = async () => {
     const picker = (
       window as unknown as {
@@ -125,20 +133,11 @@ export function ColorPicker({
           aria-valuetext={`Saturation ${Math.round(hsv.s * 100)} %, luminosité ${Math.round(hsv.v * 100)} %`}
           tabIndex={0}
           style={{ backgroundColor: `hsl(${hue} 100% 50%)` }}
-          onPointerDown={(event) => {
-            if (event.button !== 0) return
-            event.preventDefault()
-            event.currentTarget.focus()
-            editor.begin()
-            event.currentTarget.setPointerCapture(event.pointerId)
-            pick(event)
-          }}
-          onPointerMove={(event) => {
-            if (event.currentTarget.hasPointerCapture(event.pointerId))
-              pick(event)
-          }}
-          onPointerUp={editor.commit}
-          onPointerCancel={editor.cancel}
+          onPointerDown={planeGesture.onPointerDown}
+          onPointerMove={planeGesture.onPointerMove}
+          onPointerUp={planeGesture.onPointerUp}
+          onPointerCancel={planeGesture.onPointerCancel}
+          onLostPointerCapture={planeGesture.onLostPointerCapture}
           onKeyDown={(event) => {
             const direction = PLANE_KEYS[event.key]
             if (!direction) return
@@ -174,12 +173,13 @@ export function ColorPicker({
               min={0}
               max={359}
               onValueChange={(next) => {
-                editor.begin()
-                const h = Array.isArray(next) ? next[0]! : next
-                setHue(h)
-                custom(hsvToRgb({ ...hsv, h }, rgba.a))
+                sliderGesture.update(() => {
+                  const h = Array.isArray(next) ? next[0]! : next
+                  setHue(h)
+                  custom(hsvToRgb({ ...hsv, h }, rgba.a))
+                })
               }}
-              onValueCommitted={editor.commit}
+              onValueCommitted={sliderGesture.commit}
             />
             {alpha && (
               <Slider
@@ -193,10 +193,13 @@ export function ColorPicker({
                 thumbProps={{ "aria-label": "Opacité de la couleur" }}
                 value={[Math.round(rgba.a * 100)]}
                 onValueChange={(next) => {
-                  editor.begin()
-                  onAlphaChange((Array.isArray(next) ? next[0]! : next) / 100)
+                  sliderGesture.update(() =>
+                    onAlphaChange(
+                      (Array.isArray(next) ? next[0]! : next) / 100
+                    )
+                  )
                 }}
-                onValueCommitted={editor.commit}
+                onValueCommitted={sliderGesture.commit}
               />
             )}
           </div>

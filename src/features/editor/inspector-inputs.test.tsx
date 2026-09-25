@@ -293,3 +293,25 @@ it("does not overwrite mixed JSON on focus/blur and cancels a JSON edit with Esc
   expect((field as HTMLTextAreaElement).value).toBe("")
   expect(editor.state.get().transaction).toBeNull()
 })
+
+it("accepts null as a valid JSON component property", () => {
+  const editor = setup()
+  const change = vi.fn()
+  const view = render(
+    <EditorProvider editor={editor}>
+      <ComponentPropField
+        prop={{ name: "data", type: "unknown", required: false }}
+        value={{ title: "Test" }}
+        onChange={change}
+      />
+    </EditorProvider>
+  )
+  const field = view.getByRole("textbox", { name: "data · JSON" })
+  fireEvent.focus(field)
+  fireEvent.change(field, { target: { value: "null" } })
+  fireEvent.blur(field)
+
+  expect(change).toHaveBeenCalledWith(null)
+  expect(field.getAttribute("aria-invalid")).toBe("false")
+  expect((field as HTMLTextAreaElement).value).toBe("null")
+})

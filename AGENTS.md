@@ -11,7 +11,7 @@
 ## Architecture des pages
 
 - Garder `src/routes/` dédié au routage TanStack : définition des routes, paramètres d’URL et chargement des données liés à la route. Une route doit déléguer son affichage à une page dédiée, pas contenir toute l’interface.
-- Organiser chaque page dans son propre dossier sous `src/pages/`. Le composant principal de la page se trouve à la racine de ce dossier ; les composants utilisés uniquement par cette page restent dans son sous-dossier `components/`.
+- Organiser chaque page dans son propre dossier sous `src/pages/`. Le composant principal de la page se trouve dans `page.tsx` à la racine de ce dossier ; les composants utilisés uniquement par cette page restent dans son sous-dossier `components/`.
 - Placer les composants génériques réutilisés entre plusieurs pages dans `src/components/shared/`. Pour un composant global lié à un domaine précis, utiliser un dossier dédié sous `src/components/<domaine>/` (par exemple `src/components/workspace/`). Garder `src/components/ui/` pour les primitives UI générées ou gérées par shadcn/ui.
 - Regrouper la logique métier réutilisée par plusieurs pages dans `src/features/<domaine>/`. Éviter de dupliquer cette logique dans les pages ou les composants.
 - Ne créer des sous-dossiers (`hooks/`, `lib/`, `types/`, etc.) que lorsqu’ils contiennent effectivement plusieurs éléments qui le justifient ; garder une arborescence simple et prévisible.
@@ -45,6 +45,16 @@ src/
     <domaine>/                # logique métier partagée du domaine
 ```
 
+## Schémas, serveur et contrats
+
+- Organiser les tables dans `src/db/schema/<domaine>/schema.ts`. Mettre les types de persistance effectivement utilisés dans `types.ts`, dérivés de `$inferSelect` / `$inferInsert`. L’index central conserve l’import public `@/db/schema` ; les références entre tables utilisent directement le module de leur domaine.
+- Dériver les données consommées par l’interface de `RouterOutputs` et les entrées RPC de `RouterInputs`, exposés par `src/server/types.ts`. Placer les alias utiles dans `features/<domaine>/types.ts`. Les repositories et services utilisent les types de persistance et les entrées Zod, afin que les types du routeur restent en aval.
+- Garder les routeurs comme assemblages de handlers `queries/` et `mutations/`. Les handlers adaptent les erreurs et le contexte RPC ; les services orchestrent le métier et les transactions ; les repositories portent les requêtes Drizzle. Passer la transaction aux opérations de persistance qui doivent être atomiques.
+- Résoudre le contexte d’équipe commun dans le middleware dédié après la validation d’entrée. Garder les décisions de permission et les erreurs propres à chaque opération explicites.
+- Générer les UUID applicatifs avec `import { v4 as uuid } from "uuid"`. Conserver les formats d’identifiants existants et les primitives cryptographiques dédiées aux signatures et secrets.
+- Garder les validateurs importables côté navigateur et serveur. Utiliser des imports `type` pour les contrats ; conserver les frontières `.server.ts` / `.client.ts` pour le code d’exécution.
+- Ranger les scripts dans `scripts/development`, `scripts/libraries`, `scripts/generation` ou `scripts/verification` selon leur usage. Lors d’un déplacement, mettre à jour les commandes, les chemins calculés depuis `import.meta.url` et les références documentées.
+
 ## Interface avec shadcn/ui
 
 - Utiliser shadcn/ui comme bibliothèque de composants d’interface du projet. Pour les boutons, champs, menus, fenêtres modales et autres contrôles, utiliser le composant shadcn correspondant au lieu de créer une primitive maison ou d’introduire une autre bibliothèque UI.
@@ -55,7 +65,7 @@ src/
 ## Formulaires et validation
 
 - Utiliser TanStack Form (`@tanstack/react-form`) pour gérer les valeurs, les erreurs et la soumission des formulaires, avec des schémas Zod comme validateurs.
-- Définir les schémas réutilisables dans `src/features/<domaine>/` et en déduire les types avec `z.input` / `z.infer`. Réutiliser les règles côté client et côté serveur ; toute entrée externe doit être validée avec Zod.
+- Définir les schémas applicatifs dans `src/validators/<domaine>.ts`, ou dans un dossier de domaine si plusieurs contrats le justifient, et en déduire les types avec `z.input` / `z.infer`. Conserver les contrats Studio/renderer dans le package partagé. Réutiliser les règles côté client et côté serveur ; toute entrée externe doit être validée avec Zod.
 - Appliquer explicitement `schema.parse(value)` lors de la soumission pour récupérer les transformations Zod (trim, normalisation, etc.) : TanStack Form valide les valeurs sans les transformer.
 - Composer les champs avec les primitives shadcn et afficher les erreurs près des contrôles avec `aria-invalid` et `aria-describedby`. Préserver les valeurs après un échec et bloquer les doubles envois.
 

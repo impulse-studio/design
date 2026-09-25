@@ -1,5 +1,5 @@
 import { RiCloseLine, RiFileTextLine, RiDownloadLine } from "@remixicon/react"
-import type { ChatAttachment } from "@/features/chat/types"
+import type { ChatAttachment } from "@/validators/chat/messages"
 import { attachmentIsImage, attachmentSize } from "@/features/chat/attachments"
 import {
   Attachment,

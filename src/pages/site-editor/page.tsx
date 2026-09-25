@@ -9,12 +9,20 @@ export function SiteEditorPage(props: SiteEditorPageProps) {
   const page = useSiteEditorPage(props)
 
   return (
-    <div className="site-editor h-[100dvh] flex flex-col bg-background overflow-hidden">
+    <div className="site-editor flex h-[100dvh] flex-col overflow-hidden bg-background motion-reduce:**:animate-none! motion-reduce:**:transition-none!">
       <SiteToolbar {...page.toolbar} />
-      <div className="flex min-h-0 flex-1 max-[1100px]:overflow-auto">
-        <SiteEditorSidebar {...page.sidebar} />
+      <div className="flex min-h-0 flex-1 overflow-auto">
+        <div
+          id="site-sidebar"
+          hidden={!page.sidebarVisible}
+          className="flex shrink-0 [&[hidden]]:hidden"
+        >
+          <SiteEditorSidebar {...page.sidebar} />
+        </div>
         <SiteEditorWorkspace {...page.workspace} />
-        <SiteEditorInspectorPanel {...page.inspector} />
+        {page.inspector.mode !== "navigation" && (
+          <SiteEditorInspectorPanel {...page.inspector} />
+        )}
       </div>
     </div>
   )

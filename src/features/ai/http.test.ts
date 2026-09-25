@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { handleAiGet, handleAiPost } from "./http.server"
+import { AiFailure } from "./errors"
 
 const mocks = vi.hoisted(() => ({
   user: vi.fn(),
@@ -10,6 +11,23 @@ const mocks = vi.hoisted(() => ({
 vi.mock("./access.server", () => ({
   studioAiAccess: { requireUser: mocks.user },
 }))
+vi.mock("@/features/auth/browser-policy.server", () => {
+  class BrowserPolicyError extends Error {
+    kind = "origin" as const
+  }
+  return {
+    BrowserPolicyError,
+    authorizeBrowserRequest: async (request: Request) => {
+      if (
+        request.method === "POST" &&
+        request.headers.get("origin") !== "https://studio.test"
+      )
+        throw new BrowserPolicyError("Origine de la requête non autorisée.")
+      const result = await mocks.user()
+      return { user: { id: result.userId } }
+    },
+  }
+})
 vi.mock("./repository.server", () => ({
   getSnapshot: mocks.snapshot,
   createConversation: vi.fn(),
@@ -125,5 +143,23 @@ describe("frontière HTTP IA", () => {
       })
     )
     expect(injected.status).toBe(400)
+  })
+
+  it("traduit la nature d'un échec sans analyser son message", async () => {
+    mocks.stop.mockRejectedValueOnce(
+      new AiFailure("limit", "Une formulation amenée à changer")
+    )
+    const response = await handleAiPost(
+      new Request("https://studio.test/api/ai/action", {
+        method: "POST",
+        headers: {
+          origin: "https://studio.test",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ action: "stop", runId: "run" }),
+      })
+    )
+    expect(response.status).toBe(429)
+    await expect(response.json()).resolves.toMatchObject({ kind: "limit" })
   })
 })

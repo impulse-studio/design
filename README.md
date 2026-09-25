@@ -1,4 +1,4 @@
-# Digit AI Studio
+# design
 
 Éditeur de maquettes React / TypeScript avec shadcn/ui (Base UI) et TanStack Start. Les frames sont rendues par React dans une iframe ; le shell de communication reste en Vue. La sync génère `@digit-ai-studio/digicomponents-react` depuis les rendus SSR de la bibliothèque Orchestration et copie ses styles. Le studio est disponible sur [localhost:3402](http://localhost:3402), le catalogue React sur [/design-system](http://localhost:3402/design-system).
 
@@ -17,16 +17,18 @@ Avant le premier démarrage, renseigner `BETTER_AUTH_SECRET` et `DEV_AUTH_PASSWO
 
 Le studio `/` liste et crée les maquettes de l’équipe active ; `/m/$mockupId` ouvre leur éditeur. Chaque nouvelle maquette contient une frame Desktop vide de 1440 × 900. `pnpm dev` construit le renderer puis le surveille pendant le développement du studio. Le catalogue et les maquettes nécessitent une session.
 
+`pnpm sync:digicomponents --orchestration ../orchestration` prépare les sorties Digi dans un dossier temporaire et vérifie ensemble le manifest, les snapshots et les exports. Le processus lancé par `pnpm dev` se suspend pendant la publication puis redémarre une seule fois. Une publication interrompue est restaurée au prochain démarrage ou à la prochaine synchronisation. Les tests de ce mécanisme se lancent avec `node --test scripts/libraries/sync-publication.test.mjs` ; une régénération réelle nécessite le checkout Orchestration.
+
 ## Comptes, équipes et permissions
 
 Better Auth gère les comptes, sessions et organisations. Dans l’interface, une organisation correspond à une **équipe**. `/teams` permet de créer et choisir une équipe, la renommer, inviter des membres, changer leurs rôles, les retirer et quitter une équipe. Les invitations sont réservées à `@digitevent.com`, expirent après 7 jours et apparaissent à leur destinataire après connexion. Aucun email n’est envoyé automatiquement.
 
-| Rôle | Maquettes | Membres | Équipe |
-| --- | --- | --- | --- |
-| Propriétaire | Lecture, création, édition | Invitations, retrait, tous les rôles | Renommer, nommer d’autres propriétaires |
-| Administrateur | Lecture, création, édition | Invitations, retrait, rôles hors propriétaires | Renommer |
-| Éditeur | Lecture, création, édition | Consultation | Consultation |
-| Lecteur | Lecture et Dev Mode | Consultation | Consultation |
+| Rôle           | Maquettes                  | Membres                                        | Équipe                                  |
+| -------------- | -------------------------- | ---------------------------------------------- | --------------------------------------- |
+| Propriétaire   | Lecture, création, édition | Invitations, retrait, tous les rôles           | Renommer, nommer d’autres propriétaires |
+| Administrateur | Lecture, création, édition | Invitations, retrait, rôles hors propriétaires | Renommer                                |
+| Éditeur        | Lecture, création, édition | Consultation                                   | Consultation                            |
+| Lecteur        | Lecture et Dev Mode        | Consultation                                   | Consultation                            |
 
 Le dernier propriétaire ne peut pas quitter son équipe ni perdre son rôle. Les maquettes sont filtrées par appartenance à l’équipe à chaque lecture et écriture serveur. Un changement de rôle ou un retrait s’applique aux requêtes suivantes, même si une page est déjà ouverte. Les lecteurs restent en inspection et n’activent pas l’autosauvegarde.
 
@@ -66,7 +68,7 @@ Importer les primitives depuis `@/components/ui/` et les compositions depuis `@/
 import { Button } from "@/components/ui/button"
 import { StatusIcon } from "@/components/shared/StatusIcon"
 
-<Button variant="outline" size="sm">
+;<Button variant="outline" size="sm">
   <StatusIcon status="in-progress" />
   En cours
 </Button>
@@ -121,19 +123,23 @@ docker compose down
 Pour repartir de zéro, supprime aussi le volume avec `docker compose down -v` ; cette commande efface les données locales.
 
 Le port local par défaut est `5433` (5432 étant déjà occupé sur cette machine). L’URL de connexion est `postgresql://digit:digit_dev@localhost:5433/digit_ai_studio` (`DATABASE_URL` dans `.env`). Change `POSTGRES_PORT` si besoin.
+
 # Connexion Claude Code
 
 Pour modifier les maquettes du site depuis Claude Code sur un PC, voir [la configuration MCP](docs/CLAUDE_CODE_MCP.md).
 
-
 ## Sites React + Vite
 
-Le bouton **Nouveau site** crée un projet minimal React + Vite + TypeScript avec une page blanche dans `src/App.tsx`, sans thème, routeur ni contenu de démonstration. **Nouvelle maquette** conserve le renderer historique. Les fichiers du projet sont stockés en base, avec une révision et des versions restaurables ; les propositions IA obsolètes sont refusées.
+Le bouton **Nouveau site** crée un projet React ou Vue avec Vite et TypeScript, à partir du starter officiel et de sa démonstration. **Nouvelle maquette** conserve le renderer historique. Les fichiers du projet sont stockés en base, avec une révision et des versions restaurables ; les propositions IA obsolètes sont refusées.
 
 Dans l’éditeur, **Fichiers** permet de parcourir les sources et assets et de consulter le code. **Navigation** utilise le site ; **Édition** sélectionne les éléments pour modifier le texte statique et les styles, avec des portées desktop/tablette/mobile. Les sélecteurs utilisent shadcn. Les valeurs dynamiques et modifications structurelles passent par le chat.
 
-Après installation, appliquer les migrations avec `pnpm db:migrate`. `pnpm prepare:sites` prépare le template et les dépendances autorisées de la compilation navigateur ; cette commande est aussi incluse dans le démarrage du Studio et le build. Le chat utilise la configuration IA/Trigger existante décrite dans `docs/AI_CHAT.md`.
+Après installation, appliquer les migrations avec `pnpm db:migrate`. Les sites sont installés, compilés et exécutés localement dans le navigateur avec WebContainers. Le chat utilise la configuration IA/Trigger existante décrite dans `docs/AI_CHAT.md`.
 
-**Exporter ZIP** fournit un projet autonome, ses éventuels assets, son lockfile et un README d’installation/hébergement. Aucun pont de sélection du Studio n’est exporté. Le serveur d’hébergement doit rediriger les routes du site vers `index.html`. Pour vérifier une installation vierge et le build de l’export : `pnpm exec tsx scripts/verify-site-export.ts`.
+**Exporter ZIP** prépare et vérifie le projet dans un dossier WebContainer isolé, puis crée une archive avec ses assets, son `package-lock.json` et les instructions `npm ci`. Le scénario sélectionné est conservé. La progression et les erreurs sont affichées, un export échoué peut être relancé, et les deux derniers documents préparés sont gardés en cache pendant la session. Aucun pont de sélection du Studio n’est exporté. Le serveur d’hébergement doit rediriger les routes du site vers `index.html`. Pour vérifier une installation vierge et le build d’un ZIP téléchargé : `pnpm exec tsx scripts/verification/verify-site-export.ts /chemin/site.zip` (sans argument, le script génère et vérifie un nouveau projet React avec create-vite).
 
-Le socle généré se trouve dans `site-template/`. Il est copié à la création : sa mise à jour ne remplace pas les fichiers des projets existants. Les nouveaux sites contiennent uniquement React et React DOM comme dépendances applicatives. Le chat permet de construire le site progressivement depuis cette base, sans backend ni installation arbitraire de packages.
+Chaque nouveau site est généré côté serveur avec la [commande officielle Vite](https://vite.dev/guide/) : `npm create --yes vite@latest site -- --template react-ts --no-interactive --no-immediate` (ou `vue-ts`). Le serveur doit disposer de npm et accéder au registre npm. Les sources officielles sont enregistrées dans le projet ; aucun template local n’est conservé. Les dépendances sont ensuite installées dans le navigateur par WebContainers. Les projets existants conservent leurs fichiers.
+
+## Organisation du code
+
+Voir [l’architecture du Studio](docs/ARCHITECTURE.md) pour les schémas par domaine, les validateurs, les types dérivés des sorties oRPC et les responsabilités des services.

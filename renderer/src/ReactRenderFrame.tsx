@@ -10,8 +10,13 @@ import {
   color,
   length,
   selfLayoutStyle,
+  projectedElementAttributes,
+  projectedElementStyles,
+  resolveComponent,
+  visibleNodes,
 } from "@digit-ai-studio/shared"
 import { DigitComponentView } from "@digit-ai-studio/digicomponents-react"
+
 const camelCase = (name: string) =>
   name.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())
 const reactProperty = (name: string) => {
@@ -52,8 +57,7 @@ export function ReactRenderFrame({
       children: Node[],
       childDirection: "row" | "column" | "grid" = "column"
     ) =>
-      children
-        .filter((child) => !child.hidden)
+      visibleNodes(children)
         .map((child) => renderNode(child, childDirection))
     const wrap = (content: ReactNode, style?: CSSProperties) =>
       createElement(
@@ -65,20 +69,18 @@ export function ReactRenderFrame({
         },
         content
       )
-    const variant = node.type === "component" ? node.localVariant : undefined
+    const resolved = node.type === "component" ? resolveComponent(node) : null
     const styles = mergeStyles(
-      selfLayoutStyle(variant?.layout, direction) as CSSProperties,
-      selfLayoutStyle(node.layout, direction) as CSSProperties,
-      boxStyle(variant?.style) as CSSProperties,
-      boxStyle(node.style) as CSSProperties
+      selfLayoutStyle(resolved?.layout ?? node.layout, direction),
+      boxStyle(resolved?.style ?? node.style)
     )
     if (node.type === "component") {
       return createElement(DigitComponentView, {
         key: node.id,
         component: node.component,
-        props: { ...(node.localVariant?.props ?? {}), ...(node.props ?? {}) },
+        props: resolved!.props,
         nodeId: node.id,
-        text: node.text ?? node.localVariant?.text,
+        text: resolved!.text,
         slots: Object.fromEntries(
           Object.entries(node.slots ?? {}).map(([slot, children]) => [
             slot,
@@ -102,20 +104,16 @@ export function ReactRenderFrame({
         "nomodule", "novalidate", "open", "playsinline", "readonly",
         "required", "reversed", "selected",
       ])
-      for (const [key, value] of Object.entries(node.attributes ?? {}))
-        if (!/^on/i.test(key) && key.toLowerCase() !== "srcdoc" && key.toLowerCase() !== "style")
-          attributes[reactProperty(key)] =
-            booleanAttributes.has(key.toLowerCase()) && value !== false
-              ? true
-              : value
+      for (const [key, value] of Object.entries(projectedElementAttributes(node)))
+        attributes[reactProperty(key)] =
+          booleanAttributes.has(key.toLowerCase()) && value !== false
+            ? true
+            : value
       attributes.className = [node.className, attributes.className]
         .filter((value) => typeof value === "string" && value)
         .join(" ")
       attributes.style = mergeStyles(
-        cssProperties(node.inlineStyle ?? ""),
-        typeof node.attributes?.style === "string"
-          ? cssProperties(node.attributes.style)
-          : undefined,
+        ...projectedElementStyles(node).map(cssProperties),
         styles
       )
       const content = node.children.length
@@ -176,9 +174,9 @@ export function ReactRenderFrame({
 
   const frameStyle = mergeStyles(
     frame.autoLayout
-      ? (autoLayoutStyle(frame.autoLayout) as CSSProperties)
+      ? (autoLayoutStyle(frame.autoLayout))
       : undefined,
-    boxStyle(frame.style) as CSSProperties,
+    boxStyle(frame.style),
     {
       width: frame.width === "hug" ? "max-content" : `${frame.width}px`,
       height: frame.height === "hug" ? "auto" : `${frame.height}px`,

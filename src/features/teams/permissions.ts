@@ -1,5 +1,5 @@
 import { createAccessControl } from "better-auth/plugins/access"
-import { teamRoleSchema } from "./schemas"
+import { teamRoleSchema } from "@/validators/teams"
 import type { z } from "zod"
 import {
   adminAc,

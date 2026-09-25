@@ -1,11 +1,4 @@
-import type { PreviewRect } from "@/features/sites/bridge"
-
-export type SitePreviewTarget = {
-  id: string
-  domTag: string
-  sourceTag: string
-  rect: PreviewRect
-}
+import type { SitePreviewTarget } from "@/features/sites/use-preview-session"
 
 export function SitePreviewOverlay({
   hover,

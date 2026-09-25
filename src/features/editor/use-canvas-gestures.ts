@@ -16,8 +16,6 @@ import {
 } from "./gesture-transform"
 import type { EditorState } from "./types"
 
-export type { Guide } from "./canvas-runtime"
-
 type CanvasPointer = {
   clientX: number
   clientY: number

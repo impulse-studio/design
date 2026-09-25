@@ -1,26 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useOrpc } from "@/lib/use-orpc"
+import { useOrpc } from "@/server/use-orpc"
+import type { SiteChange, SiteDocument } from "@/validators/sites/document"
 import type {
-  SiteChange,
-  SiteDocument,
   SiteRecord,
   SiteVersion,
   PendingSiteProposal,
-} from "./schema"
+} from "@/features/sites/types"
 import { applySiteProposal, applyTextEdit, applyVisualEdit } from "./source"
-import { compileSite } from "./compile"
+import { syncSiteRuntime, validateSiteRuntime } from "./runtime"
+import { createSiteEditingSession } from "./editing-session"
 
 export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
   const [record, setRecord] = useState(initial),
     [history, setHistory] = useState<SiteVersion[]>([]),
     [busy, setBusy] = useState(false),
     [error, setError] = useState<string | null>(null)
-  const current = useRef(record),
-    locked = useRef(false),
-    undoStack = useRef<string[]>([]),
-    redoStack = useRef<string[]>([])
-  current.current = record
+  const session = useRef(createSiteEditingSession(initial)).current
   const queryClient = useQueryClient(),
     orpc = useOrpc(),
     { mutateAsync: save } = useMutation(orpc.sites.change.mutationOptions())
@@ -65,20 +61,15 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
     let disposed = false
     let loading = false
     const refresh = async () => {
-      if (locked.current || loading || document.visibilityState === "hidden")
+      if (session.locked || loading || document.visibilityState === "hidden")
         return
       loading = true
-      const before = current.current
+      const token = session.readToken()
       try {
         const result = await load()
-        // Le verrou peut changer pendant la requête réseau.
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (disposed || locked.current || current.current !== before) return
-        if (result.project && result.project.revision > before.revision) {
-          current.current = result.project
+        if (disposed) return
+        if (result.project && session.adoptRemote(token, result.project)) {
           setRecord(result.project)
-          undoStack.current = []
-          redoStack.current = []
           await refreshHistory()
         }
       } catch {
@@ -102,15 +93,12 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
     candidate: SiteDocument,
     summary?: string
   ) => {
-    if (locked.current) throw new Error("Une modification est en cours.")
-    if (!canEdit) throw new Error("Projet en lecture seule.")
-    locked.current = true
+    const before = session.beginWrite(canEdit)
     setBusy(true)
     setError(null)
-    const before = current.current
     try {
-      await compileSite(candidate)
-      if (current.current !== before)
+      await validateSiteRuntime(candidate)
+      if (session.record !== before)
         throw new Error("Le projet a changé pendant la compilation.")
       const previous = await versions()
       const result = await save({
@@ -126,21 +114,19 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
           queryKey: orpc.mockups.list.queryKey(),
         }),
       ])
-      current.current = result
+      const version = previous.find((v) => v.revision === before.revision)
+      if (summary === "history") session.completeHistoricalWrite(result)
+      else session.completeWrite(result, version?.id)
       setRecord(result)
-      if (summary !== "history") {
-        const version = previous.find((v) => v.revision === before.revision)
-        if (version) undoStack.current.push(version.id)
-        redoStack.current = []
-      }
       await refreshHistory()
     } catch (reason) {
+      void syncSiteRuntime(before.doc).catch(() => undefined)
       const message =
         reason instanceof Error ? reason.message : "Modification impossible."
       setError(message)
       throw reason
     } finally {
-      locked.current = false
+      if (session.locked) session.abortWrite()
       setBusy(false)
     }
   }
@@ -150,8 +136,8 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
     try {
       const candidate =
         change.type === "visual"
-          ? applyVisualEdit(current.current.doc, change.edit)
-          : applyTextEdit(current.current.doc, change.id, change.text)
+          ? applyVisualEdit(session.record.doc, change.edit)
+          : applyTextEdit(session.record.doc, change.id, change.text)
       await commit(change, candidate)
     } catch (reason) {
       setError(
@@ -165,19 +151,10 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
   ) => {
     try {
       const candidate = await readVersion(versionId),
-        latest = history.find((v) => v.revision === current.current.revision)
+        latest = history.find((v) => v.revision === session.record.revision)
       await commit({ type: "restore", versionId }, candidate, "history")
-      if (kind === "undo") {
-        undoStack.current.pop()
-        if (latest) redoStack.current.push(latest.id)
-      } else if (kind === "redo") {
-        redoStack.current.pop()
-        if (latest) undoStack.current.push(latest.id)
-      } else {
-        if (latest) undoStack.current.push(latest.id)
-        redoStack.current = []
-      }
-      setRecord({ ...current.current })
+      session.completeRestore(session.record, kind, latest?.id)
+      setRecord({ ...session.record })
     } catch (reason) {
       setError(
         reason instanceof Error ? reason.message : "Restauration impossible."
@@ -186,7 +163,13 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
   }
   return {
     saveFile: async (path: string, content: string) => {
-      await commit({type:"file",path,content},applySiteProposal(current.current.doc,{summary:`Modification de ${path}`,operations:[{type:"writeFile",path,content}]}))
+      await commit(
+        { type: "file", path, content },
+        applySiteProposal(session.record.doc, {
+          summary: `Modification de ${path}`,
+          operations: [{ type: "writeFile", path, content }],
+        })
+      )
     },
     record,
     history,
@@ -195,36 +178,34 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
     setError,
     edit,
     restore,
-    canUndo: undoStack.current.length > 0,
-    canRedo: redoStack.current.length > 0,
+    canUndo: session.canUndo,
+    canRedo: session.canRedo,
     undo: () => {
-      const id = undoStack.current.at(-1)
+      const id = session.historyTarget("undo")
       if (id) void restore(id, "undo")
     },
     redo: () => {
-      const id = redoStack.current.at(-1)
+      const id = session.historyTarget("redo")
       if (id) void restore(id, "redo")
     },
     reload: async () => {
-      if (locked.current) return
+      if (session.locked) return
+      const token = session.readToken()
       const result = await load()
-      if (result.project) {
+      if (result.project && session.reload(token, result.project)) {
         setRecord(result.project)
-        current.current = result.project
-        undoStack.current = []
-        redoStack.current = []
         setError(null)
         await refreshHistory()
       }
     },
     apply: async (proposal: PendingSiteProposal) => {
-      if (proposal.baseRevision !== current.current.revision)
+      if (proposal.baseRevision !== session.record.revision)
         throw new Error(
           "Le projet a changé pendant la génération. Demandez une nouvelle modification."
         )
       await commit(
         { type: "proposal", proposalId: proposal.id },
-        applySiteProposal(current.current.doc, proposal.input)
+        applySiteProposal(session.record.doc, proposal.input)
       )
     },
   }

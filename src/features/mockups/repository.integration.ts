@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm"
 import * as schema from "@/db/schema"
 import { emptyDocument } from "@/features/editor/document"
 import { applyMcpChanges } from "@/features/mcp/mockups.server"
-import { mockupStatusSchema } from "./status"
+import { mockupStatusSchema } from "@/validators/mockups"
 import {
   createRecord as createScopedRecord,
   loadRecord as loadScopedRecord,
@@ -42,14 +42,12 @@ beforeAll(async () => {
   database = drizzle(pool, { schema })
   await migrate(database, { migrationsFolder: "./drizzle" })
   await migrate(database, { migrationsFolder: "./drizzle" })
-  await database
-    .insert(schema.user)
-    .values({
-      id: userId,
-      name: "Test Owner",
-      email: "owner@digitevent.com",
-      emailVerified: true,
-    })
+  await database.insert(schema.user).values({
+    id: userId,
+    name: "Test Owner",
+    email: "owner@digitevent.com",
+    emailVerified: true,
+  })
   await database
     .insert(schema.organization)
     .values({ id: organizationId, name: "Test Team", slug: "test-team" })
@@ -77,12 +75,16 @@ describe("PostgreSQL migrations and revision protection", () => {
         },
       ],
     }
-    expect(await applyMcpChanges(userId, change, "https://studio.example.com")).toMatchObject({
+    expect(
+      await applyMcpChanges(userId, change, "https://studio.example.com")
+    ).toMatchObject({
       status: "saved",
       revision: 1,
     })
     expect((await loadRecord(row.id)).doc.pages[0].frames[0].width).toBe(1280)
-    expect(await applyMcpChanges(userId, change, "https://studio.example.com")).toEqual({
+    expect(
+      await applyMcpChanges(userId, change, "https://studio.example.com")
+    ).toEqual({
       status: "conflict",
       revision: 1,
     })

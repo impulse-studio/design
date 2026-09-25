@@ -37,7 +37,7 @@ booléenne, fond et largeur sont transmis au renderer Vue sans attendre le serve
 
 ```sh
 pnpm build:renderer
-node scripts/canvas-benchmark.mjs
+node scripts/verification/canvas-benchmark.mjs
 ```
 
 Ouvrir `http://127.0.0.1:3403/`, attendre le chargement des six frames puis cliquer

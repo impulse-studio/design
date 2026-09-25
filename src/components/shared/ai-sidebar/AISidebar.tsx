@@ -1,7 +1,15 @@
 "use client"
 // Adapted from beui.dev/components/agents/ai-sidebar.
 import { AnimatePresence } from "motion/react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react"
+import { createResourceTree } from "./tree"
 import type { KeyboardEvent } from "react"
 import { cn } from "@/lib/utils"
 import { ResourceRow } from "./ResourceRow"
@@ -10,12 +18,9 @@ import {
   flattenResources,
   findResource,
   containsResource,
-  moveResource,
-  renameResource,
 } from "./resources"
 import type {
   AISidebarProps,
-  SidebarResource,
   SidebarResourceMove,
   SidebarResourceMoveCommands,
   FlatResource,
@@ -38,7 +43,7 @@ export function AISidebar({
   ariaLabel = "Ressources",
   className,
 }: AISidebarProps) {
-  const [internalItems, setInternalItems] = useState(items ?? defaultItems)
+  const [tree] = useState(() => createResourceTree(items ?? defaultItems))
   const [internalActiveId, setInternalActiveId] = useState(defaultActiveId)
   const [expandedIds, setExpandedIds] = useState(
     () => new Set(defaultExpandedIds)
@@ -53,12 +58,17 @@ export function AISidebar({
   const [announcement, setAnnouncement] = useState("")
   const rowRefs = useRef(new Map<string, HTMLDivElement>())
   const movePendingRef = useRef(false)
-  const renderedItems = internalItems
+  const renderedItems = useSyncExternalStore(tree.subscribe, tree.get, tree.get)
   const selectedId = activeId !== undefined ? activeId : internalActiveId
 
   useEffect(() => {
-    if (items) setInternalItems(items)
-  }, [items])
+    if (items) tree.replace(items)
+  }, [items, tree])
+
+  useEffect(
+    () => tree.subscribe(() => onItemsChange?.(tree.get())),
+    [tree, onItemsChange]
+  )
 
   const flat = useMemo(
     () => flattenResources(renderedItems, expandedIds),
@@ -90,26 +100,15 @@ export function AISidebar({
     return () => cancelAnimationFrame(frame)
   }, [menuOpenId])
 
-  const updateItems = useCallback(
-    (next: SidebarResource[]) => {
-      setInternalItems(next)
-      onItemsChange?.(next)
-    },
-    [onItemsChange]
-  )
-
   const performMove = useCallback(
     async (move: SidebarResourceMove) => {
       if (movePendingRef.current) {
         setAnnouncement("Attendez la fin du déplacement en cours.")
         return
       }
-      const before = renderedItems
-      const next = moveResource(before, move)
-      if (!next || next === before) return
+      const before = tree.get()
 
       movePendingRef.current = true
-      updateItems(next)
       setDropTarget(null)
       setDraggingId(null)
       const moved = findResource(before, move.itemId)
@@ -121,9 +120,8 @@ export function AISidebar({
       )
 
       try {
-        await onMove?.(move)
+        await tree.change({ type: "move", move }, () => onMove?.(move))
       } catch (error) {
-        updateItems(before)
         setAnnouncement(
           `Échec du déplacement. ${moved?.label ?? "L’élément"} a été restauré.`
         )
@@ -132,7 +130,7 @@ export function AISidebar({
         movePendingRef.current = false
       }
     },
-    [onMove, onMoveError, renderedItems, updateItems]
+    [onMove, onMoveError, tree]
   )
 
   const focusRow = useCallback((id: string) => {
@@ -283,7 +281,8 @@ export function AISidebar({
         moveModifier &&
         event.key === "ArrowRight" &&
         previous &&
-        canContain(previous.item)
+        canContain(previous.item) &&
+        previous.item.id !== row.parentId
       ) {
         event.preventDefault()
         setExpandedIds((current) => new Set(current).add(previous.item.id))
@@ -352,7 +351,7 @@ export function AISidebar({
           }
         }}
         className={cn(
-          "relative flex min-w-0 flex-col gap-0.5 [overflow-anchor:none] group-data-[state=collapsed]/sidebar:hidden",
+          "min-w-0 gap-0.5 relative flex flex-col [overflow-anchor:none] group-data-[state=collapsed]/sidebar:hidden",
           draggingId && "pb-9 select-none",
           className
         )}
@@ -380,12 +379,12 @@ export function AISidebar({
                 const trimmed = label.trim()
                 setRenamingId(null)
                 if (!trimmed || trimmed === row.item.label) return
-                const before = renderedItems
-                updateItems(renameResource(before, row.item.id, trimmed))
-                void Promise.resolve()
-                  .then(() => onRename?.(row.item, trimmed))
+                void tree
+                  .change(
+                    { type: "rename", id: row.item.id, label: trimmed },
+                    () => onRename?.(row.item, trimmed)
+                  )
                   .catch(() => {
-                    updateItems(before)
                     setAnnouncement(
                       `Échec du renommage. ${row.item.label} a été restauré.`
                     )
@@ -449,7 +448,7 @@ export function AISidebar({
           <div
             aria-hidden="true"
             data-active={dropTarget?.id === null || undefined}
-            className="absolute inset-x-1 bottom-0 flex h-8 items-center justify-center rounded-lg border border-dashed border-border text-[10px] text-muted-foreground data-[active=true]:border-primary/50 data-[active=true]:bg-muted data-[active=true]:text-foreground"
+            className="inset-x-1 bottom-0 h-8 absolute flex items-center justify-center rounded-lg border border-dashed border-border text-[10px] text-muted-foreground data-[active=true]:border-primary/50 data-[active=true]:bg-muted data-[active=true]:text-foreground"
           >
             Déplacer à la racine
           </div>

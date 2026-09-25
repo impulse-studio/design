@@ -2,7 +2,7 @@ import { findNode, nodeLabel } from "@digit-ai-studio/shared"
 import { useEditorState } from "@/features/editor/context"
 import { framesOf } from "@/features/editor/document"
 import { useEditorChat } from "@/features/chat/context"
-import type { ChatScenario } from "@/features/chat/types"
+import type { ChatScenario } from "@/validators/chat/messages"
 import { ChatConversation } from "@/components/shared/chat/ChatConversation"
 import { ChatComposer } from "@/components/shared/chat/ChatComposer"
 import { ChatHeader } from "@/components/shared/chat/ChatHeader"
@@ -22,7 +22,10 @@ export function EditorDemoChat({ mockupId }: { mockupId: string }) {
   const onSend = (text: string, scenario?: ChatScenario) =>
     send(text, context, scenario)
   return (
-    <div className="editor-chat flex flex-col h-full min-h-0 min-w-0 [container-type:inline-size] [&_:is(button,_input,_textarea,_a):focus-visible]:[outline-offset:3px] [@media(pointer:coarse)]:[&_button]:min-h-[44px] [@media(pointer:coarse)]:[&_textarea]:text-[16px] motion-reduce:[&_*]:animate-none motion-reduce:[&_*]:[transition:none] motion-reduce:[&_*]:[scroll-behavior:auto] motion-reduce:[&_*::before]:animate-none motion-reduce:[&_*::before]:[transition:none] motion-reduce:[&_*::before]:[scroll-behavior:auto] motion-reduce:[&_*::after]:animate-none motion-reduce:[&_*::after]:[transition:none] motion-reduce:[&_*::after]:[scroll-behavior:auto]" data-mockup-id={mockupId}>
+    <div
+      className="editor-chat [container-type:inline-size] flex h-full min-h-0 min-w-0 flex-col motion-reduce:[&_*]:animate-none motion-reduce:[&_*]:[scroll-behavior:auto] motion-reduce:[&_*]:[transition:none] motion-reduce:[&_*::after]:animate-none motion-reduce:[&_*::after]:[scroll-behavior:auto] motion-reduce:[&_*::after]:[transition:none] motion-reduce:[&_*::before]:animate-none motion-reduce:[&_*::before]:[scroll-behavior:auto] motion-reduce:[&_*::before]:[transition:none] [&_:is(button,_input,_textarea,_a):focus-visible]:[outline-offset:3px] [@media(pointer:coarse)]:[&_button]:min-h-[44px] [@media(pointer:coarse)]:[&_textarea]:text-[16px]"
+      data-mockup-id={mockupId}
+    >
       <ChatHeader
         demo={state.demo}
         onExit={() => dispatch({ type: "mode", demo: false })}

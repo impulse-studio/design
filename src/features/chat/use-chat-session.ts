@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid"
 import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 import {
   draftKey,
@@ -7,7 +8,8 @@ import {
 } from "./reducer"
 import { chatStorageKey, restoreChat, serializeChat } from "./storage"
 import { MAX_CHAT_FILES, validateChatFile } from "./attachments"
-import type { ChatCallbacks, ChatContextItem, ChatScenario } from "./types"
+import type { ChatCallbacks } from "./types"
+import type { ChatContextItem, ChatScenario } from "@/validators/chat/messages"
 
 export const useChatSession = (mockupId: string) => {
   const [state, dispatch] = useReducer(chatReducer, undefined, initialChatState)
@@ -129,7 +131,7 @@ export const useChatSession = (mockupId: string) => {
       const blobUrl = URL.createObjectURL(file)
       urls.current.add(blobUrl)
       items.push({
-        id: crypto.randomUUID(),
+        id: uuid(),
         name: file.name,
         size: file.size,
         type: file.type,
@@ -144,8 +146,7 @@ export const useChatSession = (mockupId: string) => {
     text: string,
     context: ChatContextItem[],
     scenario?: ChatScenario
-  ) =>
-    dispatch({ type: "send", id: crypto.randomUUID(), text, context, scenario })
+  ) => dispatch({ type: "send", id: uuid(), text, context, scenario })
   const callbacks: ChatCallbacks = {
     onAnswer: (id, answers, current) =>
       dispatch({ type: "answers", id, answers, current }),
@@ -154,8 +155,7 @@ export const useChatSession = (mockupId: string) => {
     onReject: (id) => dispatch({ type: "reject", id }),
     onRequestChanges: (id) => dispatch({ type: "changes", id }),
     onToolDecision: (id, approved) => dispatch({ type: "tool", id, approved }),
-    onRetry: (id) =>
-      dispatch({ type: "retry", id, newId: crypto.randomUUID() }),
+    onRetry: (id) => dispatch({ type: "retry", id, newId: uuid() }),
     onFeedback: (id, value) => dispatch({ type: "feedback", id, value }),
   }
   return { state, draft, dispatch, send, callbacks, addFiles, storageError }

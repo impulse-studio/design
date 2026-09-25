@@ -1,6 +1,6 @@
 import { useId } from "react"
 import { useForm } from "@tanstack/react-form"
-import { mockupNameFormSchema } from "@/features/mockups/schemas"
+import { mockupNameFormSchema } from "@/validators/mockups"
 import { Field, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
@@ -39,7 +39,7 @@ export function MockupNameForm({
           return (
             <Field data-invalid={invalid}>
               <Input
-                className="editor-project-name h-[28px] border-transparent bg-transparent px-1 text-[14px] font-semibold tracking-[-0.02em] shadow-none [&:focus-visible]:border-ring [&:focus-visible]:shadow-[0_0_0_2px_color-mix(in_srgb,_var(--ring),_transparent_80%)] h-7 w-full border-transparent bg-transparent px-1 text-sm font-medium shadow-none focus-visible:border-transparent focus-visible:ring-0"
+                className="editor-project-name h-7 h-[28px] w-full border-transparent bg-transparent px-1 text-sm text-[14px] font-medium font-semibold tracking-[-0.02em] shadow-none focus-visible:border-transparent focus-visible:ring-0 [&:focus-visible]:border-ring [&:focus-visible]:shadow-[0_0_0_2px_color-mix(in_srgb,_var(--ring),_transparent_80%)]"
                 name={field.name}
                 aria-label="Nom de la maquette"
                 aria-invalid={invalid}

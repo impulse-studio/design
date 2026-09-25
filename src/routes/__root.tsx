@@ -1,9 +1,9 @@
 import { createRootRouteWithContext } from "@tanstack/react-router"
 import { RootDocument } from "@/components/shared/RootDocument"
-import { NotFoundPage } from "@/pages/not-found/NotFoundPage"
+import { NotFoundPage } from "@/pages/not-found/page"
 import { DESIGN_SYSTEM_NAME, PROJECT_DESCRIPTION } from "@/constants"
 import type { RouterContext } from "@/router"
-import appCss from "../styles.css?url"
+import appCss from "@/styles.css?url"
 import dialkitCss from "dialkit/styles.css?url"
 
 export const Route = createRootRouteWithContext<RouterContext>()({

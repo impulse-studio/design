@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { ConnectionsPage } from "@/pages/connections/ConnectionsPage"
+import { ConnectionsPage } from "@/pages/connections/page"
 import { requireAuthenticatedUser } from "@/features/auth/route-guard"
 
 export const Route = createFileRoute("/connections")({

@@ -1,7 +1,8 @@
+import { v4 as uuid } from "uuid"
 import type { AnyNode, MockupDoc, Node } from "@digit-ai-studio/shared"
 import { childLists, findNode, walk } from "@digit-ai-studio/shared"
 import { framesOf } from "./document"
-import { newId, entryFor } from "./library"
+import { entryFor } from "./library"
 
 export const isEditable = (doc: MockupDoc, id: string) => {
   const location = findNode(framesOf(doc), id)
@@ -32,7 +33,7 @@ export const detach = (doc: MockupDoc, id: string) => {
 export const freshClone = <T extends AnyNode>(node: T): T => {
   const copy = JSON.parse(JSON.stringify(node)) as T
   walk(copy, (child) => {
-    child.id = newId()
+    child.id = uuid()
   })
   return copy
 }
@@ -40,7 +41,11 @@ export const insertionList = (
   parent: AnyNode,
   slot?: string
 ): Node[] | null => {
-  if (parent.type === "frame" || parent.type === "box" || parent.type === "element")
+  if (
+    parent.type === "frame" ||
+    parent.type === "box" ||
+    parent.type === "element"
+  )
     return parent.children
   if (parent.type === "component" || parent.type === "template") {
     const key = slot ?? (parent.type === "template" ? "content" : "default")

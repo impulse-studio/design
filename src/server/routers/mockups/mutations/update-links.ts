@@ -1,13 +1,8 @@
-import { z } from "zod"
-import { mockupLinksSchema } from "@/features/mockups/schemas"
+import { updateMockupLinksSchema } from "@/validators/mockups"
+
 import { updateRecordLinks } from "@/features/mockups/repository.server"
 import { protectedProcedure } from "@/server/procedure/protected.procedure"
 
 export const updateMockupLinksHandler = protectedProcedure
-  .input(
-    z.object({
-      id: z.string().min(1).max(100),
-      ...mockupLinksSchema.shape,
-    })
-  )
+  .input(updateMockupLinksSchema)
   .handler(({ context, input }) => updateRecordLinks(input, context.user.id))

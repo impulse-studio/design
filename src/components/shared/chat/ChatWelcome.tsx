@@ -8,7 +8,7 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "@/components/ui/empty"
-import type { ChatScenario } from "@/features/chat/types"
+import type { ChatScenario } from "@/validators/chat/messages"
 import { ChatSuggestions } from "./ChatSuggestions"
 
 export function ChatWelcome({
@@ -25,7 +25,7 @@ export function ChatWelcome({
   hasSelection: boolean
 }) {
   return (
-    <Empty className="chat-welcome pt-7 pb-4 px-0.5 text-left items-stretch [&_[data-slot=empty-header]]:items-start [&_[data-slot=empty-title]]:text-[18px] [&_[data-slot=empty-title]]:tracking-[-0.03em] [&_[data-slot=empty-description]]:text-[12px] [&_[data-slot=empty-description]]:leading-[1.7] [&_[data-slot=empty-content]]:items-stretch [&_[data-slot=empty-content]]:gap-[18px]">
+    <Empty className="chat-welcome items-stretch px-0.5 pt-7 pb-4 text-left [&_[data-slot=empty-content]]:items-stretch [&_[data-slot=empty-content]]:gap-[18px] [&_[data-slot=empty-description]]:text-[12px] [&_[data-slot=empty-description]]:leading-[1.7] [&_[data-slot=empty-header]]:items-start [&_[data-slot=empty-title]]:text-[18px] [&_[data-slot=empty-title]]:tracking-[-0.03em]">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <RiSparklingLine />

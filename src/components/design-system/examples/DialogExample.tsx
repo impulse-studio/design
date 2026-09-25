@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { FormTextField } from "@/components/shared/FormTextField"
 import { FieldGroup } from "@/components/ui/field"
-import { mockupNameFormSchema } from "@/features/mockups/schemas"
+import { mockupNameFormSchema } from "@/validators/mockups"
 import { toast } from "@/components/ui/toast"
 
 export function DialogExample() {

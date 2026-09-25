@@ -1,27 +1,27 @@
+import {
+  listSitesSchema,
+  readSiteSchema,
+  listMockupsSchema,
+  readMockupSchema,
+  searchComponentsSchema,
+} from "@/validators/mcp/tools"
 import { McpServer, createMcpHandler } from "@modelcontextprotocol/server"
 import { requireMcpAuth } from "@better-auth/mcp"
 import { getAuth } from "@/features/auth/auth.server"
 import {
-  applyChangesSchema,
   applyMcpChanges,
   listMcpMockups,
-  mockupReferenceSchema,
   readMcpMockup,
   searchMcpCatalog,
 } from "./mockups.server"
-import { z } from "zod"
-import { and, eq } from "drizzle-orm"
-import { getDatabase } from "@/db/client.server"
-import { oauthConsent } from "@/db/schema"
+import { applyChangesSchema } from "@/validators/mcp/mockups"
+
 import { getAuthEnvironment } from "@/features/auth/config.server"
-import { createMcpProject, createMcpProjectSchema } from "./create.server"
-import {
-  applyMcpSiteChanges,
-  applySiteChangesSchema,
-  listMcpSites,
-  readSiteOptionsSchema,
-  readMcpSite,
-} from "./sites.server"
+import { hasCurrentMcpAccess } from "./connections.server"
+import { createMcpProject } from "./create.server"
+import { createMcpProjectSchema } from "@/validators/mcp/projects"
+import { applyMcpSiteChanges, listMcpSites, readMcpSite } from "./sites.server"
+import { applySiteChangesSchema } from "@/validators/mcp/sites"
 
 const result = (value: unknown) => ({
   content: [{ type: "text" as const, text: JSON.stringify(value) }],
@@ -36,22 +36,9 @@ export const handleMcpPost = (request: Request) => {
       if (!userId) return new Response("Invalid subject", { status: 401 })
       const clientId = typeof claims.azp === "string" ? claims.azp : null
       if (!clientId) return new Response("Client inconnu", { status: 403 })
-      const consent = await getDatabase()
-        .select({ scopes: oauthConsent.scopes })
-        .from(oauthConsent)
-        .where(
-          and(
-            eq(oauthConsent.userId, userId),
-            eq(oauthConsent.clientId, clientId)
-          )
-        )
       const scopes = new Set(String(claims.scope ?? "").split(" "))
       const granted = [...scopes].filter((scope) => scope.startsWith("mcp:"))
-      if (
-        !consent.some((row) =>
-          granted.every((scope) => row.scopes.includes(scope))
-        )
-      )
+      if (!(await hasCurrentMcpAccess(userId, clientId, granted)))
         return new Response("Accès révoqué", { status: 403 })
       const handler = createMcpHandler(
         () => {
@@ -80,7 +67,7 @@ export const handleMcpPost = (request: Request) => {
             {
               description:
                 "Liste les sites React modifiables dans le Studio, avec leur lien et leur révision. Utiliser ces outils pour la partie Site.",
-              inputSchema: z.object({}),
+              inputSchema: listSitesSchema,
               annotations: { readOnlyHint: true },
             },
             async () => result(await listMcpSites(userId, origin))
@@ -90,9 +77,7 @@ export const handleMcpPost = (request: Request) => {
             {
               description:
                 "Lit un site React à partir de son lien /m/… ou de son identifiant. mode=overview donne rapidement routes, dépendances et liste des fichiers avec leurs tailles ; mode=full lit le contenu, éventuellement limité aux paths demandés. Toujours utiliser la révision retournée avant une modification.",
-              inputSchema: readSiteOptionsSchema.extend({
-                site: mockupReferenceSchema,
-              }),
+              inputSchema: readSiteSchema,
               annotations: { readOnlyHint: true },
             },
             async ({ site, mode, paths }) =>
@@ -119,7 +104,7 @@ export const handleMcpPost = (request: Request) => {
             {
               description:
                 "Liste les maquettes accessibles et leurs révisions.",
-              inputSchema: z.object({}),
+              inputSchema: listMockupsSchema,
               annotations: { readOnlyHint: true },
             },
             async () => result(await listMcpMockups(userId))
@@ -129,10 +114,7 @@ export const handleMcpPost = (request: Request) => {
             {
               description:
                 "Lit une maquette et sa révision. mode=overview renvoie seulement les pages, frames et nombres de nœuds ; mode=full renvoie l'arbre complet nécessaire pour modifier la maquette.",
-              inputSchema: z.object({
-                mockup: mockupReferenceSchema,
-                mode: z.enum(["overview", "full"]).default("full"),
-              }),
+              inputSchema: readMockupSchema,
               annotations: { readOnlyHint: true },
             },
             async ({ mockup, mode }) =>
@@ -143,11 +125,7 @@ export const handleMcpPost = (request: Request) => {
             {
               description:
                 "Recherche les composants Digi par nom. Renvoie 20 résultats compacts par défaut ; includeExamples=true ajoute les exemples de nœuds nécessaires pour composer une maquette.",
-              inputSchema: z.object({
-                query: z.string().max(100).optional(),
-                limit: z.number().int().min(1).max(100).default(20),
-                includeExamples: z.boolean().default(false),
-              }),
+              inputSchema: searchComponentsSchema,
               annotations: { readOnlyHint: true },
             },
             async ({ query, limit, includeExamples }) =>

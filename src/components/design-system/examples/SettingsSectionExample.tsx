@@ -5,7 +5,7 @@ import { createExampleCode } from "@/features/design-system/example-code"
 import { useId } from "react"
 import { revalidateLogic, useForm } from "@tanstack/react-form"
 import { z } from "zod"
-import { mockupNameFormSchema } from "@/features/mockups/schemas"
+import { mockupNameFormSchema } from "@/validators/mockups"
 import { FormTextField } from "@/components/shared/FormTextField"
 import { SettingsSection } from "@/components/shared/SettingsSection"
 import {

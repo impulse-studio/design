@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { AISidebar } from "./AISidebar"
 import { moveResource } from "./resources"
@@ -16,6 +16,61 @@ const items: SidebarResource[] = [
 ]
 
 describe("AISidebar", () => {
+  it("préserve un renommage confirmé lorsque le déplacement précédent échoue", async () => {
+    let rejectMove!: (error: Error) => void
+    const onMove = () =>
+      new Promise<void>((_, reject) => {
+        rejectMove = reject
+      })
+    render(
+      <AISidebar
+        defaultItems={items}
+        defaultExpandedIds={["folder"]}
+        onMove={onMove}
+      />
+    )
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: /Brief/ }), {
+      key: "ArrowUp",
+      altKey: true,
+      shiftKey: true,
+    })
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: /Accueil/ }), {
+      key: "F2",
+    })
+    const input = await screen.findByRole("textbox", {
+      name: "Renommer Accueil",
+    })
+    fireEvent.change(input, { target: { value: "Inscription" } })
+    fireEvent.keyDown(input, { key: "Enter" })
+    await act(async () => {
+      await Promise.resolve()
+    })
+    await act(async () => rejectMove(new Error("Refus")))
+    expect(screen.getByRole("treeitem", { name: /Inscription/ })).toBeDefined()
+  })
+
+  it("ne remplace pas une mise à jour externe par un rollback ancien", async () => {
+    let rejectMove!: (error: Error) => void
+    const onMove = () =>
+      new Promise<void>((_, reject) => {
+        rejectMove = reject
+      })
+    const { rerender } = render(<AISidebar items={items} onMove={onMove} />)
+    fireEvent.keyDown(screen.getByRole("treeitem", { name: /Brief/ }), {
+      key: "ArrowUp",
+      altKey: true,
+      shiftKey: true,
+    })
+    rerender(
+      <AISidebar
+        items={[...items, { id: "remote", kind: "file", label: "Distant" }]}
+        onMove={onMove}
+      />
+    )
+    await act(async () => rejectMove(new Error("Refus")))
+    expect(screen.getByRole("treeitem", { name: /Distant/ })).toBeDefined()
+  })
+
   it("ouvre les dossiers, sélectionne et renomme au clavier", async () => {
     const user = userEvent.setup()
     const select = vi.fn()

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { useRouter } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
-import { useOrpc } from "@/lib/use-orpc"
+import { useOrpc } from "@/server/use-orpc"
 
 export const useTeamAction = () => {
   const router = useRouter(),

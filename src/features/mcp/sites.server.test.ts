@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createSiteDocument } from "@/features/sites/template"
+import { createSiteDocument } from "@/features/sites/document.fixture"
 import { loadSite, saveSiteChange } from "@/features/sites/repository.server"
-import { validateSiteBuild } from "@/features/sites/compile.server"
 import type * as MockupsModule from "./mockups.server"
 import { applyMcpSiteChanges, readMcpSite } from "./sites.server"
 
@@ -9,9 +8,6 @@ vi.mock("@/features/sites/repository.server", () => ({
   loadSite: vi.fn(),
   findSite: vi.fn(),
   saveSiteChange: vi.fn(),
-}))
-vi.mock("@/features/sites/compile.server", () => ({
-  validateSiteBuild: vi.fn(),
 }))
 vi.mock("./mockups.server", async (original) => ({
   ...(await original<typeof MockupsModule>()),
@@ -72,7 +68,7 @@ describe("sites MCP", () => {
       readMcpSite("owner", input.site, origin, { paths: ["missing.tsx"] })
     ).rejects.toThrow("introuvables")
   })
-  it("rejects stale revisions without compilation or writes", async () => {
+  it("rejects stale revisions without writes", async () => {
     expect(
       await applyMcpSiteChanges(
         "owner",
@@ -80,7 +76,6 @@ describe("sites MCP", () => {
         origin
       )
     ).toEqual({ status: "conflict", revision: 4 })
-    expect(validateSiteBuild).not.toHaveBeenCalled()
     expect(saveSiteChange).not.toHaveBeenCalled()
   })
   it("rejects viewers", async () => {
@@ -106,27 +101,11 @@ describe("sites MCP", () => {
     ).rejects.toThrow("protégé")
     expect(saveSiteChange).not.toHaveBeenCalled()
   })
-  it("does not persist a project that fails compilation", async () => {
-    vi.mocked(validateSiteBuild).mockRejectedValue(
-      new Error("Import indisponible")
-    )
-    await expect(applyMcpSiteChanges("owner", input, origin)).rejects.toThrow(
-      "Import indisponible"
-    )
-    expect(saveSiteChange).not.toHaveBeenCalled()
-  })
-  it("compiles and saves with the revision and summary supplied", async () => {
+  it("saves without server compilation using the supplied revision and summary", async () => {
     expect(await applyMcpSiteChanges("owner", input, origin)).toMatchObject({
       status: "saved",
       revision: 5,
     })
-    expect(validateSiteBuild).toHaveBeenCalledWith(
-      expect.objectContaining({
-        files: expect.objectContaining({
-          "src/components/Title.tsx": expect.stringContaining("Bienvenue"),
-        }),
-      })
-    )
     expect(saveSiteChange).toHaveBeenCalledWith(id, "owner", 4, {
       type: "mcp",
       input: { summary: input.summary, operations: input.operations },

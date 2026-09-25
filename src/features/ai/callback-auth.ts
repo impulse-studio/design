@@ -1,4 +1,14 @@
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto"
+import { v4 as uuid } from "uuid"
+import { createHmac, timingSafeEqual } from "node:crypto"
+import {
+  callbackRequestSchema,
+  callbackResponseSchemas,
+} from "@/validators/ai/callback"
+import type {
+  CallbackAction,
+  CallbackPayload,
+  CallbackResponses,
+} from "@/validators/ai/callback"
 
 const secret = () => {
   const value = process.env.AI_CALLBACK_SECRET
@@ -28,23 +38,24 @@ export const verifyCallback = (request: Request, body: string) => {
   )
 }
 /** Bodies are never logged; failures expose no upstream response or credential. */
-export const workerCallback = async <T>(
+export const workerCallback = async <TAction extends CallbackAction>(
   chatId: string,
-  action: string,
-  data: Record<string, unknown> = {}
-): Promise<T> => {
+  action: TAction,
+  data: CallbackPayload<TAction> = {} as CallbackPayload<TAction>
+): Promise<CallbackResponses[TAction]> => {
   const base = new URL(process.env.AI_STUDIO_URL ?? "")
   if (
     base.protocol !== "https:" &&
     !["localhost", "127.0.0.1"].includes(base.hostname)
   )
     throw new Error("HTTPS callback required")
-  const body = JSON.stringify({
+  const request = callbackRequestSchema.parse({
     chatId,
     action,
-    eventId: randomUUID(),
+    eventId: uuid(),
     ...data,
   })
+  const body = JSON.stringify(request)
   const response = await fetch(new URL("/api/ai/callback", base), {
     method: "POST",
     headers: signCallback(body),
@@ -53,5 +64,7 @@ export const workerCallback = async <T>(
     redirect: "error",
   })
   if (!response.ok) throw new Error("Studio callback unavailable")
-  return response.json() as Promise<T>
+  return callbackResponseSchemas[action].parse(
+    await response.json()
+  ) as CallbackResponses[TAction]
 }

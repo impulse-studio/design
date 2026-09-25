@@ -2,8 +2,8 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { MockupStatusMenu } from "@/components/mockups/MockupStatusMenu"
 import { APP_ROUTES } from "@/constants"
-import { useOrpc } from "@/lib/use-orpc"
-import type { MockupStatus } from "@/features/mockups/status"
+import { useOrpc } from "@/server/use-orpc"
+import type { MockupStatus } from "@/validators/mockups"
 import { Link, useRouter } from "@tanstack/react-router"
 import { RiArtboardLine, RiArrowRightLine } from "@remixicon/react"
 import type { MockupSummary } from "@/features/mockups/types"
@@ -61,7 +61,7 @@ export function StudioDocuments({
         </p>
       )}
 
-      <Table className="studio-documents-table [&_th]:h-[36px] [&_th]:text-[12px] [&_th]:font-normal [&_th]:text-muted-foreground [&_th]:bg-transparent [&_thead_>_tr]:border-0 [&_td]:h-[44px] [&_td]:text-[13px] [&_td]:border-border [&_:is(th,_td):first-child]:pl-6 [&_:is(th,_td):first-child]:w-[42%] [&_:is(th,_td):last-child]:pr-6 [&_time]:text-muted-foreground [&_time]:text-[12px] [&_time]:whitespace-nowrap [&_.mockup-status]:h-[26px] [&_.mockup-status]:text-[12px] [&_.mockup-status]:gap-1.5 max-[800px]:[&_:is(th,_td):first-child]:pl-5 max-[800px]:[&_:is(th,_td):nth-child(2)]:table-cell [@media(pointer:coarse)]:[&_.mockup-status]:min-h-[44px] max-[800px]:[&_:is(th,_td):nth-child(3)]:hidden">
+      <Table className="studio-documents-table [&_.mockup-status]:h-[26px] [&_.mockup-status]:gap-1.5 [&_.mockup-status]:text-[12px] [&_:is(th,_td):first-child]:w-[42%] [&_:is(th,_td):first-child]:pl-6 max-[800px]:[&_:is(th,_td):first-child]:pl-5 [&_:is(th,_td):last-child]:pr-6 max-[800px]:[&_:is(th,_td):nth-child(2)]:table-cell max-[800px]:[&_:is(th,_td):nth-child(3)]:hidden [&_td]:h-[44px] [&_td]:border-border [&_td]:text-[13px] [&_th]:h-[36px] [&_th]:bg-transparent [&_th]:text-[12px] [&_th]:font-normal [&_th]:text-muted-foreground [&_thead_>_tr]:border-0 [&_time]:text-[12px] [&_time]:whitespace-nowrap [&_time]:text-muted-foreground [@media(pointer:coarse)]:[&_.mockup-status]:min-h-[44px]">
         <TableHeader>
           <TableRow>
             <TableHead>Nom</TableHead>
@@ -79,11 +79,11 @@ export function StudioDocuments({
               <TableCell>
                 <div className="studio-document-main flex min-w-0 flex-col items-start gap-0.75">
                   <Link
-                    className="studio-document-link flex items-center gap-2.5 font-medium w-full"
+                    className="studio-document-link flex w-full items-center gap-2.5 font-medium"
                     to={APP_ROUTES.editor}
                     params={{ mockupId: record.id }}
                   >
-                    <span className="studio-file-icon grid place-items-center shrink-0 w-[18px] h-[18px] text-icon [&_svg]:w-[16px] [&_svg]:h-[16px]">
+                    <span className="studio-file-icon grid h-[18px] w-[18px] shrink-0 place-items-center text-icon [&_svg]:h-[16px] [&_svg]:w-[16px]">
                       <RiArtboardLine />
                     </span>
                     <span>{record.name}</span>
@@ -103,7 +103,7 @@ export function StudioDocuments({
                 />
               </TableCell>
               <TableCell>
-                <span className="studio-library-label flex gap-1.5 items-center text-muted-foreground text-[12px] [&_>_span]:w-[6px] [&_>_span]:h-[6px] [&_>_span]:bg-primary [&_>_span]:rounded-[2px]">
+                <span className="studio-library-label flex items-center gap-1.5 text-[12px] text-muted-foreground [&_>_span]:h-[6px] [&_>_span]:w-[6px] [&_>_span]:rounded-[2px] [&_>_span]:bg-primary">
                   <span />
                   Digi
                 </span>
@@ -123,7 +123,7 @@ export function StudioDocuments({
                   to={APP_ROUTES.editor}
                   params={{ mockupId: record.id }}
                   aria-label={`Ouvrir ${record.name}`}
-                  className="studio-open-document grid place-items-center w-[26px] h-[26px] text-muted-foreground rounded-md [&_svg]:w-[14px] [&_svg]:h-[14px] [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:bg-accent [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:text-foreground [@media(pointer:coarse)]:min-h-[44px]"
+                  className="studio-open-document grid h-[26px] w-[26px] place-items-center rounded-md text-muted-foreground [&_svg]:h-[14px] [&_svg]:w-[14px] [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:bg-accent [@media(hover:hover)_and_(pointer:fine)]:[&:hover]:text-foreground [@media(pointer:coarse)]:min-h-[44px]"
                 >
                   <RiArrowRightLine />
                 </Link>

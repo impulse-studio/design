@@ -5,9 +5,9 @@ import { useEditor, useEditorState } from "@/features/editor/context"
 import { framesOf } from "@/features/editor/document"
 import { ChatConversation } from "@/components/shared/chat/ChatConversation"
 import { PromptInput } from "@/components/shared/PromptInput"
-import { AiUsageDialog } from "@/components/ai/AiUsageDialog"
-import { AiProviderLogo } from "@/components/ai/AiProviderLogo"
-import { MockupProposalCard } from "@/components/ai/MockupProposalCard"
+import { AiUsageDialog } from "@/pages/editor/components/chat/AiUsageDialog"
+import { AiProviderLogo } from "@/pages/editor/components/chat/AiProviderLogo"
+import { MockupProposalCard } from "@/pages/editor/components/chat/MockupProposalCard"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -48,7 +48,10 @@ export function AiEditorChat({
       return node ? [{ id, label: nodeLabel(node) }] : []
     })
   return (
-    <div className="editor-chat flex flex-col h-full min-h-0 min-w-0 [container-type:inline-size] [&_:is(button,_input,_textarea,_a):focus-visible]:[outline-offset:3px] [@media(pointer:coarse)]:[&_button]:min-h-[44px] [@media(pointer:coarse)]:[&_textarea]:text-[16px] motion-reduce:[&_*]:animate-none motion-reduce:[&_*]:[transition:none] motion-reduce:[&_*]:[scroll-behavior:auto] motion-reduce:[&_*::before]:animate-none motion-reduce:[&_*::before]:[transition:none] motion-reduce:[&_*::before]:[scroll-behavior:auto] motion-reduce:[&_*::after]:animate-none motion-reduce:[&_*::after]:[transition:none] motion-reduce:[&_*::after]:[scroll-behavior:auto]" data-mockup-id={mockupId}>
+    <div
+      className="editor-chat [container-type:inline-size] flex h-full min-h-0 min-w-0 flex-col motion-reduce:[&_*]:animate-none motion-reduce:[&_*]:[scroll-behavior:auto] motion-reduce:[&_*]:[transition:none] motion-reduce:[&_*::after]:animate-none motion-reduce:[&_*::after]:[scroll-behavior:auto] motion-reduce:[&_*::after]:[transition:none] motion-reduce:[&_*::before]:animate-none motion-reduce:[&_*::before]:[scroll-behavior:auto] motion-reduce:[&_*::before]:[transition:none] [&_:is(button,_input,_textarea,_a):focus-visible]:[outline-offset:3px] [@media(pointer:coarse)]:[&_button]:min-h-[44px] [@media(pointer:coarse)]:[&_textarea]:text-[16px]"
+      data-mockup-id={mockupId}
+    >
       <div className="flex items-center justify-between gap-1 border-b p-2">
         <AiUsageDialog usage={chat.snapshot.usage} />
         <Button

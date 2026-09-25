@@ -1,13 +1,15 @@
 import { SiteLibraries } from "./Libraries"
-import type { SiteRecord } from "@/features/sites/schema"
+import type { SiteDocument } from "@/validators/sites/document"
+import type { SiteRecord } from "@/features/sites/types"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { SiteDocument } from "@/features/sites/schema"
 import type { useSiteChat } from "@/features/sites/use-chat"
 import { SiteChat } from "./Chat"
 import { SiteFiles } from "./Files"
 
 export function SiteEditorSidebar({
-  record, canEdit, onUpdated,
+  record,
+  canEdit,
+  onUpdated,
   panel,
   onPanelChange,
   chat,
@@ -32,13 +34,16 @@ export function SiteEditorSidebar({
   onSelectFile: (path: string) => void
 }) {
   return (
-    <aside className="flex w-[300px] min-w-[260px] shrink-0 flex-col border-r border-border">
+    <aside className="flex w-64 min-w-64 shrink-0 flex-col border-r border-border/60 bg-muted/20">
       <Tabs
         value={panel}
         onValueChange={onPanelChange}
-        className="border-b border-border px-3 py-2.5"
+        className="border-b border-border/60 px-3 py-2"
       >
-        <TabsList>
+        <TabsList
+          variant="line"
+          className="w-full [&_[data-slot=tabs-trigger]]:text-xs [&_[data-slot=tabs-trigger]]:transition-none [&_[data-slot=tabs-trigger]]:after:h-px"
+        >
           <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="files">Fichiers</TabsTrigger>
           <TabsTrigger value="libraries">Bibliothèques</TabsTrigger>
@@ -63,7 +68,14 @@ export function SiteEditorSidebar({
       >
         <SiteFiles doc={doc} selected={file} onSelect={onSelectFile} />
       </div>
-      {panel === "libraries" && <SiteLibraries record={record} canEdit={canEdit} onUpdated={onUpdated} onSelectFile={onSelectFile}/>}
+      {panel === "libraries" && (
+        <SiteLibraries
+          record={record}
+          canEdit={canEdit}
+          onUpdated={onUpdated}
+          onSelectFile={onSelectFile}
+        />
+      )}
     </aside>
   )
 }

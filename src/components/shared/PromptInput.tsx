@@ -1,6 +1,9 @@
 "use client"
 // beui.dev/components/agents/prompt-input
 
+// beui.dev/components/agents/prompt-input
+// beui.dev/components/agents/prompt-input
+// beui.dev/components/agents/prompt-input
 import {
   RiArrowUpLine as ArrowUp,
   RiAddLine as Plus,
@@ -8,8 +11,8 @@ import {
 } from "@remixicon/react"
 import { Textarea } from "@/components/ui/textarea"
 import { useForm, useStore } from "@tanstack/react-form"
-import { createPromptSchema } from "@/features/chat/prompt-schema"
-import type { PromptValues } from "@/features/chat/prompt-schema"
+import { createPromptSchema } from "@/validators/chat/prompt"
+import type { PromptValues } from "@/validators/chat/prompt"
 import { FieldError } from "@/components/ui/field"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {

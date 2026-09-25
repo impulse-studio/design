@@ -4,8 +4,6 @@
     "styles/colors.scss",
     "styles/vars.scss",
     "styles/navigationStyle.scss",
-    "styles/mixins.scss",
-    "styles/utils.scss",
     "styles/bootstrapUtils.scss",
     "styles/layersOrder.css",
     "core/EventMenu.ts",

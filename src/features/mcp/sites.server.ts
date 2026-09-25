@@ -1,26 +1,16 @@
-import { z } from "zod"
+import {
+  applySiteChangesSchema,
+  readSiteOptionsSchema,
+} from "@/validators/mcp/sites"
+import type { z } from "zod"
 import { inArray } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
 import { siteProjects } from "@/db/schema"
 import { loadSite, saveSiteChange } from "@/features/sites/repository.server"
-import { siteProposalSchema } from "@/features/sites/schema"
 import { applySiteProposal } from "@/features/sites/source"
-import { validateSiteBuild } from "@/features/sites/compile.server"
-import { siteInstructions } from "@/features/sites/instructions"
-import {
-  listMcpMockups,
-  mockupReferenceSchema,
-  resolveMockupId,
-} from "./mockups.server"
 
-export const applySiteChangesSchema = siteProposalSchema.extend({
-  site: mockupReferenceSchema,
-  expectedRevision: z.number().int().nonnegative(),
-})
-export const readSiteOptionsSchema = z.object({
-  mode: z.enum(["overview", "full"]).default("full"),
-  paths: z.array(z.string().max(200)).max(30).optional(),
-})
+import { siteInstructions } from "@/features/sites/instructions"
+import { listMcpMockups, resolveMockupId } from "./mockups.server"
 
 export const listMcpSites = async (userId: string, origin: string) => {
   const records = await listMcpMockups(userId)
@@ -101,7 +91,7 @@ export const readMcpSite = async (
           : project.doc,
     instructions: siteInstructions.replace(
       "Utilise propose_site_changes pour une proposition complète : writeFile remplace un fichier avec son contenu complet, replaceInFile remplace une occurrence exacte pour les petites itérations, deleteFile supprime un fichier. Ne prétends pas que la modification est déjà appliquée : le Studio compile puis applique automatiquement sur la révision d'origine, avec historique.",
-      "Utilise apply_site_changes avec la révision lue : writeFile remplace un fichier complet, replaceInFile remplace une occurrence exacte pour les petites itérations, deleteFile supprime un fichier. Le serveur compile et enregistre les changements avec historique. En cas de conflit, relis le site avant de réessayer."
+      "Utilise apply_site_changes avec la révision lue : writeFile remplace un fichier complet, replaceInFile remplace une occurrence exacte pour les petites itérations, deleteFile supprime un fichier. Le serveur valide la structure et enregistre les changements avec historique ; la compilation aura lieu dans le navigateur à la prochaine ouverture. En cas de conflit, relis le site avant de réessayer."
     ),
   }
 }
@@ -121,7 +111,7 @@ export const applyMcpSiteChanges = async (
   if (!record.canEdit) throw new Error("Projet en lecture seule.")
   if (project.revision !== expectedRevision)
     return { status: "conflict" as const, revision: project.revision }
-  await validateSiteBuild(applySiteProposal(project.doc, proposal))
+  applySiteProposal(project.doc, proposal)
   const saved = await saveSiteChange(record.id, userId, expectedRevision, {
     type: "mcp",
     input: proposal,

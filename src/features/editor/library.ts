@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid"
 import type {
   LocalComponentVariant,
   LibraryManifest,
@@ -40,16 +41,16 @@ export const localVariantsOf = (
     a.variant.name.localeCompare(b.variant.name)
   )
 }
-export const newId = () => crypto.randomUUID()
+
 export const textNode = (content = "Votre texte"): Node => ({
-  id: newId(),
+  id: uuid(),
   type: "text",
   content,
   fontSize: 16,
   color: { token: "foreground" },
 })
 export const boxNode = (): Node => ({
-  id: newId(),
+  id: uuid(),
   type: "box",
   name: "Conteneur",
   autoLayout: {
@@ -70,7 +71,7 @@ const component = (
 ): ComponentNode => {
   const entry = entryFor(name)
   return {
-    id: newId(),
+    id: uuid(),
     type: "component",
     component: name,
     props: { ...entry?.previewProps, ...props },
@@ -212,7 +213,7 @@ const recipes: Partial<Record<string, () => Node>> = {
 export const makeLibraryNode = (entry: ManifestComponent): Node => {
   if (entry.name === "EventLayout")
     return {
-      id: newId(),
+      id: uuid(),
       type: "template",
       template: "EventLayout",
       name: "Shell Digitevent",

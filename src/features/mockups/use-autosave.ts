@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { documentSchema } from "@digit-ai-studio/shared"
 import type { Editor } from "@/features/editor/store"
-import { useOrpc } from "@/lib/use-orpc"
+import { useOrpc } from "@/server/use-orpc"
 import { createSaveQueue, draftKey } from "./save-queue"
 import type { RecoveryDraft, SaveStatus } from "./save-queue"
 import type { MockupRecord } from "./types"
 
-import { mockupStatusSchema } from "./status"
+import { mockupStatusSchema } from "@/validators/mockups"
 
 export const useAutosave = (editor: Editor, initial: MockupRecord) => {
   const orpc = useOrpc(),

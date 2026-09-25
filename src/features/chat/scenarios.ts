@@ -1,4 +1,9 @@
-import type { ChatAnswers, ChatBlock, ChatQuestion, ChatRun } from "./types"
+import type { ChatRun } from "./types"
+import type {
+  ChatAnswers,
+  ChatBlock,
+  ChatQuestion,
+} from "@/validators/chat/messages"
 import { EXTERNAL_LINKS } from "@/constants"
 
 export const demoQuestions: ChatQuestion[] = [

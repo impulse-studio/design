@@ -4,7 +4,7 @@ import { useEditor, useEditorState } from "./context"
 import { framesOf } from "./document"
 import { isEditable } from "./tree"
 
-export const commonValue = <T>(
+const commonValue = <T>(
   nodes: AnyNode[],
   get: (node: AnyNode) => T
 ): T | undefined => {

@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { elementsOf } from "@/features/sites/source"
 import type { SiteElementStatus } from "@/features/sites/source"
 import { readScenarios, scenarioDocument } from "@/features/sites/scenarios"
-import type { SiteRecord } from "@/features/sites/schema"
+import type { SiteRecord } from "@/features/sites/types"
 
 export function useSiteEditorPageData({
   initial,

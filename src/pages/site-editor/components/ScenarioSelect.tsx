@@ -1,6 +1,6 @@
 import { OptionSelect } from "@/components/shared/OptionSelect"
 import { Button } from "@/components/ui/button"
-import type { SiteScenario } from "@/features/sites/scenarios"
+import type { SiteScenario } from "@/validators/sites/scenarios"
 
 export function SiteScenarioSelect({
   scenarios,

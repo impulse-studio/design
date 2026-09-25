@@ -1,13 +1,14 @@
+import { v4 as uuid } from "uuid"
 import type { FrameNode, MockupDoc, FramePreset } from "@digit-ai-studio/shared"
 import { FRAME_PRESETS } from "@digit-ai-studio/shared"
-import { library, newId } from "./library"
+import { library } from "./library"
 
 export const makeFrame = (
   preset: FramePreset = "desktop",
   x = 0,
   y = 0
 ): FrameNode => ({
-  id: newId(),
+  id: uuid(),
   type: "frame",
   name: FRAME_PRESETS[preset].label,
   preset,
@@ -25,7 +26,7 @@ export const emptyDocument = (): MockupDoc => ({
   libVersion: library.orchestrationSha,
   pages: [
     {
-      id: newId(),
+      id: uuid(),
       name: "Page 1",
       background: "#f5f5f5",
       frames: [makeFrame()],

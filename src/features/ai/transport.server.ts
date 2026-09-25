@@ -1,4 +1,9 @@
-import { z } from "zod"
+import {
+  transportResponseSchema,
+  transportInputSchema,
+} from "@/validators/ai/transport"
+import { uuidSchema } from "@/validators/identifiers"
+
 import { and, eq } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
 import { aiRuns } from "@/db/schema"
@@ -6,26 +11,10 @@ import { studioAiAccess } from "./access.server"
 import { requireConversation } from "./repository.server"
 import { triggerFetch } from "./trigger.server"
 
-const inputSchema = z.object({
-  kind: z.literal("message"),
-  payload: z.object({
-    chatId: z.string(),
-    trigger: z.literal("submit-message"),
-    runId: z.string().uuid(),
-    message: z.object({
-      id: z.string(),
-      role: z.literal("user"),
-      parts: z
-        .array(z.object({ type: z.literal("text"), text: z.string() }).strict())
-        .length(1),
-    }),
-  }),
-})
-
 export const proxyInput = async (request: Request, userId: string) => {
   const raw = await request.text()
   if (raw.length > 100_000) return new Response(null, { status: 413 })
-  const input = inputSchema.parse(JSON.parse(raw)).payload
+  const input = transportInputSchema.parse(JSON.parse(raw)).payload
   const conversation = await requireConversation(userId, input.chatId)
   const run = await getDatabase()
     .select()
@@ -67,13 +56,7 @@ export const proxyInput = async (request: Request, userId: string) => {
       { error: "Le service IA est temporairement indisponible." },
       { status: 503 }
     )
-  const result = z
-    .object({
-      seq: z.number().optional(),
-      pendingVersion: z.boolean().optional(),
-    })
-    .passthrough()
-    .parse(await upstream.json())
+  const result = transportResponseSchema.parse(await upstream.json())
   // Only these transport fields are public, never upstream credentials or diagnostics.
   return Response.json({
     seq: result.seq,
@@ -82,7 +65,7 @@ export const proxyInput = async (request: Request, userId: string) => {
 }
 export const proxyOutput = async (request: Request, userId: string) => {
   const url = new URL(request.url)
-  const chatId = z.string().uuid().parse(url.searchParams.get("chatId"))
+  const chatId = uuidSchema.parse(url.searchParams.get("chatId"))
   const conversation = await requireConversation(userId, chatId)
   if (!conversation.triggerSessionId) return new Response(null, { status: 204 })
   const search = new URLSearchParams()

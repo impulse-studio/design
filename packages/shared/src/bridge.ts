@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { frameSchema } from "./schema"
+import { detachedSnapshotSchema, frameSchema } from "./schema"
 
 export type Rect = { x: number; y: number; width: number; height: number }
 const rect = z.object({
@@ -97,7 +97,7 @@ export const rendererMessageSchema = z.discriminatedUnion("type", [
     type: z.literal("detached"),
     nodeId: z.string(),
     requestId: z.string(),
-    snapshot: z.json(),
+    snapshot: detachedSnapshotSchema,
   }),
   z.object({
     ...header,

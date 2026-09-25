@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { useEditor } from "@/features/editor/context"
-import { localVariantsOf } from "@/features/editor/library"
+import { localVariantsOf, entryFor  } from "@/features/editor/library"
 import { useSelection } from "@/features/editor/use-selection"
-import { entryFor } from "@/features/editor/library"
 import { InspectorSection } from "@/pages/editor/components/inspector/InspectorSection"
 import { ComponentPropField } from "@/pages/editor/components/inspector/controls/ComponentPropField"
 import { InspectorSelectField } from "@/pages/editor/components/inspector/InspectorSelectField"
+import { resolveComponent } from "@digit-ai-studio/shared"
 
 export function ComponentPropsSection() {
   const { nodes, common, apply, state } = useSelection()
@@ -107,7 +107,9 @@ export function ComponentPropsSection() {
                 nodes.map((node) =>
                   JSON.stringify(
                     node.type === "component" || node.type === "template"
-                      ? (node.props?.[prop.name] ?? prop.default)
+                      ? (node.type === "component"
+                          ? resolveComponent(node).props[prop.name]
+                          : node.props?.[prop.name]) ?? prop.default
                       : undefined
                   )
                 )
@@ -115,7 +117,9 @@ export function ComponentPropsSection() {
             }
             value={common((node) =>
               node.type === "component" || node.type === "template"
-                ? (node.props?.[prop.name] ?? prop.default)
+                ? (node.type === "component"
+                    ? resolveComponent(node).props[prop.name]
+                    : node.props?.[prop.name]) ?? prop.default
                 : undefined
             )}
             onChange={(value) =>

@@ -12,9 +12,6 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/features/auth/auth.server", () => ({ getAuth: () => ({}) }))
-vi.mock("@/features/sites/compile.server", () => ({
-  validateSiteBuild: vi.fn(),
-}))
 vi.mock("@/features/auth/config.server", () => ({
   getAuthEnvironment: () => ({ BETTER_AUTH_URL: "http://localhost:3402" }),
 }))
@@ -27,10 +24,17 @@ vi.mock("@better-auth/mcp", () => ({
     (request: Request) =>
       next(request, mocks.claims),
 }))
-vi.mock("@/db/client.server", () => ({
-  getDatabase: () => ({
-    select: () => ({ from: () => ({ where: mocks.consent }) }),
-  }),
+vi.mock("./connections.server", () => ({
+  hasCurrentMcpAccess: async (
+    _userId: string,
+    _clientId: string,
+    scopes: string[]
+  ) => {
+    const consents = await mocks.consent()
+    return consents.some((consent: { scopes: string[] }) =>
+      scopes.every((scope) => consent.scopes.includes(scope))
+    )
+  },
 }))
 vi.mock("./sites.server", async (original) => ({
   ...(await original<typeof SitesModule>()),

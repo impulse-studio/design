@@ -122,7 +122,10 @@ export function EditorToolbar({
           <RiApps2AddLine />
         </IconButton>
       )}
-      <Separator orientation="vertical" className="editor-island-divider h-[48px] -my-2 shrink-0 bg-border" />
+      <Separator
+        orientation="vertical"
+        className="editor-island-divider h-6 shrink-0 bg-border/60"
+      />
       <EditorModeSwitch />
     </EditorIsland>
   )

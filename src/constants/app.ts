@@ -1,4 +1,4 @@
-export const PROJECT_NAME = "Digit Studio"
+export const PROJECT_NAME = "design"
 export const DESIGN_SYSTEM_NAME = "Digit UI"
 
 export const PROJECT_DESCRIPTION =

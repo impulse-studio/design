@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { studioAiAccess } from "./access.server"
 import {
   createConversation,
   decideProposal,
@@ -12,9 +11,21 @@ import { handleWorkerCallback } from "./callback.server"
 import { proxyInput, proxyOutput } from "./transport.server"
 import { expireRuns, interruptRuns, startSession } from "./trigger.server"
 
-import { actionSchema, querySchema } from "./actions"
+import { actionSchema, querySchema } from "@/validators/ai/actions"
+import {
+  authorizeBrowserRequest,
+  BrowserPolicyError,
+} from "@/features/auth/browser-policy.server"
+import { AiFailure } from "./errors"
 
 const headers = { "Cache-Control": "no-store" }
+const failureStatuses = {
+  not_found: 404,
+  forbidden: 403,
+  conflict: 409,
+  limit: 429,
+  unavailable: 503,
+} as const
 const json = (data: unknown) => Response.json(data, { headers })
 const errorResponse = async (error: unknown) => {
   if (error instanceof Response)
@@ -22,26 +33,28 @@ const errorResponse = async (error: unknown) => {
       { error: await error.clone().text() },
       { status: error.status, headers }
     )
-  const safe =
-    error instanceof Error &&
-    /^(Conversation introuvable|Maquette introuvable|Cette maquette|La maquette|Cette proposition|Proposition introuvable|La sauvegarde|Enregistrez|Une génération|Créez une|Identifiant d’envoi|Modèle indisponible)/.test(
-      error.message
+  if (error instanceof AiFailure)
+    return Response.json(
+      { error: error.message, kind: error.kind },
+      { status: failureStatuses[error.kind], headers }
     )
   return Response.json(
     {
       error:
         error instanceof z.ZodError
           ? "La demande est invalide."
-          : safe
-            ? error.message
-            : "Impossible de terminer la demande. Réessayez.",
+          : "Impossible de terminer la demande. Réessayez.",
     },
     { status: error instanceof z.ZodError ? 400 : 409, headers }
   )
 }
 export const handleAiGet = async (request: Request) => {
   try {
-    const { userId } = await studioAiAccess.requireUser()
+    const { user } = await authorizeBrowserRequest(request, {
+      session: "required",
+      mutation: false,
+    })
+    const userId = user!.id
     const url = new URL(request.url)
     await expireRuns()
     if (url.pathname.endsWith("/configuration"))
@@ -78,8 +91,11 @@ export const handleAiGet = async (request: Request) => {
           if (isClosed()) return
           try {
             // Recheck both session and membership while the stream remains open.
-            const current = await studioAiAccess.requireUser()
-            if (current.userId !== userId) throw new Error("Session terminée")
+            const current = await authorizeBrowserRequest(request, {
+              session: "required",
+              mutation: false,
+            })
+            if (current.user?.id !== userId) throw new Error("Session terminée")
             await expireRuns()
             const snapshot = await getSnapshot(
               userId,
@@ -135,17 +151,16 @@ export const handleAiPost = async (request: Request) => {
   if (new URL(request.url).pathname.endsWith("/callback"))
     return handleWorkerCallback(request)
   try {
-    const expectedOrigin = new URL(process.env.BETTER_AUTH_URL ?? request.url)
-      .origin
-    if (
-      request.headers.get("origin") !== expectedOrigin ||
-      !request.headers.get("content-type")?.startsWith("application/json")
-    )
+    const { user } = await authorizeBrowserRequest(request, {
+      session: "required",
+      mutation: true,
+    })
+    if (!request.headers.get("content-type")?.startsWith("application/json"))
       return Response.json(
-        { error: "Origine de la demande invalide." },
-        { status: 403, headers }
+        { error: "La demande doit être envoyée en JSON." },
+        { status: 415, headers }
       )
-    const { userId } = await studioAiAccess.requireUser()
+    const userId = user!.id
     if (Number(request.headers.get("content-length")) > 100_000)
       return new Response(null, { status: 413 })
     if (new URL(request.url).pathname.endsWith("/transport/in"))
@@ -177,6 +192,11 @@ export const handleAiPost = async (request: Request) => {
         return json({ ok: true })
     }
   } catch (error) {
+    if (error instanceof BrowserPolicyError)
+      return Response.json(
+        { error: error.message },
+        { status: error.kind === "origin" ? 403 : 401, headers }
+      )
     return errorResponse(error)
   }
 }

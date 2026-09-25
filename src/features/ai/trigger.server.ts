@@ -1,11 +1,12 @@
 import { auth } from "@trigger.dev/sdk"
 import { chat } from "@trigger.dev/sdk/ai"
-import { and, eq, inArray, lt, or } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
-import { aiConversations, aiRuns } from "@/db/schema"
-import { activeStatuses, requireConversation } from "./repository.server"
+import { aiConversations } from "@/db/schema"
+import { requireConversation } from "./repository.server"
+import { handleGenerationCommand } from "./generation.server"
 
-export const CHAT_TASK_ID = "studio-chat"
+const CHAT_TASK_ID = "studio-chat"
 const upstreamBase = "https://api.trigger.dev"
 export const startSession = async (userId: string, chatId: string) => {
   await requireConversation(userId, chatId)
@@ -38,22 +39,13 @@ export const triggerFetch = async (
   )
 }
 export const interruptRuns = async (userId: string, runId: string) => {
-  const rows = await getDatabase()
-    .update(aiRuns)
-    .set({
-      status: "interrupted",
-      error: "Génération arrêtée.",
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(aiRuns.userId, userId),
-        eq(aiRuns.id, runId),
-        inArray(aiRuns.status, [...activeStatuses])
-      )
-    )
-    .returning()
-  for (const row of rows) {
+  const outcome = await handleGenerationCommand({
+    type: "interrupt",
+    userId,
+    runId,
+  })
+  if (outcome.kind !== "interrupted") return
+  for (const row of outcome.runs) {
     await triggerFetch(row.conversationId, "in", {
       method: "POST",
       headers: {
@@ -67,26 +59,5 @@ export const interruptRuns = async (userId: string, runId: string) => {
 }
 /** Expired leases never replay a model request; worker heartbeats fail closed. */
 export const expireRuns = async () => {
-  await getDatabase()
-    .update(aiRuns)
-    .set({
-      status: "interrupted",
-      error: "Génération interrompue. Vous pouvez envoyer un nouveau message.",
-      updatedAt: new Date(),
-    })
-    .where(
-      or(
-        and(
-          eq(aiRuns.status, "running"),
-          or(
-            lt(aiRuns.updatedAt, new Date(Date.now() - 60_000)),
-            lt(aiRuns.startedAt, new Date(Date.now() - 600_000))
-          )
-        ),
-        and(
-          eq(aiRuns.status, "queued"),
-          lt(aiRuns.createdAt, new Date(Date.now() - 600_000))
-        )
-      )
-    )
+  await handleGenerationCommand({ type: "expire" })
 }
