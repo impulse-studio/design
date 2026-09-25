@@ -2,6 +2,7 @@
 
 > Résumé de toutes les fonctionnalités prévues. Le détail technique est dans [SPEC.md](./SPEC.md).
 > Légende : ✅ V1 · 🔜 V1.1 · 💭 V2 / à décider
+> Chat : [API OpenAI et Anthropic, AI SDK et Trigger.dev](AI_CHAT.md), clés centrales et modifications après validation. L’entrée image ne fait pas partie de cette V1.
 
 ## En une phrase
 Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrais composants Digitevent** (`digicomponents`) et le **vrai shell du backoffice**. On la génère par prompt (texte, spec ou image) avec son abonnement Claude, on l'affine comme dans Figma, et les devs l'inspectent en Dev Mode.
@@ -24,7 +25,7 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 - ✅ Contour bleu, poignées, étiquette `W × H`, survol, padding et gap visualisés en rose
 - ✅ Mesures de distance avec ⌥ au survol
 - ✅ Édition de texte directement dans le canvas (double-clic)
-- ✅ Mode **Preview ▶** pour interagir réellement (menus, modales, onglets)
+- ✅ Mode **Preview ▶** pour interagir avec les éléments HTML et handlers React exposés ; les états internes des composants Vue restent statiques dans cette version
 - ✅ Toolbar : Move, Frame, Hand, Insérer un composant, bascule Dev Mode
 - 💭 Dessin libre (rectangle, pen), prototypage (liens entre frames), commentaires
 
@@ -48,6 +49,7 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 - ✅ Champs numériques ajustables à la souris, comme dans Figma
 - ✅ Valeurs hors token possibles, mais signalées ⚠
 - ✅ Annuler / rétablir (⌘Z / ⇧⌘Z), sauvegarde automatique
+- ✅ Instances Digi liées avec overrides de props, texte, styles et dimensions ; variantes locales réutilisables dans la maquette ; détachement en éléments HTML et texte éditables
 
 ## 5. IA — Chat (panneau gauche, onglet AI)
 - ✅ Prompter avec **mon abonnement Claude** (token `claude setup-token` collé dans les Settings)
@@ -70,7 +72,7 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 - ✅ **Box model** : margin, border, padding, taille
 - ✅ **Layout et tokens** en CSS, Tailwind ou SCSS (`gap: var(--spacing-md) /* 16px */`)
 - ✅ Tokens utilisés : couleurs (pastille + nom), typographie, rayons, espacements
-- ✅ **Snippet Vue** de l'élément sélectionné, à copier
+- ✅ **Snippet React** de l'élément sélectionné, à copier
 - ✅ Alerte sur les valeurs hors tokens
 - 🔜 Export PNG d'une frame ou d'un élément
 
@@ -86,7 +88,9 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 - ✅ Lien lié à une version précise ou toujours à la dernière
 - ✅ Vue en lecture seule : canvas, layers, Dev Mode, sans chat ni édition
 - ✅ Liens révocables, avec expiration optionnelle et compteur de vues
-- 💭 Connexion Google `@digitevent.com` pour les devs
+- ✅ Comptes Better Auth : Google Workspace `@digitevent.com` en production, compte de développement sans Google en local
+- ✅ Équipes, invitations internes avec expiration, membres et rôles propriétaire / administrateur / éditeur / lecteur
+- ✅ Isolation des maquettes par équipe et contrôle des permissions côté serveur
 
 ## 9. Librairie de composants & release
 - ✅ Skill **`/sync-digicomponents`** : build de la lib depuis orchestration, copie dans le studio, récupération du shell backoffice
@@ -113,7 +117,9 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 ---
 
 ## Stack
-TanStack **Start / Router / Query / Store / Form / Table / Charts / Markdown** · React 19 + shadcn (interface du studio) · Vue 3 + digicomponents (rendu des frames) · Better Auth · Drizzle + Postgres · Claude Agent SDK · Railway
+TanStack **Start / Router / Query / Store / Form / Table / Charts / Markdown** · React 19 + shadcn · React pour le rendu des frames · shell d’iframe Vue · Orchestration `digicomponents` Vue comme source de snapshots à la sync · Better Auth · Drizzle + Postgres · Claude Agent SDK · Railway
+
+Les exports React et leurs arbres DOM sont générés depuis les snapshots SSR d’Orchestration. La frame est ensuite rendue et éditée par React sans monter de composants Vue dans le navigateur. Les interactions métier propres aux composants Vue doivent encore être portées pour atteindre une parité comportementale complète.
 
 ## Jalons
 | # | Contenu |

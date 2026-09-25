@@ -1,0 +1,62 @@
+name: digit-studio
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: digit_ai_studio
+      POSTGRES_USER: digit
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a database password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U digit -d digit_ai_studio']
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the internal PostgreSQL URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+  web:
+    build:
+      context: .
+      target: web
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      BETTER_AUTH_URL: https://${STUDIO_DOMAIN:?Set the studio hostname}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set the studio session secret}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Configure the existing Google login}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?Configure the existing Google login}
+      TRIGGER_SECRET_KEY: ${TRIGGER_SECRET_KEY}
+      AI_CALLBACK_SECRET: ${AI_CALLBACK_SECRET}
+      AI_MODELS: ${AI_MODELS:-[]}
+      AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-}
+      AI_ENABLED_PROVIDERS: ${AI_ENABLED_PROVIDERS:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+  https:
+    image: caddy:2-alpine
+    environment:
+      STUDIO_DOMAIN: ${STUDIO_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

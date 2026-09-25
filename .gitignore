@@ -4,6 +4,8 @@ dist
 dist-ssr
 *.local
 .env*
+!.env.example
+.trigger
 .tanstack
 .wrangler
 .output
@@ -13,6 +15,13 @@ todos.json
 
 # typescript
 *.tsbuildinfo
+*.dump
+backups/
 
 # renderer build output (served by the studio)
 public/renderer
+
+# React site compiler assets
+public/site-runtime
+src/generated/site-template.json
+site-template/src/base.css

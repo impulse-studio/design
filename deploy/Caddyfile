@@ -1,0 +1,9 @@
+{$STUDIO_DOMAIN} {
+  encode zstd gzip
+  request_body {
+    max_size 6MB
+  }
+  reverse_proxy web:3000 {
+    flush_interval -1
+  }
+}

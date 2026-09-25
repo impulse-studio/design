@@ -5,6 +5,12 @@
 
 ---
 
+## Périmètre livré — éditeur local
+
+Cette étape met en place le studio `/`, l’éditeur `/m/$mockupId`, les statuts de maquette, un rendu React des frames dans une iframe (avec un shell de communication Vue), les couleurs et les gestes d’édition, ainsi que PostgreSQL/Drizzle avec autosave et récupération locale. Les exports React de Digi sont générés à la sync depuis les snapshots SSR d’Orchestration ; leurs interactions métier ne sont pas toutes portées. La page est organisée sous `src/pages/editor/`.
+
+L’accès au studio repose sur Better Auth et les équipes. Le chat utilise les API OpenAI et Anthropic via AI SDK et Trigger.dev Cloud ; voir [le périmètre et la configuration](AI_CHAT.md). Les sections ci-dessous conservent la vision initiale, notamment les pistes image, liens publics, collaboration, prototypage et versions serveur qui ne décrivent pas cette implémentation. Le [README](../README.md) décrit les commandes utilisables.
+
 ## 0. Liens
 - Repo studio : `digit/digitAiStudio` (scaffold TanStack Start + React 19 + Tailwind 4 + shadcn `base-vega`)
 - Lib de composants : `digit/orchestration/lib/digicomponents` (Vue 3.5, reka-ui, Tailwind 4, ~294 `.vue`, 114 stories Histoire)
@@ -29,7 +35,7 @@ Aujourd'hui, maquetter une page Digitevent passe par Figma. Or :
 2. Générer / modifier une maquette par prompt (texte, spec collée, image à reproduire) via mon abonnement Claude.
 3. Éditer sans code : arbre de layers à gauche, inspecteur Figma à droite (auto-layout, gap, padding, W/H, hug/fill, props du composant).
 4. Rendu **pixel-identique** à l'app Digitevent (vrais composants + vrais tokens + vrai shell).
-5. Dev Mode en lecture via lien : composant, import, props, box model, tokens CSS, snippet Vue.
+5. Dev Mode en lecture via lien : composant, import, props, box model, tokens CSS, snippet React.
 6. Historique de versions restaurable.
 7. Mise à jour de la lib via un skill → release du studio.
 
@@ -41,18 +47,23 @@ Aujourd'hui, maquetter une page Digitevent passe par Figma. Or :
 - Pages invitées (`front`) — V2.
 
 ## 3. Utilisateurs & rôles
-| Rôle | Qui | Peut |
-|---|---|---|
-| **Owner / éditeur** | Nicolas (unique) | tout : créer, prompter, éditer, versionner, partager, settings |
-| **Viewer dev** | devs Digitevent via lien | voir la maquette, naviguer, Dev Mode, copier snippets. Pas d'édition, pas de prompt |
 
-Auth : **Better Auth** (https://better-auth.com), intégré à TanStack Start (handler monté sur `/api/auth/*`, adapter Drizzle/Postgres).
-- V1 : login **email + mot de passe** pour l'owner. Inscription désactivée après la création du compte owner, qu'on crée par un script seed.
-- Plugin **admin** / champ `role` (`owner` | `viewer`) pour préparer l'ouverture à d'autres comptes.
-- Option recommandée : provider **Google** restreint au domaine `@digitevent.com`. Les devs peuvent ainsi se connecter en viewer sans lien, en plus des liens de partage. ❓ V1 ou V1.1 ?
-- Viewers sans compte : `/share/$token`. Ces liens de partage sont gérés par l'app, hors de Better Auth.
+Auth : **Better Auth**, intégré à TanStack Start (handler `/api/auth/*`, adapter Drizzle/PostgreSQL, plugin Organization). Une organisation Better Auth correspond à une équipe dans l’interface.
 
-❓ Plus tard : ouvrir l'édition à d'autres (chacun sa clé) ? Better Auth permet de le faire facilement : rôle `editor` + token Claude stocké par utilisateur.
+- Production : connexion Google uniquement, adresse vérifiée `@digitevent.com` et domaine Google Workspace `hd=digitevent.com`, contrôlés à chaque connexion.
+- Développement : compte `dev@digitevent.com` sans Google, activé explicitement uniquement sur localhost en mode développement. Il est propriétaire de l’équipe locale.
+- Chaque utilisateur peut créer une équipe. L’accès à une équipe existante nécessite une invitation nominative, valable 7 jours, acceptée depuis `/teams`. Pas d’envoi d’email automatique.
+- Gestion des membres, rôles, invitations, changement d’équipe, renommage et départ depuis `/teams`.
+- Maquettes isolées par équipe. Les permissions sont vérifiées sur les fonctions serveur et dans les requêtes de persistance. Les lecteurs restent en inspection sans autosauvegarde.
+
+| Rôle | Droits |
+| --- | --- |
+| Propriétaire | Toutes les actions, gestion des propriétaires. Le dernier propriétaire ne peut pas quitter l’équipe ni perdre son rôle. |
+| Administrateur | Création et édition des maquettes, invitations, gestion des membres hors propriétaires, renommage. |
+| Éditeur | Création et édition des maquettes de son équipe. |
+| Lecteur | Lecture, aperçu et Dev Mode. |
+
+Le partage public `/share/$token`, les rôles personnalisés et la collaboration simultanée restent des évolutions séparées.
 
 ## 4. Glossaire
 - **Projet** : dossier regroupant des maquettes (ex. « Refonte inscriptions »).
@@ -97,7 +108,7 @@ Auth : **Better Auth** (https://better-auth.com), intégré à TanStack Start (h
 ---
 
 ## 6. Écrans & UI (détaillé)
-Look & feel : l'UI du **studio** reprend le style Digitevent (Poppins, primary `hsl(229 100% 48%)`, radius, gris) mais avec une densité Figma (fonts 12–13px dans les panneaux). Le shell studio est en shadcn/React, thémé avec les tokens Digitevent recopiés.
+Look & feel : l’UI du **studio** utilise Digit UI, construit en shadcn/React et inspiré de l’application Linear : Inter pour les contrôles, Inter Display pour les titres, surfaces neutres claires et sombres, densité compacte et indicateurs de statut sémantiques. Les composants, variantes et tokens sont documentés dans `docs/DESIGN_SYSTEM.md`. Le thème du renderer Digitevent reste propre au contenu des maquettes.
 
 ### 6.1 Recents `/`
 - Sidebar gauche (240px) : avatar + nom, recherche (⌘K), **Recents**, **Projets** (liste), **Corbeille**.
@@ -173,7 +184,7 @@ Sections selon le type de node (toutes via **TanStack Form**, champs numériques
 - **Box model** : schéma margin/border/padding/content avec valeurs (comme Figma).
 - **Layout** : `display:flex; flex-direction:column; gap: var(--spacing-md) /* 16px */` — liste ou code, **CSS | Tailwind | SCSS** (`$spacing-md`).
 - **Tokens utilisés** : couleur (swatch + nom token + valeur HSL/hex), typographie, radius, spacing.
-- **Snippet Vue** du sous-arbre sélectionné (généré depuis le JSON, formatté, copiable).
+- **Snippet React** du sous-arbre sélectionné (généré depuis le JSON, formatté, copiable).
 - **Assets** : images exportables (PNG de la frame / du node, via capture de l'iframe) ❓V1.1.
 
 #### 6.2.6 Panneau History
@@ -256,17 +267,15 @@ Règles :
 
 ---
 
-## 8. Renderer Vue (iframes)
-- App Vite Vue 3 séparée dans `renderer/`, buildée dans `public/renderer/` (servie en statique même origine → pas de souci CORS, `postMessage` avec vérif d'origin).
-- Importe `digicomponents` depuis `renderer/vendor/digicomponents/` (dist + `style.css`) et Poppins.
-- Wrap global identique à `back/src/App.vue` : `DigiComponentConfigProvider` → `DigiTooltipProvider`.
-- `Render.vue` récursif :
-  - `component` → `registry[node.component]` (map générée depuis le manifest) avec `v-bind="props"`, slots nommés rendus via `<template #[name]>`.
-  - `template` → composant du shell vendorisé avec slots.
-  - `box` → `<div>` flex avec styles calculés depuis tokens (`gap: var(--spacing-md)`).
-  - chaque élément racine reçoit `data-node-id` (via wrapper `display:contents` + `ref` pour mesurer le premier enfant réel).
+## 8. Renderer des frames (iframes)
+- Le build Vite de `renderer/` produit une iframe de même origine avec un bridge `postMessage` vérifiant l’origine.
+- `renderer/src/App.vue` conserve le shell Vue et le bridge ; `renderer/src/ReactRenderFrame.tsx` rend l’arbre de maquette avec React.
+- `@digit-ai-studio/digicomponents-react` exporte un wrapper React typé pour chaque composant du manifest. La sync génère leurs arbres depuis les snapshots SSR de la bibliothèque Vue d’Orchestration et copie `style.css`.
+- `component` → arbre React issu du snapshot, props textuelles/variantes remplacées, slots remplis par les enfants de la maquette ; styles et dimensions d’instance appliqués au nœud racine.
+- `element` → balise HTML React avec attributs et styles filtrés ; les autres nodes (box, texte, image) sont rendus en éléments React.
+- Les composants qui exigent un contexte parent doivent être composés par une recette ; leurs snapshots isolés peuvent échouer. Les interactions métier internes à Vue demandent encore une implémentation React dédiée.
 - **Stubs du shell back** : `vue-router` en memory history avec routes factices, `vue-i18n` avec les vraies traductions FR (copiées par le skill depuis `lib/digi18n`) — ❓ confirmer où vivent les traductions ; stores Pinia mockés (événement fictif « Salon Digitevent 2026 », user « Nicolas »), SDK API remplacé par un mock.
-- Mode édition : overlay transparent capture les pointer events → hit-testing par `document.elementsFromPoint` puis remontée au `data-node-id` le plus proche. Mode preview : interactions réelles.
+- Mode édition : overlay transparent capture les pointer events → hit-testing par `document.elementsFromPoint` puis remontée au `data-editor-node` le plus proche. Mode preview : handlers React exposés ; l’état métier des composants Vue reste à porter.
 - Taille : la frame force `width` ; hauteur `hug` → le renderer renvoie sa hauteur de contenu (ResizeObserver).
 
 ### 8.1 Protocole bridge (postMessage)
@@ -382,12 +391,12 @@ Iframe → shell :
 | Rendu markdown du chat / specs collées | **TanStack Markdown** (idem, vérifier ; fallback `react-markdown`) |
 | Virtualisation de l'arbre de layers si gros | TanStack Virtual |
 | Raccourcis clavier | TanStack Hotkeys si dispo, sinon `tinykeys` |
-| UI shell | shadcn (base-ui) + Tailwind 4 + remixicon, thème tokens Digitevent |
+| UI shell | shadcn (Base UI) + Tailwind 4 + Remix Icon, thème Digit UI |
 | Auth | **Better Auth** (email/password, admin plugin, Google domaine optionnel, adapter Drizzle, helper TanStack Start + `beforeLoad` pour protéger les routes) — vérifier la doc courante via context7 à l'install |
 | DB | Postgres (Railway) + **Drizzle** |
 | Validation | Zod |
 | IA | Claude Agent SDK |
-| Renderer | Vue 3 + Vite + digicomponents |
+| Renderer des frames | React 19 + Vite ; shell de bridge Vue 3 ; snapshots générés depuis digicomponents Orchestration |
 
 Monorepo pnpm dans `digitAiStudio` : `apps/studio` (actuel) + `apps/renderer` ? ou dossier `renderer/` simple — **reco : pnpm workspace** (`studio`, `renderer`, `packages/doc-schema` partagé Zod + types, `packages/manifest`).
 
@@ -434,7 +443,7 @@ usage_events  (id, mockup_id, model, input_tokens, output_tokens, duration_ms, c
 | M2 | Socle app | Workspace pnpm, Drizzle + Railway Postgres, Better Auth (seed owner, routes protégées), Recents (grille + Table), CRUD projets/maquettes. |
 | M3 | Éditeur statique | Canvas zoom/pan, frames multiples, sélection via bridge, overlay, layers (sélection, réordonner, masquer), inspecteur Design (auto-layout, taille, props), undo/redo, autosave. |
 | M4 | IA | Settings token, agent + outils, streaming chat Markdown, patches live, scope sélection, image input. |
-| M5 | Versions & partage | History, restauration, share links, `/share/$token`, Dev Mode Inspect complet (props, box model, tokens, snippet Vue). |
+| M5 | Versions & partage | History, restauration, share links, `/share/$token`, Dev Mode Inspect complet (props, box model, tokens, snippet React). |
 | M6 | Polish & prod | Thumbnails, usage Charts, raccourcis, preview mode, deploy Railway, doc d'usage. |
 
 ## 16. Risques

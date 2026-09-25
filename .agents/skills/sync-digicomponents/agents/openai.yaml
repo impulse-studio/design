@@ -1,0 +1,6 @@
+interface:
+  display_name: "Sync DigiComponents"
+  short_description: "Synchronise la librairie et régénère son manifest"
+  default_prompt: "Lance $sync-digicomponents pour synchroniser la librairie de composants dans le dépôt."
+policy:
+  allow_implicit_invocation: false

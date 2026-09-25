@@ -4,9 +4,10 @@
     "**/*.tsx",
     "eslint.config.js",
     "prettier.config.js",
-    "vite.config.ts"
+    "vite.config.ts",
+    "trigger.config.ts"
   ],
-  "exclude": ["node_modules", "renderer", "public", "dist"],
+  "exclude": ["node_modules", "renderer", "public", "dist", "site-template"],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+.git
+.env
+.env.*
+!.env.example
+.output
+dist
+public/renderer
+.tanstack
+.codex
+.claude
+.agents
+*.log
+*.dump
+backups

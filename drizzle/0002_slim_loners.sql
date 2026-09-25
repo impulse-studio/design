@@ -1,0 +1,2 @@
+CREATE TYPE "public"."mockup_status" AS ENUM('draft', 'in_progress', 'in_review', 'approved');--> statement-breakpoint
+ALTER TABLE "mockups" ADD COLUMN "status" "mockup_status" DEFAULT 'draft' NOT NULL;

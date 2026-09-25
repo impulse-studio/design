@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "oauth_client_resource_unique_idx" ON "oauth_client_resource" USING btree ("client_id","resource_id");
