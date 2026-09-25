@@ -5,7 +5,11 @@ import type { ComponentNode, FrameNode, MockupDoc, Node } from "./doc"
 let seq = 0
 const id = (prefix: string) => `${prefix}-${++seq}`
 
-const c = (component: string, props: ComponentNode["props"] = {}, extra: Partial<ComponentNode> = {}): ComponentNode => ({
+const c = (
+  component: string,
+  props: ComponentNode["props"] = {},
+  extra: Partial<ComponentNode> = {}
+): ComponentNode => ({
   id: id(component),
   type: "component",
   component,
@@ -14,7 +18,13 @@ const c = (component: string, props: ComponentNode["props"] = {}, extra: Partial
 })
 
 const cell = (content: Node | string) =>
-  c("DigiTableCell", {}, typeof content === "string" ? { text: content } : { slots: { default: [content] } })
+  c(
+    "DigiTableCell",
+    {},
+    typeof content === "string"
+      ? { text: content }
+      : { slots: { default: [content] } }
+  )
 
 const guests = [
   ["Camille Martin", "camille.martin@acme.fr", "Inscrit", "green"],
@@ -45,52 +55,99 @@ export const demoFrame: FrameNode = {
             "DigiTablePageLayout",
             {
               title: "Liste des invités",
-              description: "Relancez les invités qui n'ont pas encore répondu à votre invitation.",
+              description:
+                "Relancez les invités qui n'ont pas encore répondu à votre invitation.",
               createCta: "Ajouter un invité",
             },
             {
               slots: {
                 table: [
-                  c("DigiTable", {}, {
-                    slots: {
-                      default: [
-                        c("DigiTableHeader", {}, {
-                          slots: {
-                            default: [
-                              c("DigiTableRow", {}, {
-                                slots: {
-                                  default: ["Nom", "E-mail", "Statut", ""].map((label) => c("DigiTableHead", {}, { text: label })),
-                                },
-                              }),
-                            ],
-                          },
-                        }),
-                        c("DigiTableBody", {}, {
-                          slots: {
-                            default: guests.map(([name, email, status, color]) =>
-                              c("DigiTableRow", {}, {
-                                slots: {
-                                  default: [
-                                    cell(name),
-                                    cell(email),
-                                    cell(c("DigiBadge", { color, text: status })),
-                                    cell(
-                                      status === "En attente"
-                                        ? c("DigiButton", { variant: "secondary", size: "sm", iconName: "mail-send-line" }, { text: "Relancer" })
-                                        : "",
-                                    ),
-                                  ],
-                                },
-                              }),
-                            ),
-                          },
-                        }),
-                      ],
-                    },
-                  }),
+                  c(
+                    "DigiTable",
+                    {},
+                    {
+                      slots: {
+                        default: [
+                          c(
+                            "DigiTableHeader",
+                            {},
+                            {
+                              slots: {
+                                default: [
+                                  c(
+                                    "DigiTableRow",
+                                    {},
+                                    {
+                                      slots: {
+                                        default: [
+                                          "Nom",
+                                          "E-mail",
+                                          "Statut",
+                                          "",
+                                        ].map((label) =>
+                                          c(
+                                            "DigiTableHead",
+                                            {},
+                                            { text: label }
+                                          )
+                                        ),
+                                      },
+                                    }
+                                  ),
+                                ],
+                              },
+                            }
+                          ),
+                          c(
+                            "DigiTableBody",
+                            {},
+                            {
+                              slots: {
+                                default: guests.map(
+                                  ([name, email, status, color]) =>
+                                    c(
+                                      "DigiTableRow",
+                                      {},
+                                      {
+                                        slots: {
+                                          default: [
+                                            cell(name),
+                                            cell(email),
+                                            cell(
+                                              c("DigiBadge", {
+                                                color,
+                                                text: status,
+                                              })
+                                            ),
+                                            cell(
+                                              status === "En attente"
+                                                ? c(
+                                                    "DigiButton",
+                                                    {
+                                                      variant: "secondary",
+                                                      size: "sm",
+                                                      iconName:
+                                                        "mail-send-line",
+                                                    },
+                                                    { text: "Relancer" }
+                                                  )
+                                                : ""
+                                            ),
+                                          ],
+                                        },
+                                      }
+                                    )
+                                ),
+                              },
+                            }
+                          ),
+                        ],
+                      },
+                    }
+                  ),
                 ],
               },
-            },
+            }
           ),
         ],
       },
@@ -114,18 +171,36 @@ export const demoMobileFrame: FrameNode = {
       autoLayout: {
         direction: "column",
         gap: { token: "spacing-md" },
-        padding: [{ token: "spacing-lg" }, { token: "spacing-md" }, { token: "spacing-lg" }, { token: "spacing-md" }],
+        padding: [
+          { token: "spacing-lg" },
+          { token: "spacing-md" },
+          { token: "spacing-lg" },
+          { token: "spacing-md" },
+        ],
       },
       children: [
-        { id: "mobile-title", type: "text", content: "Relancer les invités", textStyle: { token: "font-size-xl" }, weight: 600 },
+        {
+          id: "mobile-title",
+          type: "text",
+          content: "Relancer les invités",
+          textStyle: { token: "font-size-xl" },
+          weight: 600,
+        },
         {
           id: "mobile-desc",
           type: "text",
           content: "2 invités n'ont pas encore répondu à votre invitation.",
           color: { token: "muted-foreground" },
         },
-        c("DigiAlert", { title: "Dernière relance il y a 3 jours", variant: "info" }),
-        c("DigiButton", { variant: "primary", iconName: "mail-send-line" }, { text: "Relancer 2 invités" }),
+        c("DigiAlert", {
+          title: "Dernière relance il y a 3 jours",
+          variant: "info",
+        }),
+        c(
+          "DigiButton",
+          { variant: "primary", iconName: "mail-send-line" },
+          { text: "Relancer 2 invités" }
+        ),
         c("DigiButton", { variant: "secondary" }, { text: "Voir la liste" }),
       ],
     },
@@ -135,5 +210,12 @@ export const demoMobileFrame: FrameNode = {
 export const demoDoc: MockupDoc = {
   schemaVersion: 1,
   libVersion: "dev",
-  frames: [demoFrame, demoMobileFrame],
+  pages: [
+    {
+      id: "page-1",
+      name: "Page 1",
+      background: "#f5f5f5",
+      frames: [demoFrame, demoMobileFrame],
+    },
+  ],
 }

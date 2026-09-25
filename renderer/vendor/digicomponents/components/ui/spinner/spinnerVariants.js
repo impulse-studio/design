@@ -1,4 +1,4 @@
-import { cva } from "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
+import { cva } from "../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
 const spinnerVariants = /* @__PURE__ */ cva("inline-block animate-spin align-middle", {
   variants: {
     size: {

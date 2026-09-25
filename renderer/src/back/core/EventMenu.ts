@@ -1,7 +1,11 @@
-import type { Event, EventPermission, EventRights } from 'api_sdk'
+import type { Component } from 'vue'
 import type { RouteRecordName } from 'vue-router'
 
-import type { Renderable } from '@/models/VueTools'
+// Local shell contract: business permissions are not evaluated by the renderer.
+type Renderable = Component
+type Event = Readonly<Record<string, unknown>>
+type EventRights = Readonly<Record<string, unknown>>
+type EventPermission = string
 
 export interface EventMenuSection {
   readonly key: string

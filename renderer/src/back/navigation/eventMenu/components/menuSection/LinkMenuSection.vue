@@ -29,7 +29,7 @@ import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
 
 import { isEventMenuItemLink } from '@/core/EventMenu'
-import type { EventMenuItem, EventMenuSection } from '@/navigation/eventMenu'
+import type { EventMenuItem, EventMenuSection } from '@/core/EventMenu'
 
 const props = defineProps<{
   section: EventMenuSection

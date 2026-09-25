@@ -1,5 +1,5 @@
 import { defineComponent, useModel, useTemplateRef, withDirectives, openBlock, createElementBlock, mergeProps, unref, vModelText, mergeModels } from "vue";
-import { cva } from "../../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
+import { cva } from "../../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
 import { cn } from "../../../../lib/cn.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "DigiTextarea",

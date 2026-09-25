@@ -1,6 +1,6 @@
 import { defineComponent, useModel, computed, openBlock, createElementBlock, normalizeClass, unref, createVNode, withCtx, renderSlot, createElementVNode, toDisplayString, mergeModels } from "vue";
-import { SwitchRoot_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Switch/SwitchRoot.js";
-import { SwitchThumb_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Switch/SwitchThumb.js";
+import { SwitchRoot_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Switch/SwitchRoot.js";
+import { SwitchThumb_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Switch/SwitchThumb.js";
 import { cn } from "../../../lib/cn.js";
 import { switchVariants } from "./variants.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({

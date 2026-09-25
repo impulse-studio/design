@@ -38,7 +38,8 @@ import { mockEvent } from '@/store/useEventStore'
 
 import { ensureRoute, router } from '../router'
 
-import { DEFAULT_EVENT, DEFAULT_MENU_SECTIONS, type MenuSectionInput } from './constants'
+import { DEFAULT_EVENT, DEFAULT_MENU_SECTIONS  } from './constants'
+import type {MenuSectionInput} from './constants';
 
 const props = withDefaults(
   defineProps<{

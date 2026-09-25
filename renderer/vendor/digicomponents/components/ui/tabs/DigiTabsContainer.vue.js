@@ -1,5 +1,5 @@
 import { defineComponent, useModel, computed, watchEffect, openBlock, createBlock, unref, mergeProps, withCtx, createElementVNode, normalizeClass, createVNode, createElementBlock, Fragment, renderList, createSlots, createCommentVNode, createTextVNode, toDisplayString, renderSlot, mergeModels } from "vue";
-import { TabsRoot_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Tabs/TabsRoot.js";
+import { TabsRoot_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Tabs/TabsRoot.js";
 import DigiRemixIcon from "../icon/DigiRemixIcon.vue.js";
 import _sfc_main$1 from "./internals/DigiTabsList.vue.js";
 import _sfc_main$2 from "./internals/DigiTabsTrigger.vue.js";

@@ -5,8 +5,8 @@ import { DEFAULT_EVENT } from "~/templates/constants"
 
 export const mockEvent = reactive({
   _id: DEFAULT_EVENT.id,
-  name: DEFAULT_EVENT.name,
-  startDate: DEFAULT_EVENT.startDate,
+  name: String(DEFAULT_EVENT.name),
+  startDate: String(DEFAULT_EVENT.startDate),
   timezone: DEFAULT_EVENT.timezone,
   isDemo: false,
 })

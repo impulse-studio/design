@@ -1,5 +1,5 @@
 import { defineComponent, toRefs, ref, watch, computed, unref, withDirectives, openBlock, createElementBlock, normalizeStyle, createElementVNode, toDisplayString, Fragment, renderList, createVNode, withCtx, withModifiers, normalizeClass, vShow, createCommentVNode } from "vue";
-import { useResizeObserver, useIntersectionObserver } from "../../../node_modules/.pnpm/@vueuse_core@14.2.1_vue@3.5.28_typescript@5.9.3_/node_modules/@vueuse/core/dist/index.js";
+import { useResizeObserver, useIntersectionObserver } from "../../../external/.pnpm/@vueuse_core@14.2.1_vue@3.5.28_typescript@5.9.3_/external/@vueuse/core/dist/index.js";
 import { useReadonlyDefaultTexts } from "../../../config/composables.js";
 import _sfc_main$1 from "../tooltip/DigiTextTooltip.vue.js";
 import { useTableOfContentLinkContext } from "./utils.js";

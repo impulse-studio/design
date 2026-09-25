@@ -10,7 +10,7 @@ import _sfc_main$7 from "./internals/command/CommandList.vue.js";
 import _sfc_main$8 from "./internals/ItemOrGroupRenderer.vue.js";
 import _sfc_main$2 from "./internals/MultipleSelectValues.vue.js";
 import { provideOptionKey } from "./internals/optionKey.js";
-import SelectTrigger from "./internals/SelectTrigger.vue2.js";
+import SelectTrigger from "./internals/SelectTrigger.vue.js";
 import { filterOptionOrGroups, computeValueText, getSelectedOptionsFromValues, getValueFromOptions } from "./utils.js";
 const _hoisted_1 = { class: "border-b p-2 empty:hidden" };
 const _sfc_main = /* @__PURE__ */ defineComponent({

@@ -1,5 +1,5 @@
 import { defineComponent, ref, openBlock, createElementBlock, normalizeClass, unref, createElementVNode, createVNode, toDisplayString, createBlock, withCtx, createTextVNode, createCommentVNode } from "vue";
-import { cva } from "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
+import { cva } from "../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
 import { useReadonlyDefaultTexts } from "../../../config/composables.js";
 import { cn } from "../../../lib/cn.js";
 import _sfc_main$1 from "../actions/button/DigiButton.vue.js";

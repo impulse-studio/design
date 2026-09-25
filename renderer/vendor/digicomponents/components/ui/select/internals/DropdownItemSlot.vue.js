@@ -1,6 +1,6 @@
 import { defineComponent, openBlock, createBlock, unref, normalizeClass, withCtx, renderSlot } from "vue";
 /* empty css                            */
-import _sfc_main$1 from "./command/CommandItem.vue2.js";
+import _sfc_main$1 from "./command/CommandItem.vue.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "DropdownItemSlot",
   props: {

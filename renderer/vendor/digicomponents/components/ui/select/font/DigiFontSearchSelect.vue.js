@@ -1,5 +1,5 @@
 import { defineComponent, useModel, ref, computed, onMounted, openBlock, createElementBlock, Fragment, renderList, createVNode, unref, withCtx, normalizeStyle, createBlock, createCommentVNode, createTextVNode, toDisplayString, mergeModels } from "vue";
-import { ListboxVirtualizer_default } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Listbox/ListboxVirtualizer.js";
+import { ListboxVirtualizer_default } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Listbox/ListboxVirtualizer.js";
 import { useReadonlyDefaultTexts } from "../../../../config/composables.js";
 import _sfc_main$1 from "../../popover/DigiPopover.vue.js";
 /* empty css                            */
@@ -9,7 +9,7 @@ import _sfc_main$5 from "../internals/listbox/ListboxInput.vue.js";
 import _sfc_main$6 from "../internals/listbox/ListboxContent.vue.js";
 import _sfc_main$7 from "../internals/listbox/ListboxItem.vue.js";
 import _sfc_main$2 from "../internals/MultipleSelectValues.vue.js";
-import SelectTrigger from "../internals/SelectTrigger.vue2.js";
+import SelectTrigger from "../internals/SelectTrigger.vue.js";
 import { useFontsStore } from "./store.js";
 const _hoisted_1 = ["href"];
 const _sfc_main = /* @__PURE__ */ defineComponent({

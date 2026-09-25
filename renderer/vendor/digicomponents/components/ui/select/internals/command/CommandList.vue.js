@@ -1,6 +1,6 @@
 import { defineComponent, computed, openBlock, createBlock, unref, mergeProps, withCtx, createElementVNode, renderSlot } from "vue";
-import { useForwardPropsEmits } from "../../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/shared/useForwardPropsEmits.js";
-import { ComboboxContent_default } from "../../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Combobox/ComboboxContent.js";
+import { useForwardPropsEmits } from "../../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/shared/useForwardPropsEmits.js";
+import { ComboboxContent_default } from "../../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Combobox/ComboboxContent.js";
 import { cn } from "../../../../../lib/cn.js";
 const _hoisted_1 = { role: "presentation" };
 const _sfc_main = /* @__PURE__ */ defineComponent({

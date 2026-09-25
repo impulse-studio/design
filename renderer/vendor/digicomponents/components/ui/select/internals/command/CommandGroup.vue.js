@@ -1,6 +1,6 @@
 import { defineComponent, computed, openBlock, createBlock, unref, mergeProps, withCtx, createCommentVNode, createTextVNode, toDisplayString, renderSlot } from "vue";
-import { ComboboxGroup_default } from "../../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Combobox/ComboboxGroup.js";
-import { ComboboxLabel_default } from "../../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Combobox/ComboboxLabel.js";
+import { ComboboxGroup_default } from "../../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Combobox/ComboboxGroup.js";
+import { ComboboxLabel_default } from "../../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Combobox/ComboboxLabel.js";
 import { cn } from "../../../../../lib/cn.js";
 import DigiRemixIcon from "../../../icon/DigiRemixIcon.vue.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({

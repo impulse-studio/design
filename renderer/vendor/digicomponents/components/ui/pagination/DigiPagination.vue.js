@@ -1,6 +1,6 @@
 import { defineComponent, useModel, openBlock, createBlock, unref, withCtx, createVNode, createElementBlock, Fragment, renderList, mergeModels } from "vue";
-import { PaginationRoot_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Pagination/PaginationRoot.js";
-import { PaginationList_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Pagination/PaginationList.js";
+import { PaginationRoot_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Pagination/PaginationRoot.js";
+import { PaginationList_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Pagination/PaginationList.js";
 import _sfc_main$4 from "./internals/PaginationEllipsis.vue.js";
 import _sfc_main$1 from "./internals/PaginationFirst.vue.js";
 import _sfc_main$3 from "./internals/PaginationItem.vue.js";

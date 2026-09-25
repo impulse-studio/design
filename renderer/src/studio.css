@@ -22,3 +22,8 @@ body,
 .studio-edit-mode {
   cursor: default;
 }
+html { overflow: hidden; }
+.studio-frame { position: relative; box-sizing: border-box; }
+.studio-frame[data-mode='edit'] { user-select: none; }
+[data-editor-text][contenteditable='true'] { outline: 1px solid #0d99ff; user-select: text; cursor: text; min-width: 1ch; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

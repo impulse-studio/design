@@ -1,6 +1,6 @@
 import { defineComponent, openBlock, createBlock, unref, withCtx, createCommentVNode, createTextVNode, toDisplayString, createElementVNode, withModifiers, renderSlot } from "vue";
 import DigiRemixIcon from "../../icon/DigiRemixIcon.vue.js";
-import _sfc_main$1 from "./command/CommandItem.vue2.js";
+import _sfc_main$1 from "./command/CommandItem.vue.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "SelectItem",
   props: {

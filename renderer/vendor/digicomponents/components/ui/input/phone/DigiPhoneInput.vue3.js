@@ -1,7 +1,7 @@
 import { defineComponent, useCssVars, useModel, useTemplateRef, computed, ref, onMounted, nextTick, readonly, openBlock, createBlock, unref, mergeModels } from "vue";
-import { useElementBounding } from "../../../../node_modules/.pnpm/@vueuse_core@14.2.1_vue@3.5.28_typescript@5.9.3_/node_modules/@vueuse/core/dist/index.js";
-import { cva } from "../../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
-import { VueTelInput as Ke } from "../../../../node_modules/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-tel-input/dist/vue-tel-input.js";
+import { useElementBounding } from "../../../../external/.pnpm/@vueuse_core@14.2.1_vue@3.5.28_typescript@5.9.3_/external/@vueuse/core/dist/index.js";
+import { cva } from "../../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
+import { VueTelInput as Ke } from "../../../../external/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/external/vue-tel-input/dist/vue-tel-input.js";
 /* empty css                                                                                                                                                         */
 import { cn } from "../../../../lib/cn.js";
 import { inputVariants } from "../variants.js";

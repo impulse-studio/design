@@ -34,7 +34,15 @@ export const RADIUS_TOKENS = {
   "radius-xl": 12,
 } as const
 
-export const FONT_SIZE_TOKENS = ["font-size-xs", "font-size-sm", "font-size-md", "font-size-lg", "font-size-xl", "font-size-2xl", "font-size-3xl"] as const
+export const FONT_SIZE_TOKENS = [
+  "font-size-xs",
+  "font-size-sm",
+  "font-size-md",
+  "font-size-lg",
+  "font-size-xl",
+  "font-size-2xl",
+  "font-size-3xl",
+] as const
 
 export const COLOR_TOKENS = [
   "background",
@@ -55,3 +63,9 @@ export const COLOR_TOKENS = [
 export const FONT_WEIGHTS = [400, 500, 600, 700] as const
 
 export type EditorMode = "edit" | "preview"
+
+// Context providers render their slots without a DOM root to carry layout styles.
+export const LAYOUT_WRAPPER_COMPONENTS: ReadonlySet<string> = new Set([
+  "DigiPopover",
+  "DigiDropdownMenu",
+])

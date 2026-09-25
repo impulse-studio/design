@@ -1,5 +1,5 @@
 import { defineComponent, useTemplateRef, computed, openBlock, createBlock, withCtx, createVNode, unref, createElementVNode, renderSlot, createElementBlock } from "vue";
-import { Form } from "../../../node_modules/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/node_modules/vee-validate/dist/vee-validate.js";
+import { Form } from "../../../external/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/external/vee-validate/dist/vee-validate.js";
 import { provideFormFieldContext } from "../form/injectionKeys.js";
 /* empty css                         */
 /* empty css                          */
@@ -10,10 +10,10 @@ import "zod";
 /* empty css                                      */
 /* empty css                               */
 import "../../../lib/zodSchemas.js";
-/* empty css                                    */
+/* empty css                                     */
 import _sfc_main$3 from "./internals/DigiModalScrollArea.vue.js";
 import "lodash-es";
-import "../../../node_modules/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-tel-input/dist/vue-tel-input.js";
+import "../../../external/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/external/vue-tel-input/dist/vue-tel-input.js";
 /* empty css                                                                                                                                                      */
 /* empty css                                */
 /* empty css                                   */

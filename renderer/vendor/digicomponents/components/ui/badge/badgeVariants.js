@@ -1,4 +1,4 @@
-import { cva } from "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
+import { cva } from "../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
 const badgeVariants = /* @__PURE__ */ cva(
   "focus:ring-ring inline-flex w-min max-w-full min-w-0 items-center rounded-full border px-1.5 px-2 py-0.5 text-center text-xs leading-[1.1] font-medium transition-colors focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
   {

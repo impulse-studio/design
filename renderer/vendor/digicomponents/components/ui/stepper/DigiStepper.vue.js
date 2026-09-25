@@ -1,5 +1,5 @@
 import { defineComponent, useModel, openBlock, createBlock, unref, mergeProps, withCtx, createElementBlock, Fragment, renderList, createCommentVNode, createVNode, normalizeClass, createElementVNode, createTextVNode, toDisplayString, mergeModels } from "vue";
-import { StepperRoot_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Stepper/StepperRoot.js";
+import { StepperRoot_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Stepper/StepperRoot.js";
 import { cn } from "../../../lib/cn.js";
 /* empty css                         */
 /* empty css                          */
@@ -9,7 +9,7 @@ import _sfc_main$1 from "./internals/StepperItem.vue.js";
 import _sfc_main$2 from "./internals/StepperSeparator.vue.js";
 import _sfc_main$5 from "./internals/StepperTitle.vue.js";
 import _sfc_main$3 from "./internals/StepperTrigger.vue.js";
-import { reactiveOmit } from "../../../node_modules/.pnpm/@vueuse_shared@14.2.1_vue@3.5.28_typescript@5.9.3_/node_modules/@vueuse/shared/dist/index.js";
+import { reactiveOmit } from "../../../external/.pnpm/@vueuse_shared@14.2.1_vue@3.5.28_typescript@5.9.3_/external/@vueuse/shared/dist/index.js";
 const _hoisted_1 = { class: "mt-1 flex flex-col items-center text-center" };
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "DigiStepper",

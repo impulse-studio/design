@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from "node:url"
 
+import react from "@vitejs/plugin-react"
 import vue from "@vitejs/plugin-vue"
 import { defineConfig } from "vite"
 
@@ -8,7 +9,7 @@ const vendor = (path: string) => fileURLToPath(new URL(`./vendor/digicomponents/
 // Built into the studio's public folder so frames load it from the same origin (/renderer/).
 export default defineConfig({
   base: "/renderer/",
-  plugins: [vue()],
+  plugins: [vue(), react()],
   resolve: {
     alias: [
       { find: /^digicomponents\/dist\/variables$/, replacement: vendor("variables.scss") },

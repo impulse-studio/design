@@ -1,5 +1,5 @@
 import { defineComponent, useModel, computed, openBlock, createElementBlock, createVNode, createTextVNode, mergeModels } from "vue";
-import { fromDate as $11d87f3f76e88657$export$e57ff100d91bd4b9 } from "../../../../node_modules/.pnpm/@internationalized_date@3.11.0/node_modules/@internationalized/date/dist/conversion.js";
+import { fromDate as $11d87f3f76e88657$export$e57ff100d91bd4b9 } from "../../../../external/.pnpm/@internationalized_date@3.11.0/external/@internationalized/date/dist/conversion.js";
 import { useReadonlyConfig } from "../../../../config/composables.js";
 import _sfc_main$1 from "../time/DigiTimePicker.vue3.js";
 /* empty css                         */

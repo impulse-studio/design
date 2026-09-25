@@ -1,5 +1,5 @@
 import { defineComponent, computed, openBlock, createBlock, unref, withCtx, createElementVNode, normalizeClass, createVNode, createTextVNode, toDisplayString, renderSlot, createCommentVNode } from "vue";
-import { cva } from "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
+import { cva } from "../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
 import DigiRemixIcon from "../icon/DigiRemixIcon.vue.js";
 import _sfc_main$1 from "../tooltip/DigiTextTooltip.vue.js";
 const _hoisted_1 = { class: "w-full" };

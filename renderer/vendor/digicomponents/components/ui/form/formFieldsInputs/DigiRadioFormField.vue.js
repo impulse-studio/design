@@ -9,9 +9,9 @@ import _sfc_main$1 from "../DigiFormFieldContextRenderer.vue.js";
 /* empty css                                         */
 /* empty css                                  */
 import "../../../../lib/zodSchemas.js";
-/* empty css                                       */
+/* empty css                                        */
 import "lodash-es";
-import "../../../../node_modules/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-tel-input/dist/vue-tel-input.js";
+import "../../../../external/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/external/vue-tel-input/dist/vue-tel-input.js";
 /* empty css                                                                                                                                                         */
 /* empty css                                   */
 import _sfc_main$2 from "../../radio-group/DigiRadioGroup.vue.js";

@@ -4,7 +4,7 @@ import _sfc_main$2 from "../../select/DigiSearchSelect.vue.js";
 import "lodash-es";
 /* empty css                            */
 /* empty css                             */
-/* empty css                                       */
+/* empty css                                        */
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "DigiSearchSelectFormField",
   props: /* @__PURE__ */ mergeModels({

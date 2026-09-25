@@ -1,6 +1,6 @@
 import { defineComponent, useModel, computed, openBlock, createBlock, unref, normalizeClass, withCtx, createElementVNode, createVNode, mergeModels } from "vue";
-import { CheckboxRoot_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Checkbox/CheckboxRoot.js";
-import { CheckboxIndicator_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Checkbox/CheckboxIndicator.js";
+import { CheckboxRoot_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Checkbox/CheckboxRoot.js";
+import { CheckboxIndicator_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Checkbox/CheckboxIndicator.js";
 import DigiRemixIcon from "../icon/DigiRemixIcon.vue.js";
 import { cn } from "../../../lib/cn.js";
 const _hoisted_1 = { class: "flex h-full w-full items-center justify-center text-current" };

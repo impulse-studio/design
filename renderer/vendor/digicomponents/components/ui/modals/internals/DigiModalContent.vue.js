@@ -1,10 +1,10 @@
 import { defineComponent, computed, openBlock, createBlock, unref, withCtx, createVNode, mergeProps, withModifiers, renderSlot, createElementVNode, createCommentVNode } from "vue";
-import { cva } from "../../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
-import { useForwardPropsEmits } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/shared/useForwardPropsEmits.js";
-import { DialogClose_default } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Dialog/DialogClose.js";
-import { DialogContent_default } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Dialog/DialogContent.js";
-import { DialogOverlay_default } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Dialog/DialogOverlay.js";
-import { DialogPortal_default } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Dialog/DialogPortal.js";
+import { cva } from "../../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
+import { useForwardPropsEmits } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/shared/useForwardPropsEmits.js";
+import { DialogClose_default } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Dialog/DialogClose.js";
+import { DialogContent_default } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Dialog/DialogContent.js";
+import { DialogOverlay_default } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Dialog/DialogOverlay.js";
+import { DialogPortal_default } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Dialog/DialogPortal.js";
 import { cn } from "../../../../lib/cn.js";
 import DigiRemixIcon from "../../icon/DigiRemixIcon.vue.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({

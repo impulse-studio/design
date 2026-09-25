@@ -1,0 +1,15 @@
+{
+  "name": "@digit-ai-studio/digicomponents-react",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./style.css": "./style.css"
+  },
+  "peerDependencies": {
+    "react": "^19.2.8"
+  },
+  "dependencies": {
+    "@digit-ai-studio/shared": "workspace:*"
+  }
+}

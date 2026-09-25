@@ -1,6 +1,6 @@
 import { defineComponent, computed, openBlock, createBlock, normalizeProps, guardReactiveProps, unref, withCtx, createVNode, createElementVNode, toDisplayString, renderSlot } from "vue";
-import { useForwardPropsEmits } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/shared/useForwardPropsEmits.js";
-import { PopoverClose_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Popover/PopoverClose.js";
+import { useForwardPropsEmits } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/shared/useForwardPropsEmits.js";
+import { PopoverClose_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Popover/PopoverClose.js";
 import DigiRemixIcon from "../icon/DigiRemixIcon.vue.js";
 import _sfc_main$1 from "./DigiPopoverBasicContent.vue.js";
 const _hoisted_1 = { class: "pr-5 font-bold" };

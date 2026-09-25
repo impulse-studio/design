@@ -2,7 +2,7 @@ import { defineComponent, useTemplateRef, ref, computed, openBlock, createBlock,
 import { z } from "zod";
 import _sfc_main$7 from "../actions/button/DigiButton.vue.js";
 /* empty css                         */
-import { Form } from "../../../node_modules/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/node_modules/vee-validate/dist/vee-validate.js";
+import { Form } from "../../../external/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/external/vee-validate/dist/vee-validate.js";
 import { provideFormFieldContext } from "../form/injectionKeys.js";
 import { useReadonlyDefaultTexts, useReadonlyConfig } from "../../../config/composables.js";
 /* empty css                          */
@@ -12,13 +12,13 @@ import { useReadonlyDefaultTexts, useReadonlyConfig } from "../../../config/comp
 /* empty css                                      */
 /* empty css                               */
 import "../../../lib/zodSchemas.js";
-/* empty css                                    */
+/* empty css                                     */
 import _sfc_main$4 from "./internals/DigiModalDescription.vue2.js";
 import _sfc_main$6 from "./internals/DigiModalFooter.vue.js";
 import _sfc_main$2 from "./internals/DigiModalHeader.vue.js";
 import _sfc_main$3 from "./internals/DigiModalTitle.vue2.js";
 import "lodash-es";
-import "../../../node_modules/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/node_modules/vue-tel-input/dist/vue-tel-input.js";
+import "../../../external/.pnpm/vue-tel-input@9.6.0_libphonenumber-js@1.13.8_vue@3.5.28_typescript@5.9.3_/external/vue-tel-input/dist/vue-tel-input.js";
 /* empty css                                                                                                                                                      */
 /* empty css                                */
 import _sfc_main$5 from "../form/formFieldsInputs/DigiTextFormField.vue.js";

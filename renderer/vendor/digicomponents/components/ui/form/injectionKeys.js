@@ -1,4 +1,4 @@
-import { useId } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/shared/useId.js";
+import { useId } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/shared/useId.js";
 import { inject, provide } from "vue";
 const FORM_ITEM_INJECTION_KEY = /* @__PURE__ */ Symbol();
 function provideFormItemContext() {

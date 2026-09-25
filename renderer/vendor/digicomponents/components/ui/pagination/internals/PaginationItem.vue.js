@@ -1,5 +1,5 @@
 import { defineComponent, openBlock, createBlock, unref, withCtx, createVNode, createTextVNode, toDisplayString } from "vue";
-import { PaginationListItem_default } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Pagination/PaginationListItem.js";
+import { PaginationListItem_default } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Pagination/PaginationListItem.js";
 import _sfc_main$1 from "./PaginationButton.vue.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "PaginationItem",

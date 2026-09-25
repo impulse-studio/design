@@ -1,4 +1,5 @@
-import { createMemoryHistory, createRouter, type RouteRecordName } from "vue-router"
+import { createMemoryHistory, createRouter  } from "vue-router"
+import type {RouteRecordName} from "vue-router";
 
 import { SHELL_ROUTE_NAMES } from "./constants"
 
@@ -12,7 +13,7 @@ export const router = createRouter({
 
 for (const name of SHELL_ROUTE_NAMES) ensureRoute(name)
 
-export function ensureRoute(name: RouteRecordName): void {
+export function ensureRoute(name: NonNullable<RouteRecordName>): void {
   if (router.hasRoute(name)) return
   router.addRoute({ path: `/${String(name)}`, name, component: Empty })
 }

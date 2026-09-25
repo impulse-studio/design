@@ -1,6 +1,6 @@
 import { defineComponent, computed, openBlock, createBlock, unref, withCtx, createElementVNode, createVNode, mergeProps, renderSlot, createCommentVNode } from "vue";
-import { useForwardPropsEmits } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/shared/useForwardPropsEmits.js";
-import { Toggle_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Toggle/Toggle.js";
+import { useForwardPropsEmits } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/shared/useForwardPropsEmits.js";
+import { Toggle_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Toggle/Toggle.js";
 import DigiRemixIcon from "../icon/DigiRemixIcon.vue.js";
 import { toggleVariants } from "./toggleVariants.js";
 import _sfc_main$1 from "../tooltip/DigiTextTooltip.vue.js";

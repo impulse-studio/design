@@ -4,7 +4,7 @@ import "lodash-es";
 /* empty css                            */
 /* empty css                             */
 import _sfc_main$2 from "../../select/internals/MultipleSelectValues.vue.js";
-/* empty css                                       */
+/* empty css                                        */
 import { getSelectedOptionsFromValues } from "../../select/utils.js";
 import _sfc_main$1 from "./DigiOptionalFormField.vue.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({

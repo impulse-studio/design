@@ -1,6 +1,6 @@
 import { defineComponent, useTemplateRef, unref, openBlock, createBlock, normalizeClass, withCtx, renderSlot } from "vue";
-import { useMutationObserver } from "../../../node_modules/.pnpm/@vueuse_core@14.2.1_vue@3.5.28_typescript@5.9.3_/node_modules/@vueuse/core/dist/index.js";
-import { Slot } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Primitive/Slot.js";
+import { useMutationObserver } from "../../../external/.pnpm/@vueuse_core@14.2.1_vue@3.5.28_typescript@5.9.3_/external/@vueuse/core/dist/index.js";
+import { Slot } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Primitive/Slot.js";
 import { cn } from "../../../lib/cn.js";
 import { useTableOfContentLinkContext, TABLE_OF_CONTENT_LINK_CONTAINER_CLASS, TABLE_OF_CONTENT_LINK_CLASS } from "./utils.js";
 const _sfc_main = /* @__PURE__ */ defineComponent({

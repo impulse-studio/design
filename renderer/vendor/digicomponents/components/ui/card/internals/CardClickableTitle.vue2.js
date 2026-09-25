@@ -1,5 +1,5 @@
 import { defineComponent, openBlock, createBlock, unref, normalizeClass, withCtx, createVNode } from "vue";
-import { Primitive } from "../../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Primitive/Primitive.js";
+import { Primitive } from "../../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Primitive/Primitive.js";
 import _sfc_main$4 from "../../actions/button/DigiButton.vue.js";
 import _sfc_main$1 from "../../actions/link/DigiLink.vue.js";
 import _sfc_main$3 from "../../actions/router-link/DigiRouterLink.vue.js";

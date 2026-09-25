@@ -1,4 +1,4 @@
-import { cva } from "../../../node_modules/.pnpm/class-variance-authority@0.7.1/node_modules/class-variance-authority/dist/index.js";
+import { cva } from "../../../external/.pnpm/class-variance-authority@0.7.1/external/class-variance-authority/dist/index.js";
 const variants = /* @__PURE__ */ cva(
   "bg-off-black/50 absolute top-0 right-0 bottom-0 left-0 z-10 flex items-center justify-center p-4 text-white opacity-0 transition-opacity",
   {

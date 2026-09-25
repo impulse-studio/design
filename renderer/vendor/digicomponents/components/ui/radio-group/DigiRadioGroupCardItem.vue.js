@@ -1,6 +1,6 @@
 import { defineComponent, computed, openBlock, createBlock, unref, mergeProps, withCtx, createVNode, normalizeClass, renderSlot, createCommentVNode, createElementVNode, toDisplayString, createElementBlock } from "vue";
-import { RadioGroupItem_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/RadioGroup/RadioGroupItem.js";
-import { RadioGroupIndicator_default } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/RadioGroup/RadioGroupIndicator.js";
+import { RadioGroupItem_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/RadioGroup/RadioGroupItem.js";
+import { RadioGroupIndicator_default } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/RadioGroup/RadioGroupIndicator.js";
 import { cn } from "../../../lib/cn.js";
 import { parseDigiLabelFormat } from "../../../lib/parseSlug/parseDigiLabelFormat.js";
 import DigiRemixIcon from "../icon/DigiRemixIcon.vue.js";

@@ -1,5 +1,5 @@
 import { defineComponent, useModel, ref, openBlock, createBlock, unref, withCtx, renderSlot, createVNode, normalizeClass, mergeModels } from "vue";
-import { Slot } from "../../../node_modules/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/node_modules/reka-ui/dist/Primitive/Slot.js";
+import { Slot } from "../../../external/.pnpm/reka-ui@2.8.0_vue@3.5.28_typescript@5.9.3_/external/reka-ui/dist/Primitive/Slot.js";
 import Draggable from "vuedraggable";
 import { provideSortableConfig } from "./consts.js";
 const DEFAULT_CAN_BE_PULLED_CLASS = "can-be-pull-of-the-root";

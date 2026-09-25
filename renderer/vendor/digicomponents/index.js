@@ -48,7 +48,7 @@ import { default as default44 } from "./components/ui/dropdown-menu/basics/DigiD
 import { default as default45 } from "./components/ui/dropdown-menu/readyToUse/DigiBasicDropdownMenu.vue.js";
 import { default as default46 } from "./components/ui/dropdown-menu/readyToUse/DigiBasicDropdownItem.vue.js";
 import { default as default47 } from "./components/ui/dropdown-menu/readyToUse/DigiLinkDropdownItem.vue.js";
-import { Form } from "./node_modules/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/node_modules/vee-validate/dist/vee-validate.js";
+import { Form } from "./external/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/external/vee-validate/dist/vee-validate.js";
 import { default as default48 } from "./components/ui/form/DigiFormField.vue.js";
 import { default as default49 } from "./components/ui/form/DigiModalFormField.vue.js";
 import { default as default50, default as default51 } from "./components/ui/form/DigiNudeField.vue.js";

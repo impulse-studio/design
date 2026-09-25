@@ -1,5 +1,5 @@
 import { defineComponent, useModel, computed, watch, ref, toRefs, openBlock, createBlock, unref, withCtx, createVNode, createElementVNode, withKeys, renderSlot, createCommentVNode, createTextVNode, toDisplayString, mergeModels } from "vue";
-import { Form, Field } from "../../../node_modules/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/node_modules/vee-validate/dist/vee-validate.js";
+import { Form, Field } from "../../../external/.pnpm/vee-validate@5.0.0-beta.0_vue@3.5.28_typescript@5.9.3_/external/vee-validate/dist/vee-validate.js";
 import _sfc_main$3 from "./formRowUi/DigiFormRowContainer.vue.js";
 import { stripNativeEventListeners } from "./utils.js";
 import { parseDigiLabelFormat } from "../../../lib/parseSlug/parseDigiLabelFormat.js";
