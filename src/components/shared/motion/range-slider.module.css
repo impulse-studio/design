@@ -1,0 +1,24 @@
+.root:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.control {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+.control > div {
+  height: 100%;
+  cursor: grab;
+}
+.control > div:active {
+  cursor: grabbing;
+}
+.control [data-slot="slider-track"],
+.control [data-slot="slider-thumb"] {
+  opacity: 0;
+}
+.control [data-slot="slider-thumb"] {
+  width: 20px;
+  height: 40px;
+}

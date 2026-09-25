@@ -1,0 +1,83 @@
+import { describe, expect, it } from "vitest"
+import { render, act } from "@testing-library/react"
+import {
+  transpileModule,
+  ScriptTarget,
+  JsxEmit,
+  DiagnosticCategory,
+} from "typescript"
+import { catalog } from "./catalog"
+import { defaultOptions } from "./types"
+import { searchCatalog } from "./search"
+import { TooltipProvider } from "@/components/ui/tooltip"
+
+describe("catalogue", () => {
+  it("référence chaque primitive disponible, hors sélecteur natif", () => {
+    const files = Object.keys(import.meta.glob("/src/components/ui/*.tsx"))
+      .map((path) => path.split("/").pop()!.replace(".tsx", ""))
+      .filter((name) => name !== "native-select" && /^[a-z]/.test(name))
+    expect(
+      catalog
+        .filter((entry) => entry.kind === "component")
+        .map((entry) => entry.id)
+        .sort()
+    ).toEqual(files.sort())
+    expect(new Set(catalog.map((entry) => entry.id)).size).toBe(catalog.length)
+  })
+
+  it("recherche par intention, avec accents et plusieurs mots", () => {
+    expect(searchCatalog(catalog, "BOUTON").map((entry) => entry.id)).toContain(
+      "button"
+    )
+    expect(
+      searchCatalog(catalog, "selecteur").map((entry) => entry.id)
+    ).toContain("select")
+    expect(
+      searchCatalog(catalog, "tableau DONNÉES").map((entry) => entry.id)
+    ).toContain("data-table")
+    expect(searchCatalog(catalog, "inexistant zzz")).toEqual([])
+  })
+
+  it.each(catalog)(
+    "charge, affiche et fournit un exemple TSX valide : $id",
+    async (entry) => {
+      const example = await entry.load()
+      const options = defaultOptions(entry)
+      const { container, rerender } = render(
+        <TooltipProvider>
+          <example.Component options={options} />
+        </TooltipProvider>
+      )
+      await act(async () => {})
+      expect(container.innerHTML.length).toBeGreaterThan(0)
+      const choices = [
+        ...entry.variants.map((variant) => ({ ...options, variant })),
+        ...entry.sizes.map((size) => ({ ...options, size })),
+        ...entry.states.map((state) => ({ ...options, state })),
+      ]
+      for (const choice of choices) {
+        rerender(
+          <TooltipProvider>
+            <example.Component options={choice} />
+          </TooltipProvider>
+        )
+        const code = example.getCode(choice)
+        expect(code).toContain("export function")
+        expect(code).not.toMatch(/ExampleProps|\?raw|createExampleCode/)
+        const result = transpileModule(code, {
+          fileName: entry.id + ".tsx",
+          compilerOptions: {
+            target: ScriptTarget.ES2022,
+            jsx: JsxEmit.ReactJSX,
+          },
+          reportDiagnostics: true,
+        })
+        expect(
+          result.diagnostics?.filter(
+            (item) => item.category === DiagnosticCategory.Error
+          )
+        ).toEqual([])
+      }
+    }
+  )
+})

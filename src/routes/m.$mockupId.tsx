@@ -1,14 +1,21 @@
-import { demoDoc } from "@digit-ai-studio/shared"
 import { createFileRoute } from "@tanstack/react-router"
+import { PROJECT_NAME } from "@/constants"
+import { EditorPage } from "@/pages/editor/EditorPage"
+import { EditorLoadError } from "@/pages/editor/components/shell/EditorLoadError"
+import { requireAuthenticatedUser } from "@/features/auth/route-guard"
 
-import { EditorScreen } from "@/editor/components/EditorScreen"
-
-// Mockups are loaded from the database in M2; until then every id opens the demo.
 export const Route = createFileRoute("/m/$mockupId")({
-  ssr: false,
-  component: MockupEditor,
+  beforeLoad: ({ context, location }) =>
+    requireAuthenticatedUser(context.user, location.pathname),
+  loader: ({ context, params }) =>
+    context.queryClient.fetchQuery(
+      context.orpc.mockups.get.queryOptions({
+        input: { id: params.mockupId },
+      })
+    ),
+  component: EditorPage,
+  errorComponent: EditorLoadError,
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? "Éditeur"} — ${PROJECT_NAME}` }],
+  }),
 })
-
-function MockupEditor() {
-  return <EditorScreen name="Relance des invités (démo)" doc={demoDoc} />
-}

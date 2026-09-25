@@ -1,0 +1,23 @@
+/* Be UI's clipped reveal, adapted to Base UI's resolved opening side. */
+.content {
+  animation: none !important;
+  opacity: 1;
+  clip-path: inset(0 round 12px);
+  transition:
+    clip-path 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 150ms ease-out;
+}
+.content[data-starting-style],
+.content[data-ending-style] {
+  opacity: 0;
+  clip-path: inset(0 100% 100% 0 round 12px);
+}
+.content[data-side="left"][data-starting-style],
+.content[data-side="left"][data-ending-style] {
+  clip-path: inset(0 0 100% 100% round 12px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    transition: none;
+  }
+}

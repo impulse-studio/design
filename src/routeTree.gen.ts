@@ -10,43 +10,228 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConnectionsRouteImport } from './routes/connections'
+import { Route as ConsentRouteImport } from './routes/consent'
+import { Route as DesignSystemRouteImport } from './routes/design-system'
+import { Route as LibrariesRouteImport } from './routes/libraries'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as TeamsRouteImport } from './routes/teams'
+import { Route as DotwellKnownSplatRouteImport } from './routes/[.]well-known.$'
+import { Route as ApiLibrarySyncRouteImport } from './routes/api.library-sync'
+import { Route as ApiMcpRouteImport } from './routes/api.mcp'
+import { Route as DesignSystemIndexRouteImport } from './routes/design-system.index'
+import { Route as DesignSystemSlugRouteImport } from './routes/design-system.$slug'
 import { Route as MMockupIdRouteImport } from './routes/m.$mockupId'
+import { Route as ApiAiSplatRouteImport } from './routes/api.ai.$'
+import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
+import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConnectionsRoute = ConnectionsRouteImport.update({
+  id: '/connections',
+  path: '/connections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsentRoute = ConsentRouteImport.update({
+  id: '/consent',
+  path: '/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignSystemRoute = DesignSystemRouteImport.update({
+  id: '/design-system',
+  path: '/design-system',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibrariesRoute = LibrariesRouteImport.update({
+  id: '/libraries',
+  path: '/libraries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamsRoute = TeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DotwellKnownSplatRoute = DotwellKnownSplatRouteImport.update({
+  id: '/.well-known/$',
+  path: '/.well-known/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLibrarySyncRoute = ApiLibrarySyncRouteImport.update({
+  id: '/api/library-sync',
+  path: '/api/library-sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignSystemIndexRoute = DesignSystemIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DesignSystemRoute,
+} as any)
+const DesignSystemSlugRoute = DesignSystemSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DesignSystemRoute,
+} as any)
 const MMockupIdRoute = MMockupIdRouteImport.update({
   id: '/m/$mockupId',
   path: '/m/$mockupId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiSplatRoute = ApiAiSplatRouteImport.update({
+  id: '/api/ai/$',
+  path: '/api/ai/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
+  id: '/api/rpc/$',
+  path: '/api/rpc/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connections': typeof ConnectionsRoute
+  '/consent': typeof ConsentRoute
+  '/design-system': typeof DesignSystemRouteWithChildren
+  '/libraries': typeof LibrariesRoute
+  '/login': typeof LoginRoute
+  '/teams': typeof TeamsRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
+  '/api/library-sync': typeof ApiLibrarySyncRoute
+  '/api/mcp': typeof ApiMcpRoute
+  '/design-system/$slug': typeof DesignSystemSlugRoute
   '/m/$mockupId': typeof MMockupIdRoute
+  '/design-system/': typeof DesignSystemIndexRoute
+  '/api/ai/$': typeof ApiAiSplatRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connections': typeof ConnectionsRoute
+  '/consent': typeof ConsentRoute
+  '/libraries': typeof LibrariesRoute
+  '/login': typeof LoginRoute
+  '/teams': typeof TeamsRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
+  '/api/library-sync': typeof ApiLibrarySyncRoute
+  '/api/mcp': typeof ApiMcpRoute
+  '/design-system/$slug': typeof DesignSystemSlugRoute
   '/m/$mockupId': typeof MMockupIdRoute
+  '/design-system': typeof DesignSystemIndexRoute
+  '/api/ai/$': typeof ApiAiSplatRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/connections': typeof ConnectionsRoute
+  '/consent': typeof ConsentRoute
+  '/design-system': typeof DesignSystemRouteWithChildren
+  '/libraries': typeof LibrariesRoute
+  '/login': typeof LoginRoute
+  '/teams': typeof TeamsRoute
+  '/.well-known/$': typeof DotwellKnownSplatRoute
+  '/api/library-sync': typeof ApiLibrarySyncRoute
+  '/api/mcp': typeof ApiMcpRoute
+  '/design-system/$slug': typeof DesignSystemSlugRoute
   '/m/$mockupId': typeof MMockupIdRoute
+  '/design-system/': typeof DesignSystemIndexRoute
+  '/api/ai/$': typeof ApiAiSplatRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/m/$mockupId'
+  fullPaths:
+    | '/'
+    | '/connections'
+    | '/consent'
+    | '/design-system'
+    | '/libraries'
+    | '/login'
+    | '/teams'
+    | '/.well-known/$'
+    | '/api/library-sync'
+    | '/api/mcp'
+    | '/design-system/$slug'
+    | '/m/$mockupId'
+    | '/design-system/'
+    | '/api/ai/$'
+    | '/api/auth/$'
+    | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/m/$mockupId'
-  id: '__root__' | '/' | '/m/$mockupId'
+  to:
+    | '/'
+    | '/connections'
+    | '/consent'
+    | '/libraries'
+    | '/login'
+    | '/teams'
+    | '/.well-known/$'
+    | '/api/library-sync'
+    | '/api/mcp'
+    | '/design-system/$slug'
+    | '/m/$mockupId'
+    | '/design-system'
+    | '/api/ai/$'
+    | '/api/auth/$'
+    | '/api/rpc/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/connections'
+    | '/consent'
+    | '/design-system'
+    | '/libraries'
+    | '/login'
+    | '/teams'
+    | '/.well-known/$'
+    | '/api/library-sync'
+    | '/api/mcp'
+    | '/design-system/$slug'
+    | '/m/$mockupId'
+    | '/design-system/'
+    | '/api/ai/$'
+    | '/api/auth/$'
+    | '/api/rpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConnectionsRoute: typeof ConnectionsRoute
+  ConsentRoute: typeof ConsentRoute
+  DesignSystemRoute: typeof DesignSystemRouteWithChildren
+  LibrariesRoute: typeof LibrariesRoute
+  LoginRoute: typeof LoginRoute
+  TeamsRoute: typeof TeamsRoute
+  DotwellKnownSplatRoute: typeof DotwellKnownSplatRoute
+  ApiLibrarySyncRoute: typeof ApiLibrarySyncRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   MMockupIdRoute: typeof MMockupIdRoute
+  ApiAiSplatRoute: typeof ApiAiSplatRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +243,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/connections': {
+      id: '/connections'
+      path: '/connections'
+      fullPath: '/connections'
+      preLoaderRoute: typeof ConnectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consent': {
+      id: '/consent'
+      path: '/consent'
+      fullPath: '/consent'
+      preLoaderRoute: typeof ConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design-system': {
+      id: '/design-system'
+      path: '/design-system'
+      fullPath: '/design-system'
+      preLoaderRoute: typeof DesignSystemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/libraries': {
+      id: '/libraries'
+      path: '/libraries'
+      fullPath: '/libraries'
+      preLoaderRoute: typeof LibrariesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teams': {
+      id: '/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof TeamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/$': {
+      id: '/.well-known/$'
+      path: '/.well-known/$'
+      fullPath: '/.well-known/$'
+      preLoaderRoute: typeof DotwellKnownSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/library-sync': {
+      id: '/api/library-sync'
+      path: '/api/library-sync'
+      fullPath: '/api/library-sync'
+      preLoaderRoute: typeof ApiLibrarySyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design-system/': {
+      id: '/design-system/'
+      path: '/'
+      fullPath: '/design-system/'
+      preLoaderRoute: typeof DesignSystemIndexRouteImport
+      parentRoute: typeof DesignSystemRoute
+    }
+    '/design-system/$slug': {
+      id: '/design-system/$slug'
+      path: '/$slug'
+      fullPath: '/design-system/$slug'
+      preLoaderRoute: typeof DesignSystemSlugRouteImport
+      parentRoute: typeof DesignSystemRoute
+    }
     '/m/$mockupId': {
       id: '/m/$mockupId'
       path: '/m/$mockupId'
@@ -65,12 +327,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MMockupIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/$': {
+      id: '/api/ai/$'
+      path: '/api/ai/$'
+      fullPath: '/api/ai/$'
+      preLoaderRoute: typeof ApiAiSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/rpc/$': {
+      id: '/api/rpc/$'
+      path: '/api/rpc/$'
+      fullPath: '/api/rpc/$'
+      preLoaderRoute: typeof ApiRpcSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface DesignSystemRouteChildren {
+  DesignSystemSlugRoute: typeof DesignSystemSlugRoute
+  DesignSystemIndexRoute: typeof DesignSystemIndexRoute
+}
+
+const DesignSystemRouteChildren: DesignSystemRouteChildren = {
+  DesignSystemSlugRoute: DesignSystemSlugRoute,
+  DesignSystemIndexRoute: DesignSystemIndexRoute,
+}
+
+const DesignSystemRouteWithChildren = DesignSystemRoute._addFileChildren(
+  DesignSystemRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConnectionsRoute: ConnectionsRoute,
+  ConsentRoute: ConsentRoute,
+  DesignSystemRoute: DesignSystemRouteWithChildren,
+  LibrariesRoute: LibrariesRoute,
+  LoginRoute: LoginRoute,
+  TeamsRoute: TeamsRoute,
+  DotwellKnownSplatRoute: DotwellKnownSplatRoute,
+  ApiLibrarySyncRoute: ApiLibrarySyncRoute,
+  ApiMcpRoute: ApiMcpRoute,
   MMockupIdRoute: MMockupIdRoute,
+  ApiAiSplatRoute: ApiAiSplatRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
