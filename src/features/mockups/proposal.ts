@@ -1,8 +1,8 @@
 import type { MockupDoc } from "@digit-ai-studio/shared"
-import { validateAiComposition } from "@/features/ai/catalog"
-import { applyOperations } from "@/features/ai/operations"
-import { proposalInputSchema } from "@/validators/ai/operations"
-import type { ProposalInput } from "@/validators/ai/operations"
+import { validateComposition } from "@/features/mockups/catalog"
+import { applyOperations } from "@/features/mockups/operations"
+import { proposalInputSchema } from "@/validators/mockups/operations"
+import type { ProposalInput } from "@/validators/mockups/operations"
 import { library } from "@/features/editor/library"
 
 export type PreparedMockupProposal = {
@@ -15,7 +15,7 @@ export const prepareMockupProposal = (
   raw: unknown
 ): PreparedMockupProposal => {
   const input = proposalInputSchema.parse(raw)
-  const doc = validateAiComposition(
+  const doc = validateComposition(
     source,
     applyOperations(source, input, library)
   )

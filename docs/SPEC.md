@@ -9,7 +9,7 @@
 
 Cette étape met en place le studio `/`, l’éditeur `/m/$mockupId`, les statuts de maquette, un rendu React des frames dans une iframe (avec un shell de communication Vue), les couleurs et les gestes d’édition, ainsi que PostgreSQL/Drizzle avec autosave et récupération locale. Les exports React de Digi sont générés à la sync depuis les snapshots SSR d’Orchestration ; leurs interactions métier ne sont pas toutes portées. La page est organisée sous `src/pages/editor/`.
 
-L’accès au studio repose sur Better Auth et les équipes. Le chat utilise les API OpenAI et Anthropic via AI SDK et Trigger.dev Cloud ; voir [le périmètre et la configuration](AI_CHAT.md). Les sections ci-dessous conservent la vision initiale, notamment les pistes image, liens publics, collaboration, prototypage et versions serveur qui ne décrivent pas cette implémentation. Le [README](../README.md) décrit les commandes utilisables.
+L’accès au studio repose sur Better Auth et les équipes. Les modifications assistées passent par le [MCP du Studio](CODEX_MCP.md). Les descriptions de chat ci-dessous sont historiques et ne correspondent plus au produit : les chats intégrés ont été supprimés. Les sections ci-dessous conservent la vision initiale, notamment les pistes image, liens publics, collaboration, prototypage et versions serveur qui ne décrivent pas cette implémentation. Le [README](../README.md) décrit les commandes utilisables.
 
 ## 0. Liens
 - Repo studio : `digit/digitAiStudio` (scaffold TanStack Start + React 19 + Tailwind 4 + shadcn `base-vega`)

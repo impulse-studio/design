@@ -33,11 +33,6 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set the studio session secret}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Configure the existing Google login}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?Configure the existing Google login}
-      TRIGGER_SECRET_KEY: ${TRIGGER_SECRET_KEY}
-      AI_CALLBACK_SECRET: ${AI_CALLBACK_SECRET}
-      AI_MODELS: ${AI_MODELS:-[]}
-      AI_DEFAULT_MODEL: ${AI_DEFAULT_MODEL:-}
-      AI_ENABLED_PROVIDERS: ${AI_ENABLED_PROVIDERS:-}
     depends_on:
       migrate:
         condition: service_completed_successfully

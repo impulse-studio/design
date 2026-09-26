@@ -84,21 +84,10 @@ it("ignores a poll started before a local save", async () => {
   const { result } = renderHook(() => useSiteEditor(initial, true))
   await act(() => vi.advanceTimersByTimeAsync(1000))
   await act(() =>
-    result.current.apply({
-      id: "proposal",
-      baseRevision: 0,
-      status: "pending",
-      input: {
-        summary: "Local",
-        operations: [
-          {
-            type: "writeFile",
-            path: "src/components/Local.tsx",
-            content: "export function Local(){return <p>Local</p>}",
-          },
-        ],
-      },
-    })
+    result.current.saveFile(
+      "src/components/Local.tsx",
+      "export function Local(){return <p>Local</p>}"
+    )
   )
   await act(async () => {
     resolvePoll({ project: { ...initial, revision: 1 }, record: {} as never })

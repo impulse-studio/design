@@ -1,6 +1,6 @@
 "use client"
 // Installed from https://www.aicss.dev/r/reasoning-effort.json.
-// Original SVG geometry, styling and drag motion retained; controlled props added for the chat.
+// Original SVG geometry, styling and drag motion retained; controlled props for reuse.
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react"
 import type { PointerEvent as ReactPointerEvent } from "react"

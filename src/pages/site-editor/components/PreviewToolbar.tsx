@@ -1,12 +1,6 @@
-import { RiArrowLeftLine, RiArrowRightLine, RiMoreLine } from "@remixicon/react"
+import { RiArrowLeftLine, RiArrowRightLine } from "@remixicon/react"
 import { Button } from "@/components/ui/button"
 import { OptionSelect } from "@/components/shared/OptionSelect"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { Breakpoint } from "@/validators/sites/document"
 import type { SiteScenario } from "@/validators/sites/scenarios"
 import { SiteScenarioSelect } from "./ScenarioSelect"
@@ -15,26 +9,18 @@ export function SitePreviewToolbar({
   scenarios,
   scenarioId,
   onScenario,
-  onCreateScenarios,
-  scenariosBusy,
   breakpoint,
   onBreakpoint,
   onBack,
   onForward,
-  canEdit,
-  busy,
 }: {
   scenarios: SiteScenario[]
   scenarioId: string
   onScenario: (id: string) => void
-  onCreateScenarios: () => void
-  scenariosBusy: boolean
   breakpoint: Breakpoint
   onBreakpoint: (value: Breakpoint) => void
   onBack: () => void
   onForward: () => void
-  canEdit: boolean
-  busy: boolean
 }) {
   return (
     <div
@@ -65,8 +51,6 @@ export function SitePreviewToolbar({
           scenarios={scenarios}
           value={scenarioId}
           onChange={onScenario}
-          onCreate={onCreateScenarios}
-          disabled={!canEdit || busy || scenariosBusy}
         />
       )}
       <div className="ml-auto flex items-center gap-1">
@@ -84,29 +68,6 @@ export function SitePreviewToolbar({
             { value: "mobile", label: "Mobile · 390" },
           ]}
         />
-        {scenarios.length === 0 && canEdit && (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label="Options de l’aperçu"
-                />
-              }
-            >
-              <RiMoreLine />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                disabled={busy || scenariosBusy}
-                onClick={onCreateScenarios}
-              >
-                Ajouter des scénarios
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
       </div>
     </div>
   )

@@ -2,7 +2,7 @@
 
 > Résumé de toutes les fonctionnalités prévues. Le détail technique est dans [SPEC.md](./SPEC.md).
 > Légende : ✅ V1 · 🔜 V1.1 · 💭 V2 / à décider
-> Chat : [API OpenAI et Anthropic, AI SDK et Trigger.dev](AI_CHAT.md), clés centrales et modifications après validation. L’entrée image ne fait pas partie de cette V1.
+> IA : modifications via les clients MCP externes ; voir [le MCP du Studio](CODEX_MCP.md).
 
 ## En une phrase
 Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrais composants Digitevent** (`digicomponents`) et le **vrai shell du backoffice**. On la génère par prompt (texte, spec ou image) avec son abonnement Claude, on l'affine comme dans Figma, et les devs l'inspectent en Dev Mode.
@@ -51,19 +51,10 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 - ✅ Annuler / rétablir (⌘Z / ⇧⌘Z), sauvegarde automatique
 - ✅ Instances Digi liées avec overrides de props, texte, styles et dimensions ; variantes locales réutilisables dans la maquette ; détachement en éléments HTML et texte éditables
 
-## 5. IA — Chat (panneau gauche, onglet AI)
-- ✅ Prompter avec **mon abonnement Claude** (token `claude setup-token` collé dans les Settings)
-- ✅ **Créer une page à partir d'une problématique** : coller une issue ou une spec, l'IA construit une page crédible
-- ✅ **Reproduire une image** : coller une capture, l'IA la refait avec les composants Digi et liste les composants manquants
-- ✅ **Micro-corrections ciblées** : je sélectionne un élément, je prompte, seul cet élément change
-- ✅ L'IA n'utilise **que** les composants et tokens Digitevent, et le vrai shell (EventLayout, menu, header)
-- ✅ Le canvas se met à jour **en direct** pendant que l'IA travaille
-- ✅ Réponses en Markdown, raisonnement repliable, liste des actions appliquées (cliquables pour sélectionner l'élément)
-- ✅ Carte « Version N » après chaque prompt : restaurer, voir le diff
-- ✅ Choix du modèle (Opus / Sonnet), bouton stop
-- ✅ Un historique de chat par maquette
-- 🔜 Image de référence en superposition semi-transparente sur la frame, pour comparer
-- 🔜 Auto-vérification : l'IA regarde son rendu et se corrige
+## 5. Modifications assistées via MCP
+
+- Lecture et modification des maquettes et sites via les clients MCP externes.
+- Permissions d’équipe, validation et contrôle des révisions conservés.
 
 ## 6. Dev Mode — onglet Inspect
 - ✅ Nom du composant et **import** à copier (`import { DigiButton } from 'digicomponents'`)
@@ -86,7 +77,7 @@ Un **Figma + Figma Make interne** où chaque maquette est rendue avec les **vrai
 ## 8. Partage aux devs
 - ✅ Bouton **Share** qui génère un lien `/share/…`, copié automatiquement
 - ✅ Lien lié à une version précise ou toujours à la dernière
-- ✅ Vue en lecture seule : canvas, layers, Dev Mode, sans chat ni édition
+- ✅ Vue en lecture seule : canvas, layers, Dev Mode, sans édition
 - ✅ Liens révocables, avec expiration optionnelle et compteur de vues
 - ✅ Comptes Better Auth : Google Workspace `@digitevent.com` en production, compte de développement sans Google en local
 - ✅ Équipes, invitations internes avec expiration, membres et rôles propriétaire / administrateur / éditeur / lecteur
@@ -128,6 +119,6 @@ Les exports React et leurs arbres DOM sont générés depuis les snapshots SSR d
 | M1 | Skill de sync + manifest |
 | M2 | Socle : base de données, Better Auth, page d'accueil, projets / maquettes |
 | M3 | Éditeur : canvas, frames, sélection, layers, propriétés, annuler/rétablir |
-| M4 | IA : chat, génération, micro-corrections, image |
+| M4 | IA : outils MCP |
 | M5 | Versions, partage, Dev Mode |
 | M6 | Finitions et mise en prod |

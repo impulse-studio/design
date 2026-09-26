@@ -6,7 +6,7 @@ import { createSiteSchema } from "./sites/requests"
 import { createSiteFormSchema } from "./sites/forms"
 import { importLibrarySchema } from "./libraries/requests"
 import { filePathSchema } from "./sites/paths"
-import { createQuestionnaireAnswerSchema } from "./chat/questionnaire"
+import { createQuestionnaireAnswerSchema } from "./questionnaire"
 import { uuidSchema } from "./identifiers"
 
 describe("contrats partagés entre formulaires et API", () => {

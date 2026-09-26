@@ -1,9 +1,6 @@
-import { v4 as uuid } from "uuid"
-import type { AiRunRow } from "@/db/schema/ai"
-
 import { and, desc, eq } from "drizzle-orm"
 import { getDatabase } from "@/db/client.server"
-import { aiRuns, siteProjects, siteVersions, siteProposals } from "@/db/schema"
+import { siteProjects, siteVersions } from "@/db/schema"
 import { loadRecord } from "@/features/mockups/repository.server"
 import {
   applySiteProposal,
@@ -12,10 +9,7 @@ import {
   normalizeSources,
 } from "./source"
 import { SiteFailure } from "./errors"
-import {
-  siteDocumentSchema,
-  siteProposalSchema,
-} from "@/validators/sites/document"
+import { siteDocumentSchema } from "@/validators/sites/document"
 import type {
   SiteChange,
   SiteDocument,
@@ -71,52 +65,6 @@ export const getSiteVersion = async (
     throw new SiteFailure("invalid", "La version enregistrée est invalide.")
   return normalizeSources(doc.data)
 }
-export const getSiteProposals = async (id: string, userId: string) => {
-  await loadRecord(id, userId)
-  return getDatabase()
-    .select({
-      id: siteProposals.id,
-      input: siteProposals.input,
-      status: siteProposals.status,
-      baseRevision: siteProposals.baseRevision,
-    })
-    .from(siteProposals)
-    .innerJoin(aiRuns, eq(aiRuns.id, siteProposals.runId))
-    .where(
-      and(
-        eq(siteProposals.projectId, id),
-        eq(aiRuns.userId, userId),
-        eq(siteProposals.status, "pending")
-      )
-    )
-    .limit(20)
-}
-export const persistSiteProposal = async (
-  run: AiRunRow,
-  callId: string,
-  args: unknown
-) => {
-  if (!run.context.project || !run.context.projectId)
-    throw new Error("Projet absent.")
-  const input = siteProposalSchema.parse(args)
-  applySiteProposal(run.context.project, input)
-  await getDatabase()
-    .insert(siteProposals)
-    .values({
-      id: uuid(),
-      projectId: run.context.projectId,
-      runId: run.id,
-      toolCallId: callId,
-      baseRevision: run.context.revision,
-      input,
-    })
-    .onConflictDoNothing()
-  return {
-    status: "pending",
-    message:
-      "Fichiers préparés. Le Studio compile puis applique automatiquement si la révision est toujours actuelle.",
-  }
-}
 export const saveSiteChange = async (
   id: string,
   userId: string,
@@ -146,7 +94,7 @@ export const saveSiteChange = async (
       } else if (change.type === "text") {
         doc = applyTextEdit(current.doc, change.id, change.text)
         summary = "Modification du texte"
-      } else if (change.type === "restore") {
+      } else {
         const version = await tx
           .select()
           .from(siteVersions)
@@ -160,39 +108,6 @@ export const saveSiteChange = async (
         if (!version) throw new SiteFailure("invalid", "Version introuvable.")
         doc = normalizeSources(siteDocumentSchema.parse(version.doc))
         summary = `Restauration de la version ${version.revision}`
-      } else {
-        const proposal = await tx
-          .select({
-            proposal: siteProposals,
-            userId: aiRuns.userId,
-            status: aiRuns.status,
-          })
-          .from(siteProposals)
-          .innerJoin(aiRuns, eq(aiRuns.id, siteProposals.runId))
-          .where(
-            and(
-              eq(siteProposals.id, change.proposalId),
-              eq(siteProposals.projectId, id)
-            )
-          )
-          .then((rows) => rows.at(0))
-        if (
-          !proposal ||
-          proposal.userId !== userId ||
-          proposal.proposal.status !== "pending" ||
-          proposal.proposal.baseRevision !== expectedRevision ||
-          ["interrupted", "failed"].includes(proposal.status)
-        )
-          throw new SiteFailure(
-            "conflict",
-            "Cette génération est obsolète. Demandez une nouvelle modification."
-          )
-        doc = applySiteProposal(current.doc, proposal.proposal.input)
-        summary = proposal.proposal.input.summary
-        await tx
-          .update(siteProposals)
-          .set({ status: "applied" })
-          .where(eq(siteProposals.id, change.proposalId))
       }
       return { doc, summary }
     },

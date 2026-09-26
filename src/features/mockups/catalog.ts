@@ -7,7 +7,7 @@ import {
 } from "@/features/editor/library"
 import { canonicalDocument } from "./operations"
 
-export const aiCatalog = libraryEntries
+export const mockupCatalog = libraryEntries
   .filter((entry) => !insertionIssue(entry))
   .map((entry) => ({
     name: entry.name,
@@ -21,9 +21,9 @@ const componentName = (node: AnyNode) =>
     : node.type === "template"
       ? node.template
       : null
-const roots = new Set(aiCatalog.map((entry) => entry.name))
+const roots = new Set(mockupCatalog.map((entry) => entry.name))
 const parents = new Map<string, Set<string>>()
-for (const entry of aiCatalog)
+for (const entry of mockupCatalog)
   walk(entry.example, (node, parent) => {
     const name = componentName(node),
       parentName = parent && componentName(parent)
@@ -33,7 +33,7 @@ for (const entry of aiCatalog)
       parents.set(name, allowedParents)
     }
   })
-export const validateAiComposition = (source: MockupDoc, result: MockupDoc) => {
+export const validateComposition = (source: MockupDoc, result: MockupDoc) => {
   const previous = new Map<string, string>()
   for (const frame of source.pages[0].frames)
     walk(frame, (node, parent) =>

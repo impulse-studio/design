@@ -1,7 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ReasoningEffort } from "@/components/shared/reasoning-effort/ReasoningEffort"
-import { CHAT_EFFORTS } from "@/features/chat/catalog"
+
+const EFFORTS = [
+  { value: "low", label: "Faible" },
+  { value: "medium", label: "Moyen" },
+  { value: "high", label: "Élevé" },
+  { value: "xhigh", label: "Très élevé" },
+]
 
 describe("ReasoningEffort aicss", () => {
   it("relie le contrôle original à l’effort choisi et reste utilisable au clavier", () => {
@@ -9,7 +15,7 @@ describe("ReasoningEffort aicss", () => {
     const { container, rerender } = render(
       <ReasoningEffort
         value="medium"
-        options={CHAT_EFFORTS}
+        options={EFFORTS}
         modelLabel="Opus"
         onValueChange={onValueChange}
       />
@@ -22,7 +28,7 @@ describe("ReasoningEffort aicss", () => {
     rerender(
       <ReasoningEffort
         value="xhigh"
-        options={CHAT_EFFORTS}
+        options={EFFORTS}
         modelLabel="Opus"
         onValueChange={onValueChange}
       />
@@ -34,7 +40,7 @@ describe("ReasoningEffort aicss", () => {
     rerender(
       <ReasoningEffort
         value="low"
-        options={CHAT_EFFORTS}
+        options={EFFORTS}
         disabled
         onValueChange={onValueChange}
       />

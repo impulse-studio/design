@@ -44,7 +44,7 @@ Chaque utilisateur peut créer une équipe dont il devient propriétaire ; rejoi
 
 ## Édition
 
-- Composants Digi, calques et chat dans le panneau gauche ; canvas à plusieurs frames au centre ; Design et Inspect à droite.
+- Composants Digi et calques dans le panneau gauche ; canvas à plusieurs frames au centre ; Design et Inspect à droite.
 - Sélection, déplacement, redimensionnement, zoom, alignement, répartition, duplication, copier/coller et historique local. Les props et slots exposés proviennent du manifest.
 - Couleurs libres ou tokens, HEX/RGB/HSL/CSS, opacité, couleurs de la page et pipette quand le navigateur fournit EyeDropper.
 - Statuts : Brouillon, En cours, À valider et Validée, modifiables dans le studio et dans l’éditeur.
@@ -54,7 +54,7 @@ Chaque utilisateur peut créer une équipe dont il devient propriétaire ; rejoi
 
 Raccourcis hors champs de saisie : V sélection, H main, F frame, R conteneur, T texte, espace-glisser pour déplacer le canvas, Cmd/Ctrl-molette pour zoomer, ⇧1 pour tout afficher, ⇧2 pour cadrer la sélection, ⇧P pour l’aperçu, ⇧D pour Inspect, Cmd/Ctrl-Z pour annuler. Alt-glisser duplique ; Shift conserve les proportions au redimensionnement.
 
-Le chat de l’éditeur utilise les API OpenAI et Anthropic avec AI SDK et Trigger.dev Cloud, payées par le studio. Il conserve les conversations privées, propose des changements Digi et les applique après validation en une étape annulable. Voir [la configuration, la migration et le déploiement](docs/AI_CHAT.md). Sans configuration API/Trigger, le chat reste indisponible.
+Les modifications assistées passent par le serveur MCP du studio. Les chats intégrés et Trigger.dev ont été supprimés. La migration `0014` supprime leurs historiques et propositions ; elle conserve les maquettes, les sites et leurs versions.
 
 Une démonstration interactive reste accessible sur activation : questions, validation de plan, activité et résultats enrichis. Les réponses utilisent TanStack Markdown. Les données de démonstration sont conservées localement par maquette ; ces scénarios ne modifient pas le document et ne contactent aucun fournisseur IA. Partage public, collaboration simultanée, prototypage et dessin vectoriel ne font pas partie de cette étape. Les composants nécessitant des données métier ou un contexte obligatoire sont désactivés tant qu’une recette d’insertion valide n’est pas disponible.
 
@@ -132,9 +132,9 @@ Pour modifier les maquettes du site depuis Claude Code sur un PC, voir [la confi
 
 Le bouton **Nouveau site** crée un projet React ou Vue avec Vite et TypeScript, à partir du starter officiel et de sa démonstration. **Nouvelle maquette** conserve le renderer historique. Les fichiers du projet sont stockés en base, avec une révision et des versions restaurables ; les propositions IA obsolètes sont refusées.
 
-Dans l’éditeur, **Fichiers** permet de parcourir les sources et assets et de consulter le code. **Navigation** utilise le site ; **Édition** sélectionne les éléments pour modifier le texte statique et les styles, avec des portées desktop/tablette/mobile. Les sélecteurs utilisent shadcn. Les valeurs dynamiques et modifications structurelles passent par le chat.
+Dans l’éditeur, **Fichiers** permet de parcourir les sources et assets et de consulter le code. **Navigation** utilise le site ; **Édition** sélectionne les éléments pour modifier le texte statique et les styles, avec des portées desktop/tablette/mobile. Les sélecteurs utilisent shadcn. Les valeurs dynamiques et modifications structurelles passent par les fichiers source ou le MCP.
 
-Après installation, appliquer les migrations avec `pnpm db:migrate`. Les sites sont installés, compilés et exécutés localement dans le navigateur avec WebContainers. Le chat utilise la configuration IA/Trigger existante décrite dans `docs/AI_CHAT.md`.
+Après installation, appliquer les migrations avec `pnpm db:migrate`. Les sites sont installés, compilés et exécutés localement dans le navigateur avec WebContainers. Les outils MCP permettent de modifier les sites.
 
 **Exporter ZIP** prépare et vérifie le projet dans un dossier WebContainer isolé, puis crée une archive avec ses assets, son `package-lock.json` et les instructions `npm ci`. Le scénario sélectionné est conservé. La progression et les erreurs sont affichées, un export échoué peut être relancé, et les deux derniers documents préparés sont gardés en cache pendant la session. Aucun pont de sélection du Studio n’est exporté. Le serveur d’hébergement doit rediriger les routes du site vers `index.html`. Pour vérifier une installation vierge et le build d’un ZIP téléchargé : `pnpm exec tsx scripts/verification/verify-site-export.ts /chemin/site.zip` (sans argument, le script génère et vérifie un nouveau projet React avec create-vite).
 

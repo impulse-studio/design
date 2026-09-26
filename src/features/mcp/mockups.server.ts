@@ -1,7 +1,7 @@
 import { uuidSchema } from "@/validators/identifiers"
 import { applyChangesSchema } from "@/validators/mcp/mockups"
 
-import { aiCatalog } from "@/features/ai/catalog"
+import { mockupCatalog } from "@/features/mockups/catalog"
 
 import { listTeamsForUser } from "@/features/teams/repository.server"
 import {
@@ -74,7 +74,7 @@ export const searchMcpCatalog = (
   limit = 20,
   includeExamples = false
 ) =>
-  aiCatalog
+  mockupCatalog
     .filter((entry) =>
       entry.name.toLowerCase().includes(query?.toLowerCase() ?? "")
     )

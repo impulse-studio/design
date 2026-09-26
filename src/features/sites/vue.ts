@@ -97,7 +97,9 @@ export const analyzeVue = (code: string, file: string): ParsedSource => {
       !node.children.length ||
       !node.children.every((child) => child.type === NodeTypes.TEXT)
     )
-      throw new Error("Contenu dynamique : utilisez le chat.")
+      throw new Error(
+        "Contenu dynamique : modifiez le fichier source ou utilisez le MCP."
+      )
     const start = template.loc.start.offset + node.children[0].loc.start.offset
     const end = template.loc.start.offset + node.children.at(-1)!.loc.end.offset
     const escaped = text

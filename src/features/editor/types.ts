@@ -21,7 +21,7 @@ export type EditorState = Snapshot & {
   viewport: Viewport
   tool: Tool
   mode: "edit" | "preview"
-  tab: "components" | "layers" | "chat"
+  tab: "components" | "layers"
   rightTab: "design" | "inspect"
   inspectorVisible: boolean
   libraryVisible: boolean

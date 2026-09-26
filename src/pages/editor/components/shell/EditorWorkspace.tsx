@@ -3,7 +3,6 @@ import type { MockupRecord } from "@/features/mockups/types"
 import { createEditor } from "@/features/editor/store"
 import { EditorShell } from "./EditorShell"
 import { EditorProvider } from "./EditorProvider"
-import { ChatSessionProvider } from "@/components/shared/chat/ChatSessionProvider"
 import { useMockupSessionBaseline } from "@/features/mockups/use-session"
 
 export function EditorWorkspace({
@@ -28,9 +27,7 @@ export function EditorWorkspace({
   )
   return (
     <EditorProvider editor={editor}>
-      <ChatSessionProvider key={initial.id} mockupId={initial.id}>
-        <EditorShell initial={baseline} />
-      </ChatSessionProvider>
+      <EditorShell initial={baseline} />
     </EditorProvider>
   )
 }

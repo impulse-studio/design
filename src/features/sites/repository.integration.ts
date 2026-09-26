@@ -12,7 +12,6 @@ import {
   saveSiteChange,
   getSiteVersion,
   siteHistory,
-  getSiteProposals,
 } from "./repository.server"
 
 const userId = "test-owner",
@@ -111,7 +110,6 @@ describe("persistent React site revisions", () => {
         text: "Forbidden",
       })
     ).rejects.toMatchObject({ kind: "forbidden" })
-    await expect(getSiteProposals(record.id, "not-a-member")).rejects.toThrow()
     await database
       .update(schema.member)
       .set({ role: "owner" })
@@ -156,90 +154,5 @@ describe("persistent React site revisions", () => {
         "src/components/Welcome.tsx"
       ]
     ).toContain("Bienvenue")
-  })
-  it("applies an AI proposal once and refuses a delayed result after a visual edit", async () => {
-    const record = await createRecord("AI project", userId, organizationId),
-      doc = createSiteDocument()
-    await database.insert(schema.siteProjects).values({ id: record.id, doc })
-    await database.insert(schema.siteVersions).values({
-      id: randomUUID(),
-      projectId: record.id,
-      revision: 0,
-      doc,
-      summary: "Initial",
-    })
-    const conversationId = randomUUID(),
-      runId = randomUUID(),
-      proposalId = randomUUID()
-    await database.insert(schema.aiConversations).values({
-      id: conversationId,
-      userId,
-      mockupId: record.id,
-      title: "Test",
-    })
-    await database.insert(schema.aiRuns).values({
-      id: runId,
-      userId,
-      conversationId,
-      requestId: randomUUID(),
-      model: "openai:test",
-      provider: "openai",
-      prompt: "Build",
-      status: "completed",
-      context: {
-        doc: record.doc,
-        revision: 0,
-        hash: "test",
-        selectedIds: [],
-        project: doc,
-        projectId: record.id,
-      },
-    })
-    const input = {
-      summary: "New component",
-      operations: [
-        {
-          type: "writeFile" as const,
-          path: "src/components/Hello.tsx",
-          content: "export function Hello(){return <p>Hello</p>}",
-        },
-      ],
-    }
-    await database.insert(schema.siteProposals).values({
-      id: proposalId,
-      projectId: record.id,
-      runId,
-      toolCallId: "one",
-      baseRevision: 0,
-      input,
-    })
-    const updated = await saveSiteChange(record.id, userId, 0, {
-      type: "proposal",
-      proposalId,
-    })
-    expect(updated.doc.files["src/components/Hello.tsx"]).toContain("Hello")
-    await expect(
-      saveSiteChange(record.id, userId, 1, { type: "proposal", proposalId })
-    ).rejects.toThrow("obsolète")
-    const lateId = randomUUID()
-    await database.insert(schema.siteProposals).values({
-      id: lateId,
-      projectId: record.id,
-      runId,
-      toolCallId: "two",
-      baseRevision: 1,
-      input,
-    })
-    const id = elementsOf(updated.doc)[0].id
-    await saveSiteChange(record.id, userId, 1, {
-      type: "visual",
-      edit: { id, breakpoint: "base", styles: { gap: "16px" } },
-    })
-    await expect(
-      saveSiteChange(record.id, userId, 2, {
-        type: "proposal",
-        proposalId: lateId,
-      })
-    ).rejects.toThrow("obsolète")
   })
 })

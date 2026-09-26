@@ -7,10 +7,9 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core"
 
-import type { SiteDocument, SiteProposal } from "@/validators/sites/document"
+import type { SiteDocument } from "@/validators/sites/document"
 
 import { mockups } from "@/db/schema/mockups/schema"
-import { aiRuns } from "@/db/schema/ai/schema"
 
 // File-backed React projects coexist with legacy mockup documents.
 export const siteProjects = pgTable("site_projects", {
@@ -40,25 +39,5 @@ export const siteVersions = pgTable(
       table.projectId,
       table.revision
     ),
-  ]
-)
-
-export const siteProposals = pgTable(
-  "site_proposals",
-  {
-    id: text("id").primaryKey(),
-    projectId: text("project_id")
-      .notNull()
-      .references(() => siteProjects.id, { onDelete: "cascade" }),
-    runId: text("run_id")
-      .notNull()
-      .references(() => aiRuns.id, { onDelete: "cascade" }),
-    toolCallId: text("tool_call_id").notNull(),
-    baseRevision: integer("base_revision").notNull(),
-    input: jsonb("input").$type<SiteProposal>().notNull(),
-    status: text("status").notNull().default("pending"),
-  },
-  (table) => [
-    uniqueIndex("site_proposal_call_idx").on(table.runId, table.toolCallId),
   ]
 )

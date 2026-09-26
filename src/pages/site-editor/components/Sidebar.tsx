@@ -2,8 +2,6 @@ import { SiteLibraries } from "./Libraries"
 import type { SiteDocument } from "@/validators/sites/document"
 import type { SiteRecord } from "@/features/sites/types"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { useSiteChat } from "@/features/sites/use-chat"
-import { SiteChat } from "./Chat"
 import { SiteFiles } from "./Files"
 
 export function SiteEditorSidebar({
@@ -12,10 +10,6 @@ export function SiteEditorSidebar({
   onUpdated,
   panel,
   onPanelChange,
-  chat,
-  chatDisabled,
-  selection,
-  runtimeError,
   doc,
   file,
   onSelectFile,
@@ -25,10 +19,6 @@ export function SiteEditorSidebar({
   onUpdated: () => Promise<void>
   panel: string
   onPanelChange: (panel: string) => void
-  chat: ReturnType<typeof useSiteChat>
-  chatDisabled: boolean
-  selection: string | null
-  runtimeError: string | null
   doc: SiteDocument
   file: string | null
   onSelectFile: (path: string) => void
@@ -44,22 +34,10 @@ export function SiteEditorSidebar({
           variant="line"
           className="w-full [&_[data-slot=tabs-trigger]]:text-xs [&_[data-slot=tabs-trigger]]:transition-none [&_[data-slot=tabs-trigger]]:after:h-px"
         >
-          <TabsTrigger value="chat">Chat</TabsTrigger>
           <TabsTrigger value="files">Fichiers</TabsTrigger>
           <TabsTrigger value="libraries">Bibliothèques</TabsTrigger>
         </TabsList>
       </Tabs>
-      <div
-        className={panel === "chat" ? "flex min-h-0 flex-1 flex-col" : "hidden"}
-        hidden={panel !== "chat"}
-      >
-        <SiteChat
-          chat={chat}
-          disabled={chatDisabled}
-          selection={selection}
-          error={runtimeError}
-        />
-      </div>
       <div
         className={
           panel === "files" ? "flex min-h-0 flex-1 flex-col" : "hidden"

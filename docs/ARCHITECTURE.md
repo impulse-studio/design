@@ -4,7 +4,7 @@ Le découpage reprend les schémas par domaine, les validateurs dédiés et le c
 
 ## Contrats et types
 
-Les validateurs applicatifs résident dans `src/validators`. Les dossiers sites, bibliothèques, IA, chat et MCP séparent leurs contrats de document, formulaires, requêtes et transport. Les différences entre validation de formulaire et validation API restent explicites : messages, valeurs par défaut et transformations ne sont pas interchangeables.
+Les validateurs applicatifs résident dans `src/validators`. Les dossiers sites, bibliothèques, maquettes et MCP séparent leurs contrats de document, formulaires, requêtes et transport. Les différences entre validation de formulaire et validation API restent explicites : messages, valeurs par défaut et transformations ne sont pas interchangeables.
 
 Les tables Drizzle résident dans `src/db/schema/<domaine>`. L’index central est l’entrée de Drizzle et des consommateurs existants. Les types de ligne nécessaires sont inférés dans les domaines ; `src/db/types.ts` fournit les types de connexion et de transaction.
 

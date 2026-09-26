@@ -2,11 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useOrpc } from "@/server/use-orpc"
 import type { SiteChange, SiteDocument } from "@/validators/sites/document"
-import type {
-  SiteRecord,
-  SiteVersion,
-  PendingSiteProposal,
-} from "@/features/sites/types"
+import type { SiteRecord, SiteVersion } from "@/features/sites/types"
 import { applySiteProposal, applyTextEdit, applyVisualEdit } from "./source"
 import { syncSiteRuntime, validateSiteRuntime } from "./runtime"
 import { createSiteEditingSession } from "./editing-session"
@@ -197,16 +193,6 @@ export const useSiteEditor = (initial: SiteRecord, canEdit: boolean) => {
         setError(null)
         await refreshHistory()
       }
-    },
-    apply: async (proposal: PendingSiteProposal) => {
-      if (proposal.baseRevision !== session.record.revision)
-        throw new Error(
-          "Le projet a changé pendant la génération. Demandez une nouvelle modification."
-        )
-      await commit(
-        { type: "proposal", proposalId: proposal.id },
-        applySiteProposal(session.record.doc, proposal.input)
-      )
     },
   }
 }

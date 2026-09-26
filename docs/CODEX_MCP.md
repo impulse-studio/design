@@ -1,6 +1,6 @@
 # Codex et le MCP Digit Studio
 
-Le MCP du Studio permet de lire et modifier les sites React et les maquettes via OAuth. Il est indépendant de l’ancienne intégration de chat décrite dans `CODEX_CHAT.md`.
+Le MCP du Studio permet de lire et modifier les sites React et les maquettes via OAuth.
 
 ## Connexion locale
 

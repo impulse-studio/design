@@ -5,7 +5,6 @@ dist-ssr
 *.local
 .env*
 !.env.example
-.trigger
 .tanstack
 .wrangler
 .output

@@ -104,7 +104,7 @@ export const applyTextEdit = (
     return siteDocumentSchema.parse(doc)
   }
   throw new Error(
-    "Ce contenu est dynamique. Utilisez le chat pour le modifier."
+    "Ce contenu est dynamique. Modifiez le fichier source ou utilisez le MCP."
   )
 }
 export const isEditableFile = (path: string) =>

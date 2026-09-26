@@ -22,7 +22,6 @@ import { Route as ApiMcpRouteImport } from './routes/api.mcp'
 import { Route as DesignSystemIndexRouteImport } from './routes/design-system.index'
 import { Route as DesignSystemSlugRouteImport } from './routes/design-system.$slug'
 import { Route as MMockupIdRouteImport } from './routes/m.$mockupId'
-import { Route as ApiAiSplatRouteImport } from './routes/api.ai.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 
@@ -91,11 +90,6 @@ const MMockupIdRoute = MMockupIdRouteImport.update({
   path: '/m/$mockupId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAiSplatRoute = ApiAiSplatRouteImport.update({
-  id: '/api/ai/$',
-  path: '/api/ai/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -121,7 +115,6 @@ export interface FileRoutesByFullPath {
   '/design-system/$slug': typeof DesignSystemSlugRoute
   '/m/$mockupId': typeof MMockupIdRoute
   '/design-system/': typeof DesignSystemIndexRoute
-  '/api/ai/$': typeof ApiAiSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -138,7 +131,6 @@ export interface FileRoutesByTo {
   '/design-system/$slug': typeof DesignSystemSlugRoute
   '/m/$mockupId': typeof MMockupIdRoute
   '/design-system': typeof DesignSystemIndexRoute
-  '/api/ai/$': typeof ApiAiSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -157,7 +149,6 @@ export interface FileRoutesById {
   '/design-system/$slug': typeof DesignSystemSlugRoute
   '/m/$mockupId': typeof MMockupIdRoute
   '/design-system/': typeof DesignSystemIndexRoute
-  '/api/ai/$': typeof ApiAiSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -177,7 +168,6 @@ export interface FileRouteTypes {
     | '/design-system/$slug'
     | '/m/$mockupId'
     | '/design-system/'
-    | '/api/ai/$'
     | '/api/auth/$'
     | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
@@ -194,7 +184,6 @@ export interface FileRouteTypes {
     | '/design-system/$slug'
     | '/m/$mockupId'
     | '/design-system'
-    | '/api/ai/$'
     | '/api/auth/$'
     | '/api/rpc/$'
   id:
@@ -212,7 +201,6 @@ export interface FileRouteTypes {
     | '/design-system/$slug'
     | '/m/$mockupId'
     | '/design-system/'
-    | '/api/ai/$'
     | '/api/auth/$'
     | '/api/rpc/$'
   fileRoutesById: FileRoutesById
@@ -229,7 +217,6 @@ export interface RootRouteChildren {
   ApiLibrarySyncRoute: typeof ApiLibrarySyncRoute
   ApiMcpRoute: typeof ApiMcpRoute
   MMockupIdRoute: typeof MMockupIdRoute
-  ApiAiSplatRoute: typeof ApiAiSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
@@ -327,13 +314,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MMockupIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ai/$': {
-      id: '/api/ai/$'
-      path: '/api/ai/$'
-      fullPath: '/api/ai/$'
-      preLoaderRoute: typeof ApiAiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -377,7 +357,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLibrarySyncRoute: ApiLibrarySyncRoute,
   ApiMcpRoute: ApiMcpRoute,
   MMockupIdRoute: MMockupIdRoute,
-  ApiAiSplatRoute: ApiAiSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }

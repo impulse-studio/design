@@ -11,8 +11,8 @@ import {
 } from "@remixicon/react"
 import { Textarea } from "@/components/ui/textarea"
 import { useForm, useStore } from "@tanstack/react-form"
-import { createPromptSchema } from "@/validators/chat/prompt"
-import type { PromptValues } from "@/validators/chat/prompt"
+import { createPromptSchema } from "@/validators/prompt"
+import type { PromptValues } from "@/validators/prompt"
 import { FieldError } from "@/components/ui/field"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import {

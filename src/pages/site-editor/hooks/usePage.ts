@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { readScenarios } from "@/features/sites/scenarios"
-import { useSiteChat } from "@/features/sites/use-chat"
 import { useSiteEditor } from "@/features/sites/use-editor"
 import { useSiteExport } from "@/features/sites/use-export"
 import type { PreviewInventoryEntry } from "@/validators/sites/preview"
@@ -10,9 +9,6 @@ import type { SiteRuntimeStatus } from "@/features/sites/runtime"
 import { useSiteEditorPageData } from "./usePageData"
 import { useSiteEditorShortcuts } from "./useShortcuts"
 import type { SiteMode } from "@/pages/site-editor/components/Toolbar"
-
-const createScenariosPrompt =
-  "Ajoute des scénarios de données à cette maquette via src/scenarios.json : Lucien — 20 contacts segmentés ; Léa — 3 contacts principaux. Branche les données et les états de la même interface sur le scénario sélectionné. Conserve le design et la navigation existants."
 
 export type SiteEditorPageProps = {
   initial: SiteRecord
@@ -62,13 +58,6 @@ export function useSiteEditorPage({
     sequence: number
   } | null>(null)
 
-  const chat = useSiteChat(
-    editor.record,
-    selection,
-    path,
-    editor.apply,
-    canEdit
-  )
   const pageData = useSiteEditorPageData({
     initial,
     record: editor.record,
@@ -94,11 +83,6 @@ export function useSiteEditorPage({
   useSiteEditorShortcuts(editor)
   const runtimeBusy = runtimeStatus.stage !== "ready"
 
-  const createScenarios = () => {
-    setSidebarVisible(true)
-    setPanel("chat")
-    void chat.send(createScenariosPrompt)
-  }
   const selectScenario = (id: string) => {
     setFile(null)
     setFileLine(null)
@@ -176,10 +160,6 @@ export function useSiteEditorPage({
       onUpdated: editor.reload,
       panel,
       onPanelChange: setPanel,
-      chat,
-      chatDisabled: editor.busy || !canEdit,
-      selection,
-      runtimeError,
       doc: editor.record.doc,
       file,
       onSelectFile: selectFile,
@@ -188,15 +168,11 @@ export function useSiteEditorPage({
       previewToolbar: {
         scenarios: pageData.config?.scenarios ?? [],
         scenarioId: pageData.activeScenario?.id ?? "",
-        scenariosBusy: chat.busy || chat.running,
-        onCreateScenarios: createScenarios,
         breakpoint,
         onScenario: selectScenario,
         onBreakpoint: setBreakpoint,
         onBack: () => setCommand({ type: "back", sequence: Date.now() }),
         onForward: () => setCommand({ type: "forward", sequence: Date.now() }),
-        canEdit,
-        busy: editor.busy || runtimeBusy,
       },
       onSaveFile: editor.saveFile,
       record: editor.record,
@@ -211,7 +187,7 @@ export function useSiteEditorPage({
       selection,
       command,
       busy: editor.busy,
-      error: editor.error,
+      error: editor.error || runtimeError,
       canEdit,
       onReload: reload,
       onCloseFile: closeFile,

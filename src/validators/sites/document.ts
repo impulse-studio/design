@@ -153,8 +153,5 @@ export const siteChangeSchema = z.discriminatedUnion("type", [
   z
     .object({ type: z.literal("restore"), versionId: z.string().uuid() })
     .strict(),
-  z
-    .object({ type: z.literal("proposal"), proposalId: z.string().uuid() })
-    .strict(),
 ])
 export type SiteChange = z.infer<typeof siteChangeSchema>

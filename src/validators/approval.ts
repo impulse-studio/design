@@ -2,8 +2,8 @@ import {
   createQuestionnaireAnswerSchema,
   createQuestionnaireAnswersSchema,
   questionnaireAnswerSchema,
-} from "@/validators/chat/questionnaire"
-import type { QuestionnaireRule } from "@/validators/chat/questionnaire"
+} from "@/validators/questionnaire"
+import type { QuestionnaireRule } from "@/validators/questionnaire"
 
 type ApprovalQuestionRule = {
   id: string

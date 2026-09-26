@@ -23,7 +23,3 @@ export const getSiteVersionSchema = z.object({
 })
 
 export const getSiteSchema = z.object({ id: z.string().min(1).max(100) })
-
-export const listPendingSiteProposalsSchema = z.object({
-  id: z.string().min(1).max(100),
-})

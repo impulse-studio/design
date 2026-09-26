@@ -80,25 +80,6 @@ const definitions: CatalogDefinition[] = [
       ),
   },
   {
-    id: "chat-app",
-    importPath: "@/components/shared/chat/ChatApp",
-    documentation: null,
-    name: "Chat App",
-    description: "Espace de conversation avec navigation, messages et saisie.",
-    category: "Compositions",
-    variants: [],
-    sizes: [],
-    states: ["default"],
-    kind: "composition",
-    load: () =>
-      import("@/components/design-system/examples/ChatAppExample").then(
-        (module) => ({
-          Component: module.ChatAppExample,
-          getCode: module.getCode,
-        })
-      ),
-  },
-  {
     id: "ai-sidebar",
     importPath: "@/components/shared/ai-sidebar/AISidebar",
     documentation: null,

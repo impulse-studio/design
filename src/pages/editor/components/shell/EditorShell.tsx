@@ -18,7 +18,6 @@ import { EditorCanvas } from "@/pages/editor/components/canvas/EditorCanvas"
 import { EditorToolbar } from "@/pages/editor/components/toolbar/EditorToolbar"
 import { useCanvasViewport } from "@/features/editor/use-canvas-viewport"
 import { useCollapsiblePanel } from "@/features/editor/use-collapsible-panel"
-import { AiChatProvider } from "@/pages/editor/components/chat/AiChatProvider"
 import { EditorPersistenceContext } from "@/features/mockups/persistence-context"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
@@ -309,10 +308,8 @@ export function EditorShell({ initial }: { initial: MockupRecord }) {
   )
   return (
     <EditorPersistenceContext.Provider value={save}>
-      <AiChatProvider mockupId={initial.id}>
-        {root}
-        {portalTarget && notice ? createPortal(notice, portalTarget) : null}
-      </AiChatProvider>
+      {root}
+      {portalTarget && notice ? createPortal(notice, portalTarget) : null}
     </EditorPersistenceContext.Provider>
   )
 }

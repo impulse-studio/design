@@ -86,7 +86,7 @@ export function LayerRow({
       aria-label={nodeLabel(node)}
     >
       <div
-        className="editor-layer-row relative h-[34px] flex items-center gap-0.75 pr-1.75 select-none [&[data-selected]]:[background:color-mix(in_srgb,_var(--editor-selection),_transparent_89%)] [&[data-hovered]:not([data-selected])]:bg-muted [&[data-hidden]_>_.editor-layer-name]:opacity-[0.45] [&[data-selected]_.editor-layer-actions]:max-w-[none] [&:focus-within_.editor-layer-actions]:max-w-[none] [&[data-drop=before]]:shadow-[inset_0_2px_var(--editor-selection)] [&[data-drop=after]]:shadow-[inset_0_-2px_var(--editor-selection)] [&[data-drop=inside]]:[outline:1px_solid_var(--editor-selection)] [&[data-drop=inside]]:[outline-offset:-1px]"
+        className="editor-layer-row relative flex h-[34px] items-center gap-0.75 pr-1.75 select-none [&:focus-within_.editor-layer-actions]:max-w-[none] [&[data-drop=after]]:shadow-[inset_0_-2px_var(--editor-selection)] [&[data-drop=before]]:shadow-[inset_0_2px_var(--editor-selection)] [&[data-drop=inside]]:[outline:1px_solid_var(--editor-selection)] [&[data-drop=inside]]:[outline-offset:-1px] [&[data-hidden]_>_.editor-layer-name]:opacity-[0.45] [&[data-hovered]:not([data-selected])]:bg-muted [&[data-selected]]:[background:color-mix(in_srgb,_var(--editor-selection),_transparent_89%)] [&[data-selected]_.editor-layer-actions]:max-w-[none]"
         data-selected={selected || undefined}
         data-hovered={hovered || undefined}
         data-hidden={node.hidden || undefined}
@@ -174,7 +174,7 @@ export function LayerRow({
         >
           {expanded ? <RiArrowDownSLine /> : <RiArrowRightSLine />}
         </Button>
-        <Icon className="editor-layer-icon w-[14px] h-[14px] shrink-0 text-muted-foreground" />
+        <Icon className="editor-layer-icon h-[14px] w-[14px] shrink-0 text-muted-foreground" />
         {renaming ? (
           <Input
             autoFocus
@@ -192,7 +192,7 @@ export function LayerRow({
           <Button
             variant="ghost"
             size="sm"
-            className="editor-layer-name px-1 text-[11px] min-w-0 flex-1 justify-start overflow-hidden text-ellipsis whitespace-nowrap"
+            className="editor-layer-name min-w-0 flex-1 justify-start overflow-hidden px-1 text-[11px] text-ellipsis whitespace-nowrap"
             onClick={(event) => editor.select(node.id, event.shiftKey)}
             onDoubleClick={() => {
               if (inspect) return
@@ -213,7 +213,7 @@ export function LayerRow({
             {nodeLabel(node)}
           </Button>
         )}
-        <div className="editor-layer-actions flex items-center max-w-0 overflow-hidden">
+        <div className="editor-layer-actions flex max-w-0 items-center overflow-hidden">
           <Button
             variant="ghost"
             size="icon-xs"
@@ -305,11 +305,6 @@ export function LayerRow({
                   Dissocier
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => action(() => editor.set({ tab: "chat" }))}
-                >
-                  Demander à l’IA
-                </DropdownMenuItem>
-                <DropdownMenuItem
                   disabled={inspect}
                   onClick={() => action(editor.remove)}
                 >
@@ -326,7 +321,7 @@ export function LayerRow({
             <div key={list.key}>
               {list.key !== "children" && (
                 <div
-                  className="editor-slot-row h-[27px] flex items-center gap-1.5 text-[10px] text-muted-foreground [&_span]:tabular-nums [&_span]:opacity-[0.6]"
+                  className="editor-slot-row flex h-[27px] items-center gap-1.5 text-[10px] text-muted-foreground [&_span]:tabular-nums [&_span]:opacity-[0.6]"
                   style={{ paddingLeft: 30 + depth * 14 }}
                   onDragOver={(event) => {
                     if (!inspect) event.preventDefault()

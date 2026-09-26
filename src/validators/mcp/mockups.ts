@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { operationSchema } from "@/validators/ai/operations"
+import { operationSchema } from "@/validators/mockups/operations"
 
 export const mockupReferenceSchema = z.string().min(1).max(500)
 

@@ -4,9 +4,9 @@ import { emptyDocument } from "@/features/editor/document"
 import { library, makeLibraryNode, entryFor } from "@/features/editor/library"
 import { createEditor } from "@/features/editor/store"
 import { applyOperations, canonicalDocument } from "./operations"
-import { proposalInputSchema } from "@/validators/ai/operations"
-import type { MockupOperation } from "@/validators/ai/operations"
-import { aiCatalog, validateAiComposition } from "./catalog"
+import { proposalInputSchema } from "@/validators/mockups/operations"
+import type { MockupOperation } from "@/validators/mockups/operations"
+import { mockupCatalog, validateComposition } from "./catalog"
 
 const proposal = (operations: MockupOperation[]) => ({
   summary: "Modifications",
@@ -22,9 +22,9 @@ describe("propositions Codex", () => {
       proposal([{ type: "insertNode", parentId: frame.id, node: accordion }]),
       library
     )
-    expect(validateAiComposition(doc, next)).toEqual(next)
+    expect(validateComposition(doc, next)).toEqual(next)
     expect(
-      aiCatalog.some((entry) => entry.name === "DigiAccordionTrigger")
+      mockupCatalog.some((entry) => entry.name === "DigiAccordionTrigger")
     ).toBe(false)
     const isolated = applyOperations(
       doc,
@@ -37,7 +37,7 @@ describe("propositions Codex", () => {
       ]),
       library
     )
-    expect(() => validateAiComposition(doc, isolated)).toThrow(/parent Digi/)
+    expect(() => validateComposition(doc, isolated)).toThrow(/parent Digi/)
   })
   it("crée, modifie et déplace des calques sans muter la source", () => {
     const doc = emptyDocument(),

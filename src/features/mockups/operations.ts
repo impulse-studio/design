@@ -1,4 +1,4 @@
-import { proposalInputSchema } from "@/validators/ai/operations"
+import { proposalInputSchema } from "@/validators/mockups/operations"
 
 import {
   childLists,
