@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node scripts/development/dev.mjs",
     "build": "pnpm build:renderer && vite build",
+    "vercel-build": "if [ \"$VERCEL_ENV\" = production ]; then pnpm db:migrate; fi && pnpm build",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",

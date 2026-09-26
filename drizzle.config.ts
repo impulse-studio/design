@@ -7,6 +7,7 @@ export default defineConfig({
   out: "./drizzle",
   dbCredentials: {
     url:
+      process.env.DATABASE_URL_UNPOOLED ??
       process.env.DATABASE_URL ??
       "postgresql://digit:digit_dev@localhost:5433/digit_ai_studio",
   },
