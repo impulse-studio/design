@@ -20,3 +20,5 @@ backups/
 
 # renderer build output (served by the studio)
 public/renderer
+
+.vercel

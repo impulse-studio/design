@@ -10,7 +10,7 @@ const config = defineConfig({
     tailwindcss(),
     tanstackStart(),
     nitro({
-      preset: "node-server",
+      preset: process.env.NITRO_PRESET ?? (process.env.VERCEL ? "vercel" : "node-server"),
       routeRules: {
         "/m/**": {
           headers: {
